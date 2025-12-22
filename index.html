@@ -5,47 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- Tailwind (Play CDN) -->
+  <!-- Tailwind (optional CDN) + local fallback -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/app.css" />
 
-  <!-- Vue (local fallback first if you already put it in assets/) -->
-  <script>
-    // If you prefer local Vue, keep assets/vue.global.prod.js and uncomment next line:
-    // (and remove the unpkg line)
-  </script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- Vue (local, to avoid CDN issues) -->
+  <script src="assets/vue.global.prod.js"></script>
 
   <style>
     html, body { height:100%; }
     body{
-      overscroll-behavior-y: auto;
+      margin:0;
+      background:#0b1224;
+      color:#fff;
+      -webkit-text-size-adjust: 100%;
+      overscroll-behavior-y: none;
       -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-      overflow-x: hidden;
     }
 
-    /* Use your repo root bg.jpg */
+    /* ===== Background: use your uploaded bg.jpg ===== */
     .bg-snow{
       background-image:
-        linear-gradient(180deg, rgba(2,6,23,.55), rgba(2,6,23,.78)),
-        radial-gradient(1100px 720px at 20% 0%, rgba(96,165,250,.22), rgba(2,6,23,0) 60%),
-        radial-gradient(900px 620px at 90% 10%, rgba(191,219,254,.16), rgba(2,6,23,0) 55%),
-        url("bg.jpg");
+        linear-gradient(180deg, rgba(6,10,24,.68), rgba(6,10,24,.78)),
+        url("assets/bg.jpg");
       background-size: cover;
       background-position: center;
-      /* IMPORTANT: fixed background often causes iOS scroll jank */
-      background-attachment: scroll;
+      background-attachment: scroll; /* iOS smoother than fixed */
+      min-height: 100vh;
     }
+
+    /* subtle snow dots overlay */
     .bg-snow::before{
       content:"";
       position: fixed;
       inset: -30%;
       background-image:
-        radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px),
-        radial-gradient(rgba(255,255,255,.55) 1px, transparent 1px);
+        radial-gradient(rgba(255,255,255,.85) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,.45) 1px, transparent 1px);
       background-size: 18px 18px, 28px 28px;
       background-position: 0 0, 9px 14px;
-      opacity: .14;
+      opacity: .15;
       transform: rotate(-8deg);
       pointer-events:none;
       z-index:0;
@@ -75,33 +74,40 @@
     }
     .input::placeholder{ color: rgba(255,255,255,.45); }
 
-    /* horizontal day slider */
     .hscroll{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
     .hscroll::-webkit-scrollbar{ height:0; }
 
     .safe-bottom{ padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
 
-    /* link look */
+    /* small link row for destinations */
     .maplink{
-      display:flex; align-items:flex-start; gap:.5rem;
-      padding:.75rem .9rem;
-      border-radius: 1.25rem;
-      background: rgba(255,255,255,.06);
+      display:flex;
+      align-items:flex-start;
+      gap:.5rem;
+      padding:.55rem .75rem;
+      border-radius: 1rem;
       border: 1px solid rgba(191,219,254,.12);
+      background: rgba(255,255,255,.06);
+      text-decoration: none;
+      color: rgba(255,255,255,.92);
     }
-    .maplink:hover{ background: rgba(255,255,255,.10); }
+    .maplink:active{ transform: scale(.99); }
+    .maplink small{ color: rgba(191,219,254,.72); display:block; margin-top:.15rem; }
+
+    /* prevent blank while Vue mounting */
+    [v-cloak]{ display:none; }
   </style>
 </head>
 
-<body class="bg-snow min-h-screen text-white/90">
-<div id="app" class="relative min-h-screen">
+<body class="bg-snow">
+<div id="app" class="relative min-h-screen" v-cloak>
   <div class="relative z-10">
     <div class="mx-auto max-w-md px-4 pt-6 pb-36">
 
       <!-- Header -->
-      <div class="glass rounded-3xl p-5 shadow-[0_0_0_1px_rgba(191,219,254,.35),0_18px_60px_rgba(37,99,235,.14)]">
+      <div class="glass rounded-3xl p-5 shadow-[0_18px_50px_rgba(3,20,60,.22)]">
         <div class="flex items-start justify-between gap-3">
-          <div>
+          <div class="min-w-0">
             <div class="text-xs tracking-[0.22em] uppercase text-blue-100/70">Sapporo • Snow • First Love vibe</div>
             <h1 class="text-xl font-semibold text-white">札幌旅行 App</h1>
             <p class="text-sm text-blue-100/70 mt-1">行程 / 航程 / 記帳 / 購物</p>
@@ -121,12 +127,11 @@
         </div>
       </div>
 
-      <!-- CONTENT -->
+      <!-- Content -->
       <div class="mt-4 glass-2 rounded-3xl p-5 shadow-[0_18px_50px_rgba(3,20,60,.22)]">
 
-        <!-- ========= PLAN ========= -->
+        <!-- ===== PLAN ===== -->
         <div v-if="view==='plan'" class="space-y-4">
-
           <!-- Weather -->
           <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
             <div class="flex items-center justify-between gap-3">
@@ -144,57 +149,50 @@
             </div>
           </div>
 
-          <!-- Day slider (ONLY place to edit day) -->
+          <!-- Day slider (clean) -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <div class="font-semibold text-white">行程（按日）</div>
-              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10" @click="goAdd('day')">
-                + Day
+              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
+                      @click="goAdd('day')">
+                ＋ Day
               </button>
             </div>
 
             <div class="hscroll">
               <div class="flex gap-2 pb-1">
-                <div v-for="d in days" :key="d.id"
-                     class="relative shrink-0">
-                  <button
-                    @click="selectedDayId=d.id"
-                    :class="dayChip(d.id)"
-                    class="w-[220px] rounded-3xl px-4 py-3 text-left border">
-                    <div class="text-xs font-semibold text-white/90">
-                      Day {{ d.dayNo }} <span class="text-blue-100/70">· {{ d.dateLabel }}</span>
-                    </div>
-                    <div v-if="d.title" class="mt-1 text-base font-semibold text-white leading-snug line-clamp-2">
-                      {{ d.titleShort }}
-                    </div>
-                    <div v-else class="mt-1 text-sm text-blue-100/70">
-                      {{ d.dateFull }}
-                    </div>
-                  </button>
-
-                  <!-- Edit icon on chip -->
-                  <button
-                    class="absolute top-2 right-2 pill rounded-xl px-2 py-1 text-[11px] font-semibold hover:bg-white/10"
-                    @click.stop="goEdit('day', d.id)">
-                    Edit
-                  </button>
-                </div>
+                <button v-for="d in days" :key="d.id"
+                        @click="selectedDayId=d.id"
+                        :class="dayChip(d.id)"
+                        class="shrink-0 rounded-2xl px-3 py-2 text-left min-w-[210px]">
+                  <div class="text-[11px] text-blue-100/70">Day {{ d.dayNo }} · {{ d.dateShort }}</div>
+                  <div class="text-sm font-semibold text-white truncate">{{ d.title || d.dateFull }}</div>
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- If no day -->
           <div v-if="!selectedDay" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
-            你未有 Day。按「+ Day」開個日子先。
+            你未有 Day。按「＋ Day」先。
           </div>
 
-          <!-- Timeslots (no duplicate big day card) -->
+          <!-- Timeslots -->
           <div v-else class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-xs text-blue-100/70">Day {{ selectedDay.dayNo }} · {{ selectedDay.dateFull }}</div>
+                <div class="text-lg font-semibold text-white break-words">{{ selectedDay.title || '' }}</div>
+              </div>
+              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 shrink-0"
+                      @click="goEdit('day', selectedDay.id)">
+                Edit
+              </button>
+            </div>
 
-            <div v-for="slot in slotOrder" :key="slot.key" class="rounded-3xl border border-blue-100/20 bg-white/5 p-4">
+            <div v-for="slot in slotOrder" :key="slot.key" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-lg font-semibold text-white">{{ slot.label }}</div>
+                  <div class="font-semibold text-white">{{ slot.label }}</div>
                   <div class="text-xs text-blue-100/60 mt-0.5">目的地可多個；餐飲只一個</div>
                 </div>
                 <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
@@ -203,33 +201,25 @@
                 </button>
               </div>
 
-              <!-- Destinations -->
+              <!-- Destinations as map links -->
               <div class="mt-3">
-                <div class="text-xs text-blue-100/65">目的地</div>
+                <div class="text-xs text-blue-100/60">目的地（可多個）</div>
 
-                <div v-if="selectedDay.slots[slot.key].destinations.length===0"
-                     class="mt-2 text-sm text-blue-100/55">
+                <div v-if="selectedDay.slots[slot.key].destinations.length===0" class="mt-2 text-sm text-blue-100/55">
                   未加目的地
                 </div>
 
                 <div v-else class="mt-2 space-y-2">
-                  <div v-for="p in selectedDay.slots[slot.key].destinations" :key="p.id" class="maplink">
-                    <button class="shrink-0 text-white/90" @click="openDirections(p.place)" title="Open Google Maps">
-                      📍
-                    </button>
-                    <div class="min-w-0 flex-1">
-                      <div class="text-sm font-semibold text-white break-words">
-                        <a href="#" class="underline decoration-white/20 hover:decoration-white/50"
-                           @click.prevent="openDirections(p.place)">
-                          {{ p.place }}
-                        </a>
+                  <div v-for="p in selectedDay.slots[slot.key].destinations" :key="p.id" class="flex items-start gap-2">
+                    <a class="maplink w-full" href="#" @click.prevent="openDirections(p.place)">
+                      <div class="text-base leading-none">📍</div>
+                      <div class="min-w-0">
+                        <div class="text-sm font-semibold break-words">{{ p.place }}</div>
+                        <small v-if="p.note" class="break-words">📝 {{ p.note }}</small>
                       </div>
-                      <div v-if="p.note" class="mt-1 text-xs text-blue-100/65 whitespace-pre-wrap break-words">
-                        {{ p.note }}
-                      </div>
-                    </div>
+                    </a>
                     <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 shrink-0"
-                            @click.stop="goEdit('destination', { dayId:selectedDay.id, slot:slot.key, id:p.id })">
+                            @click="goEdit('destination', { dayId:selectedDay.id, slot:slot.key, id:p.id })">
                       Edit
                     </button>
                   </div>
@@ -238,10 +228,9 @@
 
               <!-- Food -->
               <div class="mt-4 pt-3 border-t border-blue-100/10">
-                <div class="text-xs text-blue-100/65">餐飲（只一個）</div>
+                <div class="text-xs text-blue-100/60">餐飲（只一個）</div>
 
-                <div v-if="!selectedDay.slots[slot.key].food"
-                     class="mt-2 flex items-center justify-between gap-3">
+                <div v-if="!selectedDay.slots[slot.key].food" class="mt-2 flex items-center justify-between gap-3">
                   <div class="text-sm text-blue-100/55">未加餐飲</div>
                   <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
                           @click="goAdd('food', { dayId:selectedDay.id, slot:slot.key })">
@@ -249,42 +238,39 @@
                   </button>
                 </div>
 
-                <div v-else class="mt-2 maplink">
-                  <button class="shrink-0 text-white/90" @click="openDirections(selectedDay.slots[slot.key].food.place)" title="Open Google Maps">
-                    🍜
-                  </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="text-sm font-semibold text-white break-words">
-                      <a href="#" class="underline decoration-white/20 hover:decoration-white/50"
-                         @click.prevent="openDirections(selectedDay.slots[slot.key].food.place)">
-                        {{ selectedDay.slots[slot.key].food.place }}
-                      </a>
+                <div v-else class="mt-2 flex items-start gap-2">
+                  <a class="maplink w-full" href="#" @click.prevent="openDirections(selectedDay.slots[slot.key].food.place)">
+                    <div class="text-base leading-none">🍜</div>
+                    <div class="min-w-0">
+                      <div class="text-sm font-semibold break-words">{{ selectedDay.slots[slot.key].food.place }}</div>
+                      <small v-if="selectedDay.slots[slot.key].food.note" class="break-words">📝 {{ selectedDay.slots[slot.key].food.note }}</small>
                     </div>
-                    <div v-if="selectedDay.slots[slot.key].food.note" class="mt-1 text-xs text-blue-100/65 whitespace-pre-wrap break-words">
-                      {{ selectedDay.slots[slot.key].food.note }}
-                    </div>
-                  </div>
+                  </a>
                   <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 shrink-0"
-                          @click.stop="goEdit('food', { dayId:selectedDay.id, slot:slot.key })">
+                          @click="goEdit('food', { dayId:selectedDay.id, slot:slot.key })">
                     Edit
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Wear (米衣著) ALWAYS at the bottom of each day -->
-            <div v-if="selectedDay.wear" class="rounded-3xl border border-blue-100/20 bg-white/5 p-4">
-              <div class="text-xs text-blue-100/65">米衣著</div>
-              <div class="mt-2 text-base font-semibold text-white break-words">👕 {{ selectedDay.wear }}</div>
+            <!-- Wear at bottom -->
+            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+              <div class="text-xs text-blue-100/70">米衣著（放每個 Day 最底）</div>
+              <div class="mt-1 text-sm text-white/90 whitespace-pre-wrap">{{ selectedDay.wear || '—' }}</div>
+              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 mt-3"
+                      @click="goEdit('day', selectedDay.id)">
+                Edit
+              </button>
             </div>
 
             <div class="text-xs text-blue-100/55 text-center">
-              點 📍/🍜 會開 Google Maps（起點：現時位置）
+              點 📍 / 🍜 會開 Google Maps 導航（起點：現時位置）
             </div>
           </div>
         </div>
 
-        <!-- ========= FLIGHT ========= -->
+        <!-- ===== FLIGHT ===== -->
         <div v-else-if="view==='flight'" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">航程</div>
@@ -295,7 +281,7 @@
           </div>
 
           <div v-if="flights.length===0" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
-            未有航程。按右上角「＋」新增。
+            未有航程（應該唔會）。如果你見到空白，refresh 一次。
           </div>
 
           <div v-for="f in flights" :key="f.id" class="rounded-3xl border border-blue-100/20 bg-white/5 p-4">
@@ -338,7 +324,7 @@
 
             <div v-if="f.note" class="mt-3 text-xs text-blue-100/65 whitespace-pre-wrap">{{ f.note }}</div>
 
-            <div class="mt-3 flex gap-2">
+            <div class="mt-3 flex gap-2 flex-wrap">
               <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
                       @click="openDirections(f.fromCity + ' Airport')">
                 去出發機場
@@ -351,7 +337,7 @@
           </div>
         </div>
 
-        <!-- ========= EXPENSE ========= -->
+        <!-- ===== EXPENSE ===== -->
         <div v-else-if="view==='expense'" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">記帳</div>
@@ -387,7 +373,7 @@
           </div>
         </div>
 
-        <!-- ========= SHOP ========= -->
+        <!-- ===== SHOP ===== -->
         <div v-else-if="view==='shop'" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">購物清單</div>
@@ -395,6 +381,10 @@
                     @click="goAdd('shop')">
               ＋
             </button>
+          </div>
+
+          <div class="text-xs text-blue-100/60">
+            Tickbox 用途：你買咗就 tick，方便你即場掃清單（done = true 會排到下面 + 劃線）
           </div>
 
           <div v-if="shop.length===0" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
@@ -424,7 +414,7 @@
           </div>
         </div>
 
-        <!-- ========= ADD ========= -->
+        <!-- ===== ADD ===== -->
         <div v-else-if="view==='add'" class="space-y-4">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">新增</div>
@@ -437,8 +427,8 @@
           <div v-if="addMode==='choose'" class="grid grid-cols-2 gap-3">
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
                     @click="goAdd('slotItem', { dayId:selectedDayId, slot:'morning' })">
-              <div class="font-semibold">＋ 目的地/餐飲</div>
-              <div class="text-xs text-blue-100/60 mt-1">加到某日某時段</div>
+              <div class="font-semibold">＋ 目的地 / 餐飲</div>
+              <div class="text-xs text-blue-100/60 mt-1">支援 A -> B -> C</div>
             </button>
 
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
@@ -450,19 +440,19 @@
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
                     @click="goAdd('expense')">
               <div class="font-semibold">＋ 記帳</div>
-              <div class="text-xs text-blue-100/60 mt-1">現金/信用卡</div>
+              <div class="text-xs text-blue-100/60 mt-1">現金 / 信用卡</div>
             </button>
 
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
                     @click="goAdd('shop')">
               <div class="font-semibold">＋ 購物</div>
-              <div class="text-xs text-blue-100/60 mt-1">哪裡買 + note</div>
+              <div class="text-xs text-blue-100/60 mt-1">Where + note</div>
             </button>
 
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10 col-span-2"
                     @click="goAdd('day')">
-              <div class="font-semibold">＋ 新增 Day</div>
-              <div class="text-xs text-blue-100/60 mt-1">建立 Day 1 / Day 2…</div>
+              <div class="font-semibold">＋ Day</div>
+              <div class="text-xs text-blue-100/60 mt-1">新增一日</div>
             </button>
           </div>
 
@@ -481,10 +471,10 @@
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">米衣著（可空）</label>
-                  <input v-model="form.day.wear" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="今日穿搭">
+                  <input v-model="form.day.wear" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：黑色保暖外套 + 短boots">
                 </div>
               </div>
-              <div class="mt-4 flex gap-2">
+              <div class="mt-4">
                 <button class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold hover:bg-blue-500"
                         @click="submitAddDay">
                   新增
@@ -494,7 +484,7 @@
           </div>
 
           <!-- Add Slot item -->
-          <div v-else-if="addMode==='slotItem'" class="space-y-3">
+          <div v-else-if="addMode==='slotItem' || addMode==='food'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增到行程</div>
               <div class="text-xs text-blue-100/60 mt-1">
@@ -502,20 +492,23 @@
               </div>
 
               <div class="mt-3 grid grid-cols-2 gap-2">
-                <button @click="form.slot.kind='destination'" :class="kindBtn('destination')" class="rounded-2xl py-2 text-xs font-semibold border">目的地</button>
-                <button @click="form.slot.kind='food'"        :class="kindBtn('food')"        class="rounded-2xl py-2 text-xs font-semibold border">餐飲</button>
+                <button @click="form.slot.kind='destination'" :class="kindBtn('destination')" class="rounded-2xl py-2 text-xs font-semibold">目的地</button>
+                <button @click="form.slot.kind='food'"        :class="kindBtn('food')"        class="rounded-2xl py-2 text-xs font-semibold">餐飲</button>
               </div>
 
               <div class="mt-4 space-y-3">
                 <div>
-                  <label class="text-xs text-blue-100/70">{{ form.slot.kind==='food' ? '餐廳/食店' : '目的地' }}</label>
-                  <input v-model="form.slot.place" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="可直接輸入店名/地點名">
+                  <label class="text-xs text-blue-100/70">
+                    {{ form.slot.kind==='food' ? '餐廳/食店' : '目的地（可用 -> 分隔多個）' }}
+                  </label>
+                  <input v-model="form.slot.place" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm"
+                         placeholder="例如：北海道神宮 -> 円山公園 -> 大通公園">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">備註（可空）</label>
-                  <input v-model="form.slot.note" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：預約、營業時間、想買咩">
+                  <input v-model="form.slot.note" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm"
+                         placeholder="例如：預約 / 營業時間 / 想買咩">
                 </div>
-
                 <div>
                   <label class="text-xs text-blue-100/70">時段</label>
                   <select v-model="addCtx.slot" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm">
@@ -524,12 +517,6 @@
                     <option value="evening">夜晚</option>
                     <option value="late">深夜</option>
                   </select>
-                </div>
-
-                <div class="rounded-2xl border border-blue-100/10 bg-white/5 p-3 text-xs text-blue-100/60">
-                  Tip：如果你想一次過加多個目的地，可以用 <span class="font-semibold text-white/90">-></span> 分隔，例如：<br/>
-                  <span class="text-white/90">北海道神宮 -> 円山公園 -> 三角山市場</span><br/>
-                  系統會自動拆成多條 📍
                 </div>
               </div>
 
@@ -541,7 +528,7 @@
               </div>
 
               <div class="mt-3 text-xs text-blue-100/55">
-                餐飲每個時段只可以有一個；再加會覆蓋舊餐飲（更貼旅行用）。
+                餐飲每個時段只可以有一個；再加會覆蓋舊餐飲。
               </div>
             </div>
           </div>
@@ -563,7 +550,6 @@
                   <label class="text-xs text-blue-100/70">Duration</label>
                   <input v-model="form.flight.duration" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="5h 55m">
                 </div>
-
                 <div>
                   <label class="text-xs text-blue-100/70">From City</label>
                   <input v-model="form.flight.fromCity" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Sapporo">
@@ -572,7 +558,6 @@
                   <label class="text-xs text-blue-100/70">To City</label>
                   <input v-model="form.flight.toCity" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Hong Kong">
                 </div>
-
                 <div>
                   <label class="text-xs text-blue-100/70">From Code</label>
                   <input v-model="form.flight.fromCode" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="CTS">
@@ -581,7 +566,6 @@
                   <label class="text-xs text-blue-100/70">To Code</label>
                   <input v-model="form.flight.toCode" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="HKG">
                 </div>
-
                 <div>
                   <label class="text-xs text-blue-100/70">Depart</label>
                   <input v-model="form.flight.departTime" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="16:00">
@@ -590,10 +574,9 @@
                   <label class="text-xs text-blue-100/70">Arrive</label>
                   <input v-model="form.flight.arriveTime" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="20:55">
                 </div>
-
                 <div class="col-span-2">
                   <label class="text-xs text-blue-100/70">備註（可空）</label>
-                  <textarea v-model="form.flight.note" rows="3" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Terminal / check-in / luggage…"></textarea>
+                  <textarea v-model="form.flight.note" rows="3" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm"></textarea>
                 </div>
               </div>
 
@@ -635,7 +618,7 @@
               <div class="font-semibold text-white">新增購物</div>
               <div class="mt-3 space-y-3">
                 <input v-model="form.shop.item" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="名稱">
-                <input v-model="form.shop.where" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="邊度買（Where to buy）">
+                <input v-model="form.shop.where" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="邊度買（Where）">
                 <textarea v-model="form.shop.note" rows="3" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="Note（價錢、售光時間…）"></textarea>
               </div>
               <div class="mt-4">
@@ -648,7 +631,7 @@
           </div>
         </div>
 
-        <!-- ========= EDIT ========= -->
+        <!-- ===== EDIT ===== -->
         <div v-else-if="view==='edit'" class="space-y-4">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">Edit</div>
@@ -665,16 +648,12 @@
             <div v-if="editMode==='day'" class="mt-3 space-y-3">
               <input v-model="editBuffer.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="標題">
               <input v-model="editBuffer.date" type="date" class="input w-full rounded-2xl px-3 py-2 text-sm">
-              <input v-model="editBuffer.wear" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="米衣著（可空）">
+              <input v-model="editBuffer.wear" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="米衣著">
               <div class="flex gap-2 mt-3">
                 <button class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold hover:bg-blue-500"
-                        @click="saveEdit">
-                  保存
-                </button>
+                        @click="saveEdit">保存</button>
                 <button class="rounded-2xl bg-red-500/20 border border-red-300/20 px-4 py-2 text-sm font-semibold hover:bg-red-500/30 text-red-100"
-                        @click="deleteCurrent">
-                  刪除
-                </button>
+                        @click="deleteCurrent">刪除</button>
               </div>
             </div>
 
@@ -725,7 +704,8 @@
             <!-- Expense edit -->
             <div v-else-if="editMode==='expense'" class="mt-3 space-y-3">
               <input v-model="editBuffer.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="項目">
-              <input v-model.number="editBuffer.amount" type="number" min="0" step="0.01" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="金額">
+              <input v-model.number="editBuffer.amount" type="number" min="0" step="0.01"
+                     class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="金額">
               <select v-model="editBuffer.method" class="input w-full rounded-2xl px-3 py-2 text-sm">
                 <option value="現金">現金</option>
                 <option value="信用卡">信用卡</option>
@@ -757,10 +737,10 @@
           </div>
         </div>
 
-      </div><!-- /content -->
-    </div><!-- /container -->
+      </div>
+    </div>
 
-    <!-- Bottom bar: ONE add button only -->
+    <!-- Bottom bar: one add only -->
     <div class="fixed bottom-0 left-0 right-0 z-20 safe-bottom">
       <div class="mx-auto max-w-md px-4">
         <div class="glass rounded-3xl px-4 py-3 flex items-center justify-between shadow-[0_18px_50px_rgba(3,20,60,.22)]">
@@ -782,7 +762,11 @@
 const { createApp } = Vue;
 
 function uid(){
-  return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+  try{
+    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now() + Math.random());
+  }catch{
+    return String(Date.now() + Math.random());
+  }
 }
 
 createApp({
@@ -865,13 +849,13 @@ createApp({
     },
     dayChip(id){
       return this.selectedDayId===id
-        ? 'bg-blue-500/25 text-white border-blue-100/20'
-        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border-blue-100/10';
+        ? 'bg-blue-500/25 text-white border border-blue-100/20'
+        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
     },
     kindBtn(kind){
       return this.form.slot.kind===kind
-        ? 'bg-blue-500/25 text-white border-blue-100/20'
-        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border-blue-100/10';
+        ? 'bg-blue-500/25 text-white border border-blue-100/20'
+        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
     },
     slotLabel(k){
       const m = { morning:'上午', noon:'中午', evening:'夜晚', late:'深夜' };
@@ -882,51 +866,47 @@ createApp({
       return m[v] || v;
     },
 
+    /* ===== A -> B -> C parser for destinations ===== */
+    addDestinationsByArrow(day, slotKey, text, noteForLast=''){
+      const raw = String(text || '').trim();
+      if(!raw) return;
+
+      const parts = raw.includes('->')
+        ? raw.split('->').map(s=>s.trim()).filter(Boolean)
+        : [raw];
+
+      for(const p of parts){
+        day.slots[slotKey].destinations.push({ id: uid(), place: p, note:'' });
+      }
+      if(noteForLast){
+        const last = day.slots[slotKey].destinations[day.slots[slotKey].destinations.length - 1];
+        if(last) last.note = noteForLast;
+      }
+    },
+
+    /* ===== Storage ===== */
     loadAll(){
       const safe = (k, fallback)=> {
         try { return JSON.parse(localStorage.getItem(k) || fallback); }
         catch { return JSON.parse(fallback); }
       };
-
-      this.days    = safe('sp_v3_days', '[]');
-      this.flights = safe('sp_v3_flights', '[]');
-      this.expenses= safe('sp_v3_expenses', '[]');
-      this.shop    = safe('sp_v3_shop', '[]');
-
-      this.normalizeDays();
+      this.days    = safe('sp_v2_days', '[]');
+      this.flights = safe('sp_v2_flights', '[]');
+      this.expenses= safe('sp_v2_expenses', '[]');
+      this.shop    = safe('sp_v2_shop', '[]');
 
       if(this.days.length>0 && !this.selectedDayId){
         this.selectedDayId = this.days[0].id;
       }
     },
     persistAll(){
-      localStorage.setItem('sp_v3_days', JSON.stringify(this.days));
-      localStorage.setItem('sp_v3_flights', JSON.stringify(this.flights));
-      localStorage.setItem('sp_v3_expenses', JSON.stringify(this.expenses));
-      localStorage.setItem('sp_v3_shop', JSON.stringify(this.shop));
+      localStorage.setItem('sp_v2_days', JSON.stringify(this.days));
+      localStorage.setItem('sp_v2_flights', JSON.stringify(this.flights));
+      localStorage.setItem('sp_v2_expenses', JSON.stringify(this.expenses));
+      localStorage.setItem('sp_v2_shop', JSON.stringify(this.shop));
     },
 
-    normalizeDays(){
-      // Ensure date labels are consistent for ALL days
-      for(const d of this.days){
-        d.dateShort = d.dateShort || this.formatDateShort(d.date);
-        d.dateFull  = d.dateFull  || this.formatDateFull(d.date);
-        d.dateLabel = d.dateLabel || this.formatDateLabel(d.date);
-        d.titleShort = d.title ? this.compactTitle(d.title) : '';
-        d.wear = d.wear || '';
-        // Ensure slots exist
-        d.slots = d.slots || {};
-        for(const k of ['morning','noon','evening','late']){
-          if(!d.slots[k]) d.slots[k] = { destinations: [], food: null };
-          if(!Array.isArray(d.slots[k].destinations)) d.slots[k].destinations = [];
-        }
-      }
-    },
-    compactTitle(t){
-      // Remove repeated day prefix etc (keep it clean)
-      return String(t||'').replace(/\s+/g,' ').trim();
-    },
-
+    /* ===== Navigation ===== */
     navTo(v){
       this.view = v;
       this.tab = v;
@@ -997,8 +977,6 @@ createApp({
         d.wear = (b.wear||'').trim();
         d.dateShort = this.formatDateShort(d.date);
         d.dateFull = this.formatDateFull(d.date);
-        d.dateLabel = this.formatDateLabel(d.date);
-        d.titleShort = d.title ? this.compactTitle(d.title) : '';
         this.persistAll();
         this.view = this.prevView;
         return;
@@ -1056,7 +1034,7 @@ createApp({
         this.days = this.days.filter(x=>x.id!==b.id);
         if(this.selectedDayId===b.id) this.selectedDayId = this.days[0]?.id || null;
         // re-number dayNo
-        this.days.forEach((d,i)=> d.dayNo=i+1);
+        this.days.forEach((d,i)=> d.dayNo = i+1);
         this.persistAll();
         this.view = this.prevView;
         return;
@@ -1100,6 +1078,7 @@ createApp({
       }
     },
 
+    /* ===== Add ===== */
     submitAddDay(){
       const date = this.form.day.date;
       if(!date) return;
@@ -1111,9 +1090,7 @@ createApp({
         date,
         dateShort: this.formatDateShort(date),
         dateFull: this.formatDateFull(date),
-        dateLabel: this.formatDateLabel(date),
         title: (this.form.day.title||'').trim(),
-        titleShort: (this.form.day.title||'').trim(),
         wear: (this.form.day.wear||'').trim(),
         slots: {
           morning: { destinations: [], food: null },
@@ -1132,41 +1109,23 @@ createApp({
       this.view = 'plan';
     },
 
-    splitByArrow(input){
-      const s = String(input||'').trim();
-      if(!s) return [];
-      if(s.includes('->')){
-        return s.split('->').map(x=>x.trim()).filter(Boolean);
-      }
-      return [];
-    },
-
     submitAddSlotItem(){
       const dayId = this.addCtx.dayId;
       const slot = this.addCtx.slot;
       const d = this.getDayById(dayId);
       if(!d) return;
 
-      const raw = (this.form.slot.place||'').trim();
-      if(!raw) return;
+      const placeRaw = (this.form.slot.place||'').trim();
+      if(!placeRaw) return;
+
       const note = (this.form.slot.note||'').trim();
 
       if(this.form.slot.kind==='destination'){
-        const parts = this.splitByArrow(raw);
-        if(parts.length>0){
-          for(const p of parts){
-            d.slots[slot].destinations.push({ id: uid(), place: p, note: '' });
-          }
-          if(note){
-            // attach note to the last one (optional)
-            const last = d.slots[slot].destinations[d.slots[slot].destinations.length-1];
-            last.note = note;
-          }
-        }else{
-          d.slots[slot].destinations.push({ id: uid(), place: raw, note });
-        }
+        // support A -> B -> C
+        this.addDestinationsByArrow(d, slot, placeRaw, note);
       }else{
-        d.slots[slot].food = { place: raw, note };
+        // food only one
+        d.slots[slot].food = { place: placeRaw, note };
       }
 
       this.persistAll();
@@ -1213,6 +1172,7 @@ createApp({
       this.view = 'shop';
     },
 
+    /* ===== Utils ===== */
     getDayById(id){
       return this.days.find(x=>x.id===id) || null;
     },
@@ -1220,13 +1180,6 @@ createApp({
       try{
         const d = new Date(iso + 'T00:00:00');
         return `${d.getMonth()+1}/${d.getDate()}`;
-      }catch{ return iso; }
-    },
-    formatDateLabel(iso){
-      try{
-        const d = new Date(iso + 'T00:00:00');
-        const w = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
-        return `${d.getMonth()+1}/${d.getDate()} ${w}`;
       }catch{ return iso; }
     },
     formatDateFull(iso){
@@ -1237,6 +1190,7 @@ createApp({
       }catch{ return iso; }
     },
 
+    /* ===== Directions ===== */
     ensureOrigin(){
       return new Promise((resolve)=>{
         if(this.originLatLng){ resolve(this.originLatLng); return; }
@@ -1259,6 +1213,7 @@ createApp({
       window.open(url, '_blank');
     },
 
+    /* ===== Weather ===== */
     async refreshWeather(){
       if(!navigator.geolocation){
         this.weather.summary = '此裝置不支援定位';
@@ -1301,6 +1256,7 @@ createApp({
       return (code in m) ? m[code] : '天氣狀況不明';
     },
 
+    /* ===== Clock ===== */
     startClock(){
       const tick = ()=>{
         this.hkClock = new Date().toLocaleTimeString('en-GB', {
@@ -1312,79 +1268,162 @@ createApp({
       this.clockTimer = setInterval(tick, 1000);
     },
 
-    seedIfEmpty(){
-      if(this.days.length>0 || this.shop.length>0 || this.flights.length>0) return;
-
-      // ===== Preset from your Sapporo.xlsx (hardcoded; app does NOT rely on excel) =====
-      const presetDays = [
-        {
-          id: uid(), dayNo: 1, date: '2026-01-08',
-          title: 'Pre-Flight 去程 2026/1/8 星期四',
-          wear: '黑色假兩件 瑜伽喇叭褲',
-          slots: {
-            morning: {
-              destinations: [
-                { id: uid(), place:'行程', note:'UO856 香港T1出發 → 07:05 NRT T2抵達。轉機：NRT T2 → T1（免費航站樓巴士）→ TR892 NRT T1出發 → 12:25 新千歲D抵達。取行李 → JR至札幌市中心（約40分鐘），Check-in 飯店休息/適應時差。' },
-                { id: uid(), place:'酒店休息、酒店附近逛逛', note:'' }
-              ],
-              food: { place:'餐飲建議', note:'機上/機場早餐：隨意。午餐：機場內海鮮飯（約¥1,500）。' }
-            },
-            noon: { destinations: [], food: null },
-            evening: { destinations: [{ id: uid(), place:'晚餐', note:'' }], food: { place:'餐飲建議', note:'' } },
-            late: { destinations: [], food: null }
+    /* ===== Preset from your Excel (hardcode, not relying on Excel) ===== */
+    seedPresetIfMissing(){
+      // Days: only seed if empty (avoid overriding your edits)
+      if(this.days.length === 0){
+        const mkDay = (dayNo, date, title, wear) => ({
+          id: uid(),
+          dayNo,
+          date,
+          dateShort: this.formatDateShort(date),
+          dateFull: this.formatDateFull(date),
+          title,
+          wear,
+          slots:{
+            morning:{ destinations:[], food:null },
+            noon:{ destinations:[], food:null },
+            evening:{ destinations:[], food:null },
+            late:{ destinations:[], food:null }
           }
-        },
-        {
-          id: uid(), dayNo: 2, date: '2026-01-09',
-          title: 'Day 2 1/9 星期五',
-          wear: '',
-          slots: {
-            morning: { destinations: [{ id: uid(), place:'北海道神宮', note:'' }], food: null },
-            noon: { destinations: [{ id: uid(), place:'午餐', note:'' }], food: null },
-            evening: { destinations: [], food: null },
-            late: { destinations: [], food: null }
+        });
+
+        // ===== Day 1 (Pre-Flight) =====
+        const d1 = mkDay(
+          1, '2026-01-08',
+          'Pre-Flight 去程 2026/1/8 星期四',
+          '黑色保暖外套 + 針織帽/頸巾（機場冷）'
+        );
+        // 主要活動（由你張表重點抽出，並支援 ->）
+        this.addDestinationsByArrow(d1, 'morning',
+          'HKG 機場 -> NRT 成田機場 -> CTS 新千歲機場 -> JR 札幌站 -> 酒店 Check-in'
+        );
+        d1.slots.morning.food = { place:'機場/途中簡單食', note:'（可空）' };
+
+        this.addDestinationsByArrow(d1, 'noon',
+          'Stellar Place（札幌站） -> PARCO（札幌）'
+        );
+        d1.slots.noon.food = { place:'Soup Curry KING / Sapporo Ichiryuan Ramen', note:'約¥1,500（optional）' };
+
+        this.addDestinationsByArrow(d1, 'evening',
+          '狸小路'
+        );
+        d1.slots.evening.food = { place:'Sapporo Tanukikoji', note:'已預約 17:30（如適用可改）' };
+
+        // ===== Day 2 =====
+        const d2 = mkDay(
+          2, '2026-01-09',
+          'Day 2 1/9 星期五',
+          '粉藍/白色毛衣 + 米白頸巾（白色好襯雪）'
+        );
+        this.addDestinationsByArrow(d2, 'morning', '北海道神宮');
+        d2.slots.noon.food = { place:'海鮮丼（札幌二條市場一帶）', note:'' };
+
+        this.addDestinationsByArrow(d2, 'noon', 'Stellar Place（札幌站） -> PARCO（札幌）');
+        this.addDestinationsByArrow(d2, 'evening', '大通公園');
+        d2.slots.evening.food = {
+          place:'Suage Soup Curry / Yakiniku Raurau / Toritori（焼鳥）',
+          note:'Wine & Sake 居酒屋（可按當日 mood 改）'
+        };
+
+        // ===== Day 3 =====
+        const d3 = mkDay(
+          3, '2026-01-10',
+          'Day 3 1/10 星期六（Klook Tour）',
+          '心心毛衣 + 米白頸巾'
+        );
+        this.addDestinationsByArrow(d3, 'morning', 'Klook 一日團：小樽 -> 余市（按團內容）');
+        this.addDestinationsByArrow(d3, 'noon', '小樽運河（視行程）');
+        this.addDestinationsByArrow(d3, 'evening', '回札幌市區');
+        d3.slots.evening.food = {
+          place:'札幌駅前 ホルモン酒場風土 / SHINJUKU-TEI',
+          note:'Sapporo Hokkaido Suage Soup Curry / Yakiniku Restaurant（可改）'
+        };
+
+        // ===== Day 4 =====
+        const d4 = mkDay(
+          4, '2026-01-11',
+          'Day 4 1/11 星期日（小樽日）',
+          '情侶毛衣 + 高筒厚底靴'
+        );
+        this.addDestinationsByArrow(d4, 'morning', '札幌站 -> 小樽（JR） -> 堺町通り');
+        this.addDestinationsByArrow(d4, 'noon', '小樽運河');
+        d4.slots.noon.food = { place:'海鮮丼（小樽）', note:'約¥1,500（參考）' };
+
+        this.addDestinationsByArrow(d4, 'evening', '札幌市區');
+        d4.slots.evening.food = { place:'Zen（體驗/活動）', note:'（如你張表：可改成連結/備註）' };
+
+        // ===== Day 5 =====
+        const d5 = mkDay(
+          5, '2026-01-12',
+          'Day 5 1/12 星期一',
+          '黃粉/米色系毛衣 + 針織帽'
+        );
+        this.addDestinationsByArrow(d5, 'morning', '羊ヶ丘展望台');
+        this.addDestinationsByArrow(d5, 'noon', 'JOZANKEI（如果去）');
+        this.addDestinationsByArrow(d5, 'evening', '白色戀人公園');
+        d5.slots.evening.food = {
+          place:'Stellar Place（札幌站）',
+          note:'再食 Soup Curry KING / Sapporo Ichiryuan Ramen（optional）'
+        };
+
+        // ===== Day 6 (Post-Flight) =====
+        const d6 = mkDay(
+          6, '2026-01-13',
+          'Post-Flight 回程 1/13 星期二',
+          '黑色保暖外套 + 針織帽'
+        );
+        this.addDestinationsByArrow(d6, 'morning', '酒店 -> 新千歲機場');
+        d6.slots.morning.food = { place:'機場（簡單食）', note:'' };
+
+        this.days = [d1,d2,d3,d4,d5,d6];
+        this.selectedDayId = this.days[0].id;
+      }
+
+      // Flights: seed if empty (this fixes “冇晒航程”)
+      if(this.flights.length === 0){
+        this.flights.push(
+          {
+            id: uid(),
+            dateLabel:'Thu 08 Jan 2026',
+            flightNo:'UO856',
+            fromCity:'Hong Kong',
+            toCity:'Tokyo (NRT)',
+            fromCode:'HKG',
+            toCode:'NRT',
+            departTime:'02:00',
+            arriveTime:'07:05',
+            duration:'',
+            fromTerminal:'',
+            toTerminal:'',
+            note:'轉機：NRT → CTS（你表內：12:25 到札幌）'
+          },
+          {
+            id: uid(),
+            dateLabel:'Tue 13 Jan 2026',
+            flightNo:'CX581',
+            fromCity:'Sapporo',
+            toCity:'Hong Kong',
+            fromCode:'CTS',
+            toCode:'HKG',
+            departTime:'16:00',
+            arriveTime:'20:55',
+            duration:'5h 55m',
+            fromTerminal:'Int’l Terminal',
+            toTerminal:'Terminal 1',
+            note:'11:00 出發去機場買手信'
           }
-        },
-        {
-          id: uid(), dayNo: 3, date: '2026-01-10',
-          title: 'Day 3 1/10 星期六',
-          wear: '',
-          slots: { morning:{destinations:[],food:null}, noon:{destinations:[],food:null}, evening:{destinations:[],food:null}, late:{destinations:[],food:null} }
-        },
-        {
-          id: uid(), dayNo: 4, date: '2026-01-11',
-          title: 'Day 4 1/11 星期日',
-          wear: '',
-          slots: { morning:{destinations:[],food:null}, noon:{destinations:[],food:null}, evening:{destinations:[],food:null}, late:{destinations:[],food:null} }
-        },
-        {
-          id: uid(), dayNo: 5, date: '2026-01-12',
-          title: 'Day 5 1/12 星期一',
-          wear: '',
-          slots: { morning:{destinations:[],food:null}, noon:{destinations:[],food:null}, evening:{destinations:[],food:null}, late:{destinations:[],food:null} }
-        },
-        {
-          id: uid(), dayNo: 6, date: '2026-01-13',
-          title: 'Day 6 1/13 星期二',
-          wear: '',
-          slots: { morning:{destinations:[],food:null}, noon:{destinations:[],food:null}, evening:{destinations:[],food:null}, late:{destinations:[],food:null} }
-        }
-      ];
+        );
+      }
 
-      const presetShop = [
-        { id: uid(), item:'小樽 魷魚絲', where:'小樽Ika Taro Honpo いか太郎本舗  14:00前會售光', note:'', done:false },
-        { id: uid(), item:'六花亭葡萄奶油夾心餅乾', where:'札幌車站附近、新千歲機場', note:'10個入 1450 YEN', done:false },
-        { id: uid(), item:'Le Tao小樽色內通起司夾心餅乾', where:'小樽、新千歲機場', note:'9片裝1,134日圓（含稅）、16片裝1,998日圓（含稅）、20片裝2,484日圓（含稅）', done:false },
-        { id: uid(), item:'北海道これにまいった', where:'新千歲機場 JAL PLAZA', note:'1箱（20g×6袋入）930円', done:false },
-        { id: uid(), item:'炸玉米', where:'新千歲機場 JAL PLAZA', note:'6袋648日圓・10袋1029日圓（含稅）', done:false },
-        { id: uid(), item:'白色戀人', where:'新千歲機場 / 札幌站', note:'（按你想買嘅盒數）', done:false }
-      ];
-
-      this.days = presetDays;
-      this.shop = presetShop;
-
-      this.normalizeDays();
-      this.selectedDayId = this.days[0]?.id || null;
+      // Shop: seed if empty (this fixes “冇晒購物”)
+      if(this.shop.length === 0){
+        this.shop.push(
+          { id: uid(), item:'小樽 魷魚絲', where:'小樽 ika Taro Honpo いか太郎本舗', note:'14:00 前可能售光', done:false },
+          { id: uid(), item:'六花亭葡萄奶油夾心餅乾', where:'札幌車站附近 / 新千歲機場', note:'10個入 1450 YEN', done:false },
+          { id: uid(), item:'Le Tao 小樽色內通起司夾心餅乾', where:'小樽 / 新千歲機場', note:'9片裝1,134円；16片1,998円；20片2,484円（含稅）', done:false }
+        );
+      }
 
       this.persistAll();
     }
@@ -1392,7 +1431,7 @@ createApp({
 
   mounted(){
     this.loadAll();
-    this.seedIfEmpty();
+    this.seedPresetIfMissing();   // <— hardcode preset (no Excel dependency)
     this.startClock();
     this.refreshWeather();
   },
