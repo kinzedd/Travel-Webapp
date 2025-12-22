@@ -913,11 +913,20 @@ createApp({
         return { id:d.id, title:d.title, date:d.date };
       }
       if(mode==='destination'){
-        const { dayId, slot, id } = ctx;
-        const d = this.getDayById(dayId);
-        const p = d.slots[slot].destinations.find(x=>x.id===id);
-        return { dayId, slot, id, place:p.place, note:p.note || '' };
+        const d = this.getDayById(b.dayId);
+        const arr = d.slots[b.slot].destinations;
+        const p = arr.find(x=>x.id===b.id);
+      
+        if(p){
+          p.place = (b.place||'').trim();
+          p.note  = (b.note||'').trim();
+        }
+      
+        this.persistAll();
+        this.view = this.prevView;
+        return;
       }
+
       if(mode==='food'){
         const { dayId, slot } = ctx;
         const d = this.getDayById(dayId);
