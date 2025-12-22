@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sapporo Snow — Planner</title>
+  <title>Sapporo Snow — Travel App</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,64 +24,59 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
   <style>
-    /* First Love / Sapporo snow vibe: deep blue night + soft snow + bokeh lights */
-    .sapporo-bg{
-      background:
-        radial-gradient(1100px 720px at 20% 0%, rgba(96,165,250,.35), rgba(2,6,23,.0) 60%),
-        radial-gradient(900px 620px at 90% 10%, rgba(191,219,254,.22), rgba(2,6,23,.0) 55%),
-        radial-gradient(800px 520px at 70% 70%, rgba(59,130,246,.16), rgba(2,6,23,.0) 60%),
-        linear-gradient(180deg, #0b1224, #071024 45%, #050b1a);
-      position: relative;
-      overflow: hidden;
+    /* ✅ Fix iOS scroll jank / stuck */
+    html, body { height: 100%; }
+    body{
+      overscroll-behavior-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
 
-    /* snow layer */
-    .sapporo-bg:before{
+    /* Snowfield background image + soft blue overlay (First Love feel) */
+    .bg-snow{
+      /* 你想換雪地圖：改呢條 url 即可 */
+      background-image:
+        linear-gradient(180deg, rgba(2,6,23,.70), rgba(2,6,23,.78)),
+        radial-gradient(1100px 720px at 20% 0%, rgba(96,165,250,.30), rgba(2,6,23,0) 60%),
+        radial-gradient(900px 620px at 90% 10%, rgba(191,219,254,.20), rgba(2,6,23,0) 55%),
+        url("https://images.unsplash.com/photo-1542736667-069246bdbc74?auto=format&fit=crop&w=1400&q=80");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    /* subtle snow dots overlay */
+    .bg-snow::before{
       content:"";
-      position:absolute; inset:-30%;
+      position: fixed;
+      inset: -30%;
       background-image:
         radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px),
         radial-gradient(rgba(255,255,255,.55) 1px, transparent 1px);
       background-size: 18px 18px, 28px 28px;
       background-position: 0 0, 9px 14px;
-      opacity:.22;
+      opacity: .20;
       transform: rotate(-8deg);
-      pointer-events:none;
-    }
-
-    /* bokeh */
-    .sapporo-bg:after{
-      content:"";
-      position:absolute; inset:-20%;
-      background:
-        radial-gradient(circle at 12% 28%, rgba(255,255,255,.12) 0 12px, transparent 14px),
-        radial-gradient(circle at 22% 62%, rgba(147,197,253,.14) 0 16px, transparent 18px),
-        radial-gradient(circle at 78% 26%, rgba(255,255,255,.10) 0 14px, transparent 16px),
-        radial-gradient(circle at 88% 58%, rgba(191,219,254,.12) 0 18px, transparent 20px);
-      filter: blur(0.2px);
-      opacity:.65;
-      pointer-events:none;
+      pointer-events: none;
+      z-index: 0;
     }
 
     .glass{
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.10);
       border: 1px solid rgba(191,219,254,.16);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
-
     .glass-2{
-      background: rgba(255,255,255,.10);
+      background: rgba(255,255,255,.12);
       border: 1px solid rgba(191,219,254,.16);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
-
     .pill{
       background: rgba(191,219,254,.10);
-      border: 1px solid rgba(191,219,254,.20);
+      border: 1px solid rgba(191,219,254,.22);
     }
-
     .input{
       background: rgba(255,255,255,.10);
       border: 1px solid rgba(191,219,254,.18);
@@ -92,369 +87,529 @@
   </style>
 </head>
 
-<body class="sapporo-bg min-h-screen text-white/90">
+<body class="bg-snow min-h-screen text-white/90">
   <div id="app" class="relative min-h-screen">
-    <div class="mx-auto max-w-md px-4 pb-28 pt-6">
-      <!-- Header -->
-      <div class="glass shadow-glow rounded-3xl p-5">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <div class="text-xs tracking-[0.22em] uppercase text-blue-100/70">Sapporo • Snow • Blue/White</div>
-            <h1 class="text-xl font-semibold text-white">札幌旅行小 App</h1>
-            <p class="text-sm text-blue-100/70 mt-1">行程 / 地圖導航 / 記帳 / 購物清單 / 照片</p>
+    <!-- z layer above bg overlay -->
+    <div class="relative z-10">
+      <!-- App content -->
+      <div class="mx-auto max-w-md px-4 pt-6 pb-32">
+        <!-- Header -->
+        <div class="glass shadow-glow rounded-3xl p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-xs tracking-[0.22em] uppercase text-blue-100/70">Sapporo • Snow • Blue/White</div>
+              <h1 class="text-xl font-semibold text-white">札幌旅行 App</h1>
+              <p class="text-sm text-blue-100/70 mt-1">行程 / 航程 / 酒店 / 記帳 / 購物 / 照片</p>
+            </div>
+            <div class="pill rounded-2xl px-3 py-2 text-right">
+              <div class="text-[11px] text-blue-100/70">HK Time</div>
+              <div class="font-semibold text-white">{{ hkClock }}</div>
+            </div>
           </div>
-          <div class="pill rounded-2xl px-3 py-2 text-right">
-            <div class="text-[11px] text-blue-100/70">HK Time</div>
-            <div class="font-semibold text-white">{{ hkClock }}</div>
+
+          <!-- Main Tabs -->
+          <div class="mt-4 grid grid-cols-4 gap-2">
+            <button @click="tab='plan'"    :class="tabBtn('plan')"    class="rounded-2xl py-2 text-xs font-semibold">行程</button>
+            <button @click="tab='map'"     :class="tabBtn('map')"     class="rounded-2xl py-2 text-xs font-semibold">地圖</button>
+            <button @click="tab='expense'" :class="tabBtn('expense')" class="rounded-2xl py-2 text-xs font-semibold">記帳</button>
+            <button @click="tab='shop'"    :class="tabBtn('shop')"    class="rounded-2xl py-2 text-xs font-semibold">購物</button>
           </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="mt-4 grid grid-cols-4 gap-2">
-          <button @click="tab='itinerary'" :class="tabBtn('itinerary')" class="rounded-2xl py-2 text-xs font-semibold">行程</button>
-          <button @click="tab='map'"       :class="tabBtn('map')"       class="rounded-2xl py-2 text-xs font-semibold">地圖</button>
-          <button @click="tab='expense'"   :class="tabBtn('expense')"   class="rounded-2xl py-2 text-xs font-semibold">記帳</button>
-          <button @click="tab='shop'"      :class="tabBtn('shop')"      class="rounded-2xl py-2 text-xs font-semibold">購物</button>
-        </div>
-      </div>
+        <!-- Content -->
+        <div class="mt-4 glass-2 shadow-soft rounded-3xl p-5 space-y-4">
 
-      <!-- Main Card -->
-      <div class="mt-4 glass-2 shadow-soft rounded-3xl p-5">
-        <!-- ITINERARY -->
-        <div v-if="tab==='itinerary'" class="space-y-4">
-          <!-- Weather first -->
-          <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <div class="text-xs text-blue-100/70">天氣（Open-Meteo，免 Key；用你位置）</div>
-                <div class="mt-1 flex items-center gap-2">
-                  <div class="text-lg font-semibold text-white">{{ weather.summary }}</div>
-                  <span v-if="weather.temp!==null" class="pill rounded-xl px-2 py-0.5 text-sm font-semibold text-white">
-                    {{ weather.temp }}°C
-                  </span>
-                </div>
-                <div class="text-xs text-blue-100/60 mt-1" v-if="weather.place">{{ weather.place }}</div>
-              </div>
-              <div class="text-right">
-                <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10" @click="refreshWeather">
-                  重新抓天氣
-                </button>
-                <div class="text-[11px] text-blue-100/60 mt-2" v-if="weather.updatedAt">更新：{{ weather.updatedAt }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Add itinerary -->
-          <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-            <div class="font-semibold text-white">新增行程</div>
-            <div class="mt-3 grid grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs text-blue-100/70">日期</label>
-                <input type="date" v-model="itForm.date" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-              <div>
-                <label class="text-xs text-blue-100/70">時間</label>
-                <input type="time" v-model="itForm.time" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-              <div class="col-span-2">
-                <label class="text-xs text-blue-100/70">地點（可用作導航）</label>
-                <input type="text" v-model="itForm.location" placeholder="例如：Odori Park / Susukino"
-                  class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-              <div class="col-span-2">
-                <label class="text-xs text-blue-100/70">備註</label>
-                <input type="text" v-model="itForm.note" placeholder="活動/餐廳/注意事項"
-                  class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-            </div>
-            <div class="mt-3 flex gap-2">
-              <button @click="addItinerary"
-                class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-                加入行程
-              </button>
-              <button @click="clearItinerary"
-                class="rounded-2xl pill px-4 py-2 text-sm font-semibold hover:bg-white/10">
-                清空全部
-              </button>
-            </div>
-          </div>
-
-          <!-- Itinerary list -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="font-semibold text-white">行程表（已由 Excel 匯入）</div>
-              <div class="text-xs text-blue-100/60">localStorage 自動保存</div>
-            </div>
-
-            <div v-if="itineraries.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-              暫時未有行程。
-            </div>
-
-            <div v-for="it in sortedItineraries" :key="it.id" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <div class="text-sm font-semibold text-white">
-                      {{ it.dateDisplay }} <span class="text-blue-100/60 font-normal" v-if="it.time">· {{ it.time }}</span>
-                    </div>
-                    <span v-if="it.location" class="pill rounded-xl px-2 py-0.5 text-[11px] font-semibold">
-                      {{ it.location }}
+          <!-- ✅ 行程（內部分 sub-tabs） -->
+          <div v-if="tab==='plan'" class="space-y-4">
+            <!-- Weather always at top -->
+            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-xs text-blue-100/70">天氣（Open-Meteo，免 Key）</div>
+                  <div class="mt-1 flex items-center gap-2">
+                    <div class="text-lg font-semibold text-white">{{ weather.summary }}</div>
+                    <span v-if="weather.temp!==null" class="pill rounded-xl px-2 py-0.5 text-sm font-semibold text-white">
+                      {{ weather.temp }}°C
                     </span>
                   </div>
-                  <div class="text-sm text-blue-50/90 mt-2 break-words" v-if="it.note">{{ it.note }}</div>
+                  <div class="text-xs text-blue-100/60 mt-1" v-if="weather.place">{{ weather.place }}</div>
+                </div>
+                <div class="text-right">
+                  <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10" @click="refreshWeather">
+                    重新抓天氣
+                  </button>
+                  <div class="text-[11px] text-blue-100/60 mt-2" v-if="weather.updatedAt">更新：{{ weather.updatedAt }}</div>
+                </div>
+              </div>
+            </div>
 
-                  <div class="mt-2 flex flex-wrap gap-2" v-if="it.location">
-                    <a :href="googleDirectionsLink(it.location)" target="_blank"
-                       class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
-                      用 Google Maps 導航
-                    </a>
-                    <button @click="setMapDestination(it.location); tab='map'"
-                       class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
-                      在地圖頁顯示
-                    </button>
+            <!-- Sub Tabs -->
+            <div class="grid grid-cols-4 gap-2">
+              <button @click="planTab='daily'"  :class="subTabBtn('daily')"  class="rounded-2xl py-2 text-xs font-semibold">日期</button>
+              <button @click="planTab='flight'" :class="subTabBtn('flight')" class="rounded-2xl py-2 text-xs font-semibold">航程</button>
+              <button @click="planTab='hotel'"  :class="subTabBtn('hotel')"  class="rounded-2xl py-2 text-xs font-semibold">酒店</button>
+              <button @click="planTab='memo'"   :class="subTabBtn('memo')"   class="rounded-2xl py-2 text-xs font-semibold">備忘</button>
+            </div>
+
+            <!-- Daily Plan -->
+            <div v-if="planTab==='daily'" class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-white">每日行程</div>
+                <div class="text-xs text-blue-100/60">由 Excel 匯入 + 可手動新增</div>
+              </div>
+
+              <!-- Add daily item -->
+              <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="font-semibold text-white">新增一條行程</div>
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="text-xs text-blue-100/70">日期</label>
+                    <input type="date" v-model="itForm.date" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                  </div>
+                  <div>
+                    <label class="text-xs text-blue-100/70">時間</label>
+                    <input type="time" v-model="itForm.time" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                  </div>
+                  <div class="col-span-2">
+                    <label class="text-xs text-blue-100/70">地點</label>
+                    <input type="text" v-model="itForm.location" placeholder="例如：Odori Park / Susukino"
+                      class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                  </div>
+                  <div class="col-span-2">
+                    <label class="text-xs text-blue-100/70">內容</label>
+                    <input type="text" v-model="itForm.note" placeholder="做咩 / 食咩 / 注意事項"
+                      class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
                   </div>
                 </div>
+                <div class="mt-3 flex gap-2">
+                  <button @click="addDaily"
+                    class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                    加入
+                  </button>
+                  <button @click="clearDaily"
+                    class="rounded-2xl pill px-4 py-2 text-sm font-semibold hover:bg-white/10">
+                    清空
+                  </button>
+                </div>
+              </div>
 
-                <button @click="removeItinerary(it.id)"
-                  class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
-                  刪除
+              <!-- Group by date -->
+              <div v-if="dailyGroups.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                暫時未有每日行程。
+              </div>
+
+              <div v-for="g in dailyGroups" :key="g.key" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="flex items-center justify-between">
+                  <div class="font-semibold text-white">{{ g.title }}</div>
+                  <div class="text-xs text-blue-100/60">{{ g.items.length }} items</div>
+                </div>
+
+                <div class="mt-3 space-y-2">
+                  <div v-for="it in g.items" :key="it.id" class="rounded-2xl bg-white/5 border border-blue-100/10 p-3">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div class="text-sm font-semibold text-white">
+                            <span v-if="it.time">{{ it.time }}</span>
+                            <span v-else class="text-blue-100/60 font-normal">（未填時間）</span>
+                          </div>
+                          <span v-if="it.location" class="pill rounded-xl px-2 py-0.5 text-[11px] font-semibold">
+                            {{ it.location }}
+                          </span>
+                        </div>
+                        <div class="text-sm text-blue-50/90 mt-2 break-words" v-if="it.note">{{ it.note }}</div>
+
+                        <div class="mt-2 flex flex-wrap gap-2" v-if="it.location">
+                          <a :href="googleDirectionsLink(it.location)" target="_blank"
+                             class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                            Google Maps 導航
+                          </a>
+                          <button @click="setMapDestination(it.location); tab='map'"
+                             class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                            在地圖頁睇
+                          </button>
+                        </div>
+                      </div>
+
+                      <button @click="removeDaily(it.id)"
+                        class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
+                        刪除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flight -->
+            <div v-else-if="planTab==='flight'" class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-white">航程資訊</div>
+                <div class="text-xs text-blue-100/60">集中顯示去程/回程</div>
+              </div>
+
+              <div v-if="flights.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                未有航程資料（你可以手動加）。
+              </div>
+
+              <div v-for="f in flights" :key="f.id" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="font-semibold text-white">{{ f.title }}</div>
+                <div class="text-xs text-blue-100/60 mt-1">{{ f.dateDisplay }}</div>
+                <div class="text-sm text-blue-50/90 mt-2 whitespace-pre-wrap break-words">{{ f.note }}</div>
+              </div>
+
+              <!-- Add flight -->
+              <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="font-semibold text-white">新增航程</div>
+                <div class="mt-3 space-y-3">
+                  <input v-model="flightForm.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：去程 HKG → CTS">
+                  <input v-model="flightForm.dateDisplay" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：2026/1/8（四）">
+                  <textarea v-model="flightForm.note" rows="4" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="航班號、時間、轉機、注意事項…"></textarea>
+                </div>
+                <div class="mt-3 flex gap-2">
+                  <button @click="addFlight" class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">加入</button>
+                  <button @click="clearFlights" class="rounded-2xl pill px-4 py-2 text-sm font-semibold hover:bg-white/10">清空</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hotel -->
+            <div v-else-if="planTab==='hotel'" class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-white">酒店資訊</div>
+                <div class="text-xs text-blue-100/60">入住/退房/地址/備註</div>
+              </div>
+
+              <div v-if="hotels.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                未有酒店資料。你可以加返你訂咗邊間（旅行一定要有！）
+              </div>
+
+              <div v-for="h in hotels" :key="h.id" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="font-semibold text-white break-words">{{ h.name }}</div>
+                    <div class="text-xs text-blue-100/60 mt-1">
+                      入住：{{ h.checkin || '—' }} · 退房：{{ h.checkout || '—' }}
+                    </div>
+                    <div class="text-sm text-blue-50/90 mt-2 break-words" v-if="h.address">{{ h.address }}</div>
+                    <div class="text-sm text-blue-50/90 mt-2 break-words whitespace-pre-wrap" v-if="h.note">{{ h.note }}</div>
+
+                    <div class="mt-2 flex flex-wrap gap-2" v-if="h.address">
+                      <a :href="googleDirectionsLink(h.address)" target="_blank"
+                         class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                        去酒店導航
+                      </a>
+                      <button @click="setMapDestination(h.address); tab='map'"
+                         class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                        地圖顯示
+                      </button>
+                    </div>
+                  </div>
+
+                  <button @click="removeHotel(h.id)"
+                    class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
+                    刪除
+                  </button>
+                </div>
+              </div>
+
+              <!-- Add hotel -->
+              <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="font-semibold text-white">新增酒店</div>
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <div class="col-span-2">
+                    <label class="text-xs text-blue-100/70">酒店名</label>
+                    <input v-model="hotelForm.name" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：JR Tower Hotel Nikko Sapporo">
+                  </div>
+                  <div>
+                    <label class="text-xs text-blue-100/70">入住</label>
+                    <input type="date" v-model="hotelForm.checkin" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm">
+                  </div>
+                  <div>
+                    <label class="text-xs text-blue-100/70">退房</label>
+                    <input type="date" v-model="hotelForm.checkout" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm">
+                  </div>
+                  <div class="col-span-2">
+                    <label class="text-xs text-blue-100/70">地址</label>
+                    <input v-model="hotelForm.address" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="地址 / 地點名都得（for Google Maps）">
+                  </div>
+                  <div class="col-span-2">
+                    <label class="text-xs text-blue-100/70">備註</label>
+                    <textarea v-model="hotelForm.note" rows="3" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="訂房編號、早餐、check-in時間…"></textarea>
+                  </div>
+                </div>
+                <div class="mt-3 flex gap-2">
+                  <button @click="addHotel" class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">加入</button>
+                  <button @click="clearHotels" class="rounded-2xl pill px-4 py-2 text-sm font-semibold hover:bg-white/10">清空</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Memo -->
+            <div v-else class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-white">備忘 / 清單</div>
+                <div class="text-xs text-blue-100/60">旅行最常用：帶咩、注意咩</div>
+              </div>
+
+              <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <label class="text-xs text-blue-100/70">新增備忘</label>
+                <div class="mt-2 flex gap-2">
+                  <input v-model="memoForm.text" @keyup.enter="addMemo" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：帶手套 / 充電寶 / 預約成吉思汗">
+                  <button @click="addMemo" class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">加</button>
+                </div>
+              </div>
+
+              <div v-if="memos.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                未有備忘。
+              </div>
+
+              <div class="space-y-2">
+                <div v-for="m in memos" :key="m.id" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 flex items-start justify-between gap-3">
+                  <label class="flex items-start gap-3 min-w-0">
+                    <input type="checkbox" v-model="m.done" @change="persistAll"
+                      class="mt-1 h-5 w-5 rounded border-blue-200 text-blue-500 focus:ring-blue-200/40">
+                    <span :class="m.done ? 'line-through text-blue-100/40' : 'text-white'" class="text-sm font-semibold break-words">
+                      {{ m.text }}
+                    </span>
+                  </label>
+                  <button @click="removeMemo(m.id)"
+                    class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
+                    刪除
+                  </button>
+                </div>
+              </div>
+
+              <!-- Photos here too (optional) -->
+              <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="font-semibold text-white">照片相簿</div>
+                    <div class="text-xs text-blue-100/60">上傳相片（localStorage 保存）</div>
+                  </div>
+                  <button @click="clearPhotos" class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10">
+                    清空照片
+                  </button>
+                </div>
+
+                <input type="file" accept="image/*" multiple @change="onPhotoFiles"
+                  class="block w-full text-sm text-blue-100/80 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-500/80 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-500"/>
+
+                <div v-if="photos.length===0" class="text-sm text-blue-100/70">未有照片。</div>
+                <div v-else class="grid grid-cols-3 gap-2">
+                  <div v-for="p in photos" :key="p.id" class="rounded-2xl overflow-hidden border border-blue-100/20 bg-white/5">
+                    <img :src="p.dataUrl" class="w-full h-28 object-cover" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MAP -->
+          <div v-else-if="tab==='map'" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-white">地圖 / 導航</div>
+                <div class="text-xs text-blue-100/60">Google Maps 內嵌 + 一鍵導航</div>
+              </div>
+              <button @click="useCurrentLocation" class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10">
+                用我而家位置
+              </button>
+            </div>
+
+            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+              <label class="text-xs text-blue-100/70">目的地</label>
+              <input type="text" v-model="map.destination" placeholder="例如：Odori Park / Otaru Canal"
+                class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+              <div class="mt-3 flex flex-wrap gap-2">
+                <a :href="googleDirectionsLink(map.destination)" target="_blank"
+                   class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                  開 Google Maps 導航
+                </a>
+                <button @click="map.refreshKey = Date.now()"
+                   class="pill rounded-2xl px-4 py-2 text-sm font-semibold hover:bg-white/10">
+                  刷新內嵌地圖
                 </button>
               </div>
             </div>
+
+            <div class="rounded-2xl overflow-hidden border border-blue-100/20 bg-white/5">
+              <iframe
+                :key="map.refreshKey"
+                class="w-full h-[360px]"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                :src="googleEmbedSrc(map.destination)"
+              ></iframe>
+            </div>
+
+            <div class="text-xs text-blue-100/60">
+              內嵌係搜尋地圖；turn-by-turn 導航請用「開 Google Maps 導航」。
+            </div>
           </div>
 
-          <!-- Photos (since xlsx had no photo sheet) -->
-          <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 space-y-3">
+          <!-- EXPENSE -->
+          <div v-else-if="tab==='expense'" class="space-y-4">
             <div class="flex items-center justify-between">
               <div>
-                <div class="font-semibold text-white">照片相簿</div>
-                <div class="text-xs text-blue-100/60">（Excel 無照片欄，所以用上傳方式加入；會存 localStorage）</div>
+                <div class="font-semibold text-white">記帳</div>
+                <div class="text-xs text-blue-100/60">付款方式：現金 / 信用卡（下拉）</div>
               </div>
-              <button @click="clearPhotos"
+              <div class="pill rounded-2xl px-3 py-2 text-xs font-semibold">
+                本月合計：HK$ {{ monthTotal.toFixed(2) }}
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+              <div class="font-semibold text-white">新增支出</div>
+              <div class="mt-3 grid grid-cols-2 gap-3">
+                <div class="col-span-2">
+                  <label class="text-xs text-blue-100/70">項目</label>
+                  <input type="text" v-model="exForm.title" placeholder="例如：拉麵 / JR / 咖啡"
+                    class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                </div>
+                <div>
+                  <label class="text-xs text-blue-100/70">金額（HKD）</label>
+                  <input type="number" v-model.number="exForm.amount" min="0" step="0.01" placeholder="0.00"
+                    class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                </div>
+                <div>
+                  <label class="text-xs text-blue-100/70">付款方式</label>
+                  <select v-model="exForm.method"
+                    class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                    <option value="現金">現金</option>
+                    <option value="信用卡">信用卡</option>
+                  </select>
+                </div>
+                <div class="col-span-2">
+                  <label class="text-xs text-blue-100/70">日期</label>
+                  <input type="date" v-model="exForm.date"
+                    class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
+                </div>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button @click="addExpense"
+                  class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                  記錄支出
+                </button>
+                <button @click="clearExpenses"
+                  class="rounded-2xl pill px-4 py-2 text-sm font-semibold hover:bg-white/10">
+                  清空全部
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div v-if="expenses.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                仲未有支出紀錄。
+              </div>
+
+              <div v-for="e in sortedExpenses" :key="e.id" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="text-sm font-semibold text-white">{{ e.title || '(未命名)' }}</div>
+                    <div class="mt-1 text-sm text-blue-50/90">
+                      HK$ {{ Number(e.amount).toFixed(2) }}
+                      <span class="pill rounded-xl px-2 py-0.5 text-[11px] font-semibold ml-2">{{ e.method }}</span>
+                    </div>
+                    <div class="text-xs text-blue-100/60 mt-1">{{ e.date }}</div>
+                  </div>
+                  <button @click="removeExpense(e.id)"
+                    class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
+                    刪除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SHOP -->
+          <div v-else class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-white">購物清單</div>
+                <div class="text-xs text-blue-100/60">✅ 名稱 → 🧭 邊度買 → 📝 note</div>
+              </div>
+              <button @click="clearShop"
                 class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10">
-                清空照片
-              </button>
-            </div>
-
-            <input type="file" accept="image/*" multiple @change="onPhotoFiles"
-              class="block w-full text-sm text-blue-100/80 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-500/80 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-500"/>
-
-            <div v-if="photos.length===0" class="text-sm text-blue-100/70">
-              未有照片。你可以揀幾張旅行相加落去～
-            </div>
-
-            <div v-else class="grid grid-cols-3 gap-2">
-              <div v-for="p in photos" :key="p.id" class="rounded-2xl overflow-hidden border border-blue-100/20 bg-white/5">
-                <img :src="p.dataUrl" class="w-full h-28 object-cover" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MAP -->
-        <div v-else-if="tab==='map'" class="space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-white">地圖 / 導航</div>
-              <div class="text-xs text-blue-100/60">Google Maps 內嵌 + 一鍵導航</div>
-            </div>
-            <button @click="useCurrentLocation" class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10">
-              用我而家位置
-            </button>
-          </div>
-
-          <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-            <label class="text-xs text-blue-100/70">目的地</label>
-            <input type="text" v-model="map.destination" placeholder="例如：Odori Park / Otaru Canal"
-              class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-            <div class="mt-3 flex flex-wrap gap-2">
-              <a :href="googleDirectionsLink(map.destination)" target="_blank"
-                 class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-                開 Google Maps 導航
-              </a>
-              <button @click="map.refreshKey = Date.now()"
-                 class="pill rounded-2xl px-4 py-2 text-sm font-semibold hover:bg-white/10">
-                刷新內嵌地圖
-              </button>
-            </div>
-          </div>
-
-          <div class="rounded-2xl overflow-hidden border border-blue-100/20 bg-white/5">
-            <iframe
-              :key="map.refreshKey"
-              class="w-full h-[360px]"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              :src="googleEmbedSrc(map.destination)"
-            ></iframe>
-          </div>
-
-          <div class="text-xs text-blue-100/60">
-            內嵌係搜尋地圖；turn-by-turn 導航請用「開 Google Maps 導航」。
-          </div>
-        </div>
-
-        <!-- EXPENSE -->
-        <div v-else-if="tab==='expense'" class="space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-white">記帳</div>
-              <div class="text-xs text-blue-100/60">付款方式：現金 / 信用卡（下拉）</div>
-            </div>
-            <div class="pill rounded-2xl px-3 py-2 text-xs font-semibold">
-              本月合計：HK$ {{ monthTotal.toFixed(2) }}
-            </div>
-          </div>
-
-          <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-            <div class="font-semibold text-white">新增支出</div>
-            <div class="mt-3 grid grid-cols-2 gap-3">
-              <div class="col-span-2">
-                <label class="text-xs text-blue-100/70">項目</label>
-                <input type="text" v-model="exForm.title" placeholder="例如：拉麵 / JR / 咖啡"
-                  class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-              <div>
-                <label class="text-xs text-blue-100/70">金額（HKD）</label>
-                <input type="number" v-model.number="exForm.amount" min="0" step="0.01" placeholder="0.00"
-                  class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-              <div>
-                <label class="text-xs text-blue-100/70">付款方式</label>
-                <select v-model="exForm.method"
-                  class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-                  <option value="現金">現金</option>
-                  <option value="信用卡">信用卡</option>
-                </select>
-              </div>
-              <div class="col-span-2">
-                <label class="text-xs text-blue-100/70">日期</label>
-                <input type="date" v-model="exForm.date"
-                  class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              </div>
-            </div>
-            <div class="mt-3 flex gap-2">
-              <button @click="addExpense"
-                class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-                記錄支出
-              </button>
-              <button @click="clearExpenses"
-                class="rounded-2xl pill px-4 py-2 text-sm font-semibold hover:bg-white/10">
                 清空全部
               </button>
             </div>
-          </div>
 
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="font-semibold text-white">支出列表</div>
-              <div class="text-xs text-blue-100/60">localStorage 自動保存</div>
+            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 space-y-3">
+              <div class="font-semibold text-white">新增項目</div>
+              <input v-model="shopForm.item" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="名稱，例如：六花亭葡萄奶油夾心">
+              <input v-model="shopForm.where" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="邊度買，例如：新千歲機場 JAL PLAZA">
+              <textarea v-model="shopForm.note" rows="3" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="note，例如：價錢、幾點前售光…"></textarea>
+
+              <div class="flex gap-2">
+                <button @click="addShop"
+                  class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                  加入
+                </button>
+              </div>
             </div>
 
-            <div v-if="expenses.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-              仲未有支出紀錄。
+            <div v-if="shop.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+              清單空空地～加啲先。
             </div>
 
-            <div v-for="e in sortedExpenses" :key="e.id" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-sm font-semibold text-white">{{ e.title || '(未命名)' }}</div>
-                  <div class="mt-1 text-sm text-blue-50/90">
-                    HK$ {{ Number(e.amount).toFixed(2) }}
-                    <span class="pill rounded-xl px-2 py-0.5 text-[11px] font-semibold ml-2">{{ e.method }}</span>
+            <div class="space-y-2">
+              <div v-for="s in sortedShop" :key="s.id"
+                class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 flex items-start justify-between gap-3">
+                <label class="flex items-start gap-3 min-w-0">
+                  <input type="checkbox" v-model="s.done" @change="persistAll"
+                    class="mt-1 h-5 w-5 rounded border-blue-200 text-blue-500 focus:ring-blue-200/40">
+                  <div class="min-w-0">
+                    <div :class="s.done ? 'line-through text-blue-100/40' : 'text-white'" class="text-sm font-semibold break-words">
+                      {{ s.item }}
+                    </div>
+
+                    <div v-if="s.where" class="mt-1 text-xs text-blue-100/70 break-words">
+                      🧭 {{ s.where }}
+                    </div>
+
+                    <div v-if="s.note" class="mt-2 text-xs text-blue-100/60 whitespace-pre-wrap break-words">
+                      📝 {{ s.note }}
+                    </div>
                   </div>
-                  <div class="text-xs text-blue-100/60 mt-1">{{ e.date }}</div>
-                </div>
-                <button @click="removeExpense(e.id)"
+                </label>
+
+                <button @click="removeShop(s.id)"
                   class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
                   刪除
                 </button>
               </div>
             </div>
           </div>
+
         </div>
 
-        <!-- SHOP -->
-        <div v-else class="space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-white">購物清單（已由 Excel 匯入）</div>
-              <div class="text-xs text-blue-100/60">可勾選已買，未買置頂</div>
-            </div>
-            <button @click="clearShop"
-              class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10">
-              清空全部
-            </button>
-          </div>
+        <div class="mt-4 text-center text-xs text-blue-100/55">
+          Vue + Tailwind｜天氣：Open-Meteo｜地圖：Google Maps｜資料：localStorage
+        </div>
+      </div>
 
-          <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-            <label class="text-xs text-blue-100/70">新增項目</label>
-            <div class="mt-2 flex gap-2">
-              <input type="text" v-model="shopForm.item" @keyup.enter="addShop" placeholder="例如：六花亭 / Le Tao"
-                class="input w-full rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200/40">
-              <button @click="addShop"
-                class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
-                加
-              </button>
-            </div>
-          </div>
-
-          <div v-if="shop.length===0" class="text-sm text-blue-100/70 rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-            清單空空地～加啲先。
-          </div>
-
-          <div class="space-y-2">
-            <div v-for="s in sortedShop" :key="s.id"
-              class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 flex items-start justify-between gap-3">
-              <label class="flex items-start gap-3 min-w-0">
-                <input type="checkbox" v-model="s.done" @change="persistAll"
-                  class="mt-1 h-5 w-5 rounded border-blue-200 text-blue-500 focus:ring-blue-200/40">
-                <div class="min-w-0">
-                  <div :class="s.done ? 'line-through text-blue-100/40' : 'text-white'" class="text-sm font-semibold break-words">
-                    {{ s.item }}
-                  </div>
-                  <div v-if="s.note" class="text-xs text-blue-100/60 mt-1 break-words">{{ s.note }}</div>
-                </div>
-              </label>
-              <button @click="removeShop(s.id)"
-                class="rounded-2xl px-3 py-2 text-xs font-semibold text-red-200 bg-red-500/10 hover:bg-red-500/20 border border-red-300/20">
-                刪除
-              </button>
+      <!-- Bottom Nav (fixed) -->
+      <div class="fixed bottom-0 left-0 right-0 z-20">
+        <div class="mx-auto max-w-md px-4 pb-4">
+          <div class="glass shadow-soft rounded-3xl px-4 py-3">
+            <div class="grid grid-cols-4 gap-2">
+              <button @click="tab='plan'"    :class="bottomBtn('plan')"    class="rounded-2xl py-2 text-xs font-semibold">行程</button>
+              <button @click="tab='map'"     :class="bottomBtn('map')"     class="rounded-2xl py-2 text-xs font-semibold">地圖</button>
+              <button @click="tab='expense'" :class="bottomBtn('expense')" class="rounded-2xl py-2 text-xs font-semibold">記帳</button>
+              <button @click="tab='shop'"    :class="bottomBtn('shop')"    class="rounded-2xl py-2 text-xs font-semibold">購物</button>
             </div>
           </div>
         </div>
-
       </div>
-
-      <div class="mt-4 text-center text-xs text-blue-100/55">
-        Vue + Tailwind｜天氣：Open-Meteo｜地圖：Google Maps｜資料：localStorage
-      </div>
-    </div>
-
-    <!-- Bottom Nav -->
-    <div class="fixed bottom-0 left-0 right-0">
-      <div class="mx-auto max-w-md px-4 pb-4">
-        <div class="glass shadow-soft rounded-3xl px-4 py-3">
-          <div class="grid grid-cols-4 gap-2">
-            <button @click="tab='itinerary'" :class="bottomBtn('itinerary')" class="rounded-2xl py-2 text-xs font-semibold">行程</button>
-            <button @click="tab='map'"       :class="bottomBtn('map')"       class="rounded-2xl py-2 text-xs font-semibold">地圖</button>
-            <button @click="tab='expense'"   :class="bottomBtn('expense')"   class="rounded-2xl py-2 text-xs font-semibold">記帳</button>
-            <button @click="tab='shop'"      :class="bottomBtn('shop')"      class="rounded-2xl py-2 text-xs font-semibold">購物</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </div><!-- /z-10 -->
   </div>
 
 <script>
 const { createApp } = Vue;
 
-/**
- * ✅ IMPORT DATA from your Sapporo.xlsx (Schedule + Shopping List)
- * - 行程：由 Excel forward-fill 日期欄，轉成 date(ISO) + dateDisplay + time + note
- * - 購物清單：產品 +（價錢/上哪買）組成 note
- * - Excel 內未見「照片」欄/Sheet，所以照片用上傳加入
- */
+/* 你之前 Excel 匯入結果（沿用），我只係改咗 import 時拆 where/note */
 const XLSX_IMPORT = {
   itineraries: [
     {"date":"2026-01-08","dateDisplay":"Pre-Flight 去程 2026/1/8 星期四","time":"凌晨-中午","location":"","note":"02:00 UO856 香港T1出發 → 07:05 NRT T2抵達。 轉機：NRT T2 → T1（免費航站樓巴士，每... T1出發 → 12:25 新千歲D抵達。 取行李 → JR至札幌市中心（約40分鐘），Check-in飯店休息/適應時差。 / 餐飲：機上/機場早餐：隨意。 午餐：機場內海鮮飯（約¥1,500）。 / 米衣著：黑色假兩件 瑜伽喇叭褲 / 髮型：直髮"},
@@ -490,34 +645,63 @@ createApp({
     const iso = (d)=> d.toISOString().slice(0,10);
 
     return {
-      tab: 'itinerary',
+      tab: 'plan',
+      planTab: 'daily',
+
       hkClock: '',
       clockTimer: null,
 
       weather: { summary:'未取得天氣', temp:null, place:'', updatedAt:'' },
 
+      // Daily items
       itForm: { date: iso(today), time:'09:00', location:'', note:'' },
-      itineraries: [],
+      daily: [],
 
+      // Flights
+      flights: [],
+      flightForm: { title:'', dateDisplay:'', note:'' },
+
+      // Hotels
+      hotels: [],
+      hotelForm: { name:'', checkin:'', checkout:'', address:'', note:'' },
+
+      // Memos
+      memos: [],
+      memoForm: { text:'' },
+
+      // Map
       map: { destination:'Odori Park, Sapporo', origin:'', refreshKey: Date.now() },
 
+      // Expense
       exForm: { title:'', amount:null, method:'現金', date: iso(today) },
       expenses: [],
 
-      shopForm: { item:'' },
+      // Shop
+      shopForm: { item:'', where:'', note:'' },
       shop: [],
 
-      photos: [] // {id, dataUrl}
+      // Photos
+      photos: []
     };
   },
 
   computed:{
-    sortedItineraries(){
-      return [...this.itineraries].sort((a,b)=>{
-        const A = (a.date||'9999-99-99') + 'T' + (a.time||'');
-        const B = (b.date||'9999-99-99') + 'T' + (b.time||'');
-        return A.localeCompare(B);
-      });
+    dailyGroups(){
+      const m = new Map();
+      for(const it of this.daily){
+        const key = it.date || '—';
+        if(!m.has(key)){
+          m.set(key, { key, title: it.dateDisplay || key, items: [] });
+        }
+        m.get(key).items.push(it);
+      }
+      // sort groups by date
+      const groups = Array.from(m.values()).sort((a,b)=> (a.key||'').localeCompare(b.key||''));
+      // sort items by time
+      for(const g of groups){
+        g.items.sort((x,y)=> (x.time||'').localeCompare(y.time||''));
+      }
+      return groups;
     },
     sortedExpenses(){
       return [...this.expenses].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
@@ -547,6 +731,11 @@ createApp({
         ? 'bg-white/15 text-white border border-blue-100/20'
         : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
     },
+    subTabBtn(key){
+      return this.planTab===key
+        ? 'bg-blue-500/25 text-white border border-blue-100/20'
+        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
+    },
 
     // storage
     loadAll(){
@@ -554,46 +743,91 @@ createApp({
         try { return JSON.parse(localStorage.getItem(k) || fallback); }
         catch { return JSON.parse(fallback); }
       };
-      this.itineraries = safe('sapporo_itineraries', '[]');
-      this.expenses    = safe('sapporo_expenses', '[]');
-      this.shop        = safe('sapporo_shop', '[]');
-      this.photos      = safe('sapporo_photos', '[]');
+      this.daily    = safe('sp_daily', '[]');
+      this.flights  = safe('sp_flights', '[]');
+      this.hotels   = safe('sp_hotels', '[]');
+      this.memos    = safe('sp_memos', '[]');
+      this.expenses = safe('sp_expenses', '[]');
+      this.shop     = safe('sp_shop', '[]');
+      this.photos   = safe('sp_photos', '[]');
     },
     persistAll(){
-      localStorage.setItem('sapporo_itineraries', JSON.stringify(this.itineraries));
-      localStorage.setItem('sapporo_expenses', JSON.stringify(this.expenses));
-      localStorage.setItem('sapporo_shop', JSON.stringify(this.shop));
-      localStorage.setItem('sapporo_photos', JSON.stringify(this.photos));
+      localStorage.setItem('sp_daily', JSON.stringify(this.daily));
+      localStorage.setItem('sp_flights', JSON.stringify(this.flights));
+      localStorage.setItem('sp_hotels', JSON.stringify(this.hotels));
+      localStorage.setItem('sp_memos', JSON.stringify(this.memos));
+      localStorage.setItem('sp_expenses', JSON.stringify(this.expenses));
+      localStorage.setItem('sp_shop', JSON.stringify(this.shop));
+      localStorage.setItem('sp_photos', JSON.stringify(this.photos));
     },
 
-    // import xlsx data if empty
-    applyXlsxImportIfEmpty(){
-      if(this.itineraries.length===0){
-        this.itineraries = XLSX_IMPORT.itineraries.map(x => ({
-          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
-          date: x.date || '',
-          dateDisplay: x.dateDisplay || (x.date || ''),
-          time: x.time || '',
-          location: x.location || '',
-          note: x.note || ''
-        }));
+    // ✅ import: split daily vs flight; split shop where/note
+    applyImportIfEmpty(){
+      if(this.daily.length===0 && this.flights.length===0){
+        for(const x of XLSX_IMPORT.itineraries){
+          const text = (x.dateDisplay || '') + ' ' + (x.note || '');
+          const isFlight = /flight|UO\d+|CX\d+|HKG|NRT|CTS|新千歲|香港|回程|去程/i.test(text);
+
+          const obj = {
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+            date: x.date || '',
+            dateDisplay: x.dateDisplay || (x.date || ''),
+            time: x.time || '',
+            location: x.location || '',
+            note: x.note || ''
+          };
+
+          if(isFlight){
+            this.flights.push({
+              id: obj.id,
+              title: obj.dateDisplay.includes('Post') ? '回程' : '去程/航程',
+              dateDisplay: obj.dateDisplay,
+              note: obj.note
+            });
+          }else{
+            this.daily.push(obj);
+          }
+        }
       }
+
       if(this.shop.length===0){
-        this.shop = XLSX_IMPORT.shop.map(x => ({
-          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
-          item: x.item || '',
-          note: x.note || '',
-          done: !!x.done
-        }));
+        for(const x of XLSX_IMPORT.shop){
+          const parsed = this.parseWhereAndNote(x.note || '');
+          this.shop.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+            item: x.item || '',
+            where: parsed.where,
+            note: parsed.note,
+            done: !!x.done
+          });
+        }
       }
+
       this.persistAll();
     },
 
-    // itinerary
-    addItinerary(){
+    parseWhereAndNote(raw){
+      // 支援： "上哪買：" / "上哪買:" / "上哪买：" 等等
+      const s = String(raw || '').trim();
+      const markers = ['上哪買：','上哪買:','上哪买：','上哪买:','在哪買：','在哪買:'];
+      let idx = -1, marker = '';
+      for(const m of markers){
+        const i = s.indexOf(m);
+        if(i !== -1){ idx = i; marker = m; break; }
+      }
+      if(idx === -1){
+        return { where:'', note:s };
+      }
+      const before = s.slice(0, idx).trim().replace(/\/\s*$/, '').trim();
+      const after = s.slice(idx + marker.length).trim();
+      return { where: after, note: before };
+    },
+
+    // Daily actions
+    addDaily(){
       const d = (this.itForm.date||'').trim();
       if(!d) return;
-      this.itineraries.push({
+      this.daily.push({
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
         date: this.itForm.date,
         dateDisplay: this.itForm.date,
@@ -602,19 +836,72 @@ createApp({
         note: (this.itForm.note||'').trim()
       });
       this.persistAll();
-      this.itForm.location = '';
-      this.itForm.note = '';
+      this.itForm.location='';
+      this.itForm.note='';
     },
-    removeItinerary(id){
-      this.itineraries = this.itineraries.filter(x=>x.id!==id);
+    removeDaily(id){
+      this.daily = this.daily.filter(x=>x.id!==id);
       this.persistAll();
     },
-    clearItinerary(){
-      this.itineraries = [];
+    clearDaily(){
+      this.daily = [];
       this.persistAll();
     },
 
-    // map
+    // Flight actions
+    addFlight(){
+      if(!this.flightForm.title.trim() && !this.flightForm.note.trim()) return;
+      this.flights.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+        title: this.flightForm.title.trim() || '航程',
+        dateDisplay: this.flightForm.dateDisplay.trim(),
+        note: this.flightForm.note.trim()
+      });
+      this.persistAll();
+      this.flightForm = { title:'', dateDisplay:'', note:'' };
+    },
+    clearFlights(){
+      this.flights = [];
+      this.persistAll();
+    },
+
+    // Hotel actions
+    addHotel(){
+      if(!this.hotelForm.name.trim()) return;
+      this.hotels.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+        name: this.hotelForm.name.trim(),
+        checkin: this.hotelForm.checkin || '',
+        checkout: this.hotelForm.checkout || '',
+        address: (this.hotelForm.address||'').trim(),
+        note: (this.hotelForm.note||'').trim()
+      });
+      this.persistAll();
+      this.hotelForm = { name:'', checkin:'', checkout:'', address:'', note:'' };
+    },
+    removeHotel(id){
+      this.hotels = this.hotels.filter(x=>x.id!==id);
+      this.persistAll();
+    },
+    clearHotels(){
+      this.hotels = [];
+      this.persistAll();
+    },
+
+    // Memo
+    addMemo(){
+      const t = (this.memoForm.text||'').trim();
+      if(!t) return;
+      this.memos.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()), text:t, done:false });
+      this.persistAll();
+      this.memoForm.text='';
+    },
+    removeMemo(id){
+      this.memos = this.memos.filter(x=>x.id!==id);
+      this.persistAll();
+    },
+
+    // Map
     googleEmbedSrc(destination){
       const q = encodeURIComponent(destination || 'Sapporo');
       return `https://www.google.com/maps?q=${q}&output=embed`;
@@ -629,22 +916,15 @@ createApp({
       this.map.refreshKey = Date.now();
     },
     useCurrentLocation(){
-      if(!navigator.geolocation){
-        alert('你部機唔支援定位。');
-        return;
-      }
+      if(!navigator.geolocation){ alert('你部機唔支援定位。'); return; }
       navigator.geolocation.getCurrentPosition(
-        (pos)=>{
-          const { latitude, longitude } = pos.coords;
-          this.map.origin = `${latitude},${longitude}`;
-          this.map.refreshKey = Date.now();
-        },
+        (pos)=>{ this.map.origin = `${pos.coords.latitude},${pos.coords.longitude}`; this.map.refreshKey = Date.now(); },
         ()=> alert('攞唔到定位（請允許定位）。'),
         { enableHighAccuracy:true, timeout:8000 }
       );
     },
 
-    // expense
+    // Expense
     addExpense(){
       const amt = Number(this.exForm.amount);
       if(!amt || amt<=0) return;
@@ -656,9 +936,7 @@ createApp({
         date: this.exForm.date || new Date().toISOString().slice(0,10)
       });
       this.persistAll();
-      this.exForm.title='';
-      this.exForm.amount=null;
-      this.exForm.method='現金';
+      this.exForm.title=''; this.exForm.amount=null; this.exForm.method='現金';
     },
     removeExpense(id){
       this.expenses = this.expenses.filter(x=>x.id!==id);
@@ -669,13 +947,19 @@ createApp({
       this.persistAll();
     },
 
-    // shop
+    // Shop
     addShop(){
       const item = (this.shopForm.item||'').trim();
       if(!item) return;
-      this.shop.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()), item, note:'', done:false });
+      this.shop.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+        item,
+        where: (this.shopForm.where||'').trim(),
+        note: (this.shopForm.note||'').trim(),
+        done: false
+      });
       this.persistAll();
-      this.shopForm.item='';
+      this.shopForm = { item:'', where:'', note:'' };
     },
     removeShop(id){
       this.shop = this.shop.filter(x=>x.id!==id);
@@ -686,17 +970,13 @@ createApp({
       this.persistAll();
     },
 
-    // photos
+    // Photos
     async onPhotoFiles(evt){
       const files = Array.from(evt.target.files || []);
       if(files.length===0) return;
-
       for(const f of files){
         const dataUrl = await this.fileToDataUrl(f);
-        this.photos.push({
-          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
-          dataUrl
-        });
+        this.photos.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()), dataUrl });
       }
       this.persistAll();
       evt.target.value = '';
@@ -714,7 +994,7 @@ createApp({
       this.persistAll();
     },
 
-    // weather
+    // Weather
     async refreshWeather(){
       if(!navigator.geolocation){
         this.weather.summary = '此裝置不支援定位，無法自動抓天氣';
@@ -758,7 +1038,7 @@ createApp({
       return (code in m) ? m[code] : '天氣狀況不明';
     },
 
-    // hk time
+    // HK clock
     startClock(){
       const tick = ()=>{
         this.hkClock = new Date().toLocaleTimeString('en-GB', {
@@ -773,7 +1053,7 @@ createApp({
 
   mounted(){
     this.loadAll();
-    this.applyXlsxImportIfEmpty(); // ✅ import your xlsx data when first run
+    this.applyImportIfEmpty();
     this.startClock();
     this.refreshWeather();
   },
