@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- Tailwind (optional CDN) + local fallback -->
+  <!-- Tailwind CDN (optional). If it fails, app still works with custom CSS. -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Your local CSS (recommended) -->
   <link rel="stylesheet" href="assets/app.css" />
 
-  <!-- Vue (local, to avoid CDN issues) -->
+  <!-- Vue local (avoid CDN issues) -->
   <script src="assets/vue.global.prod.js"></script>
 
   <style>
@@ -19,32 +21,31 @@
       background:#0b1224;
       color:#fff;
       -webkit-text-size-adjust: 100%;
-      overscroll-behavior-y: none;
+      overscroll-behavior: none;
       -webkit-overflow-scrolling: touch;
     }
 
-    /* ===== Background: use your uploaded bg.jpg ===== */
+    /* Background: bg.jpg in repo ROOT */
     .bg-snow{
       background-image:
-        linear-gradient(180deg, rgba(6,10,24,.68), rgba(6,10,24,.78)),
-        url("assets/bg.jpg");
+        linear-gradient(180deg, rgba(6,10,24,.65), rgba(6,10,24,.78)),
+        url("bg.jpg");
       background-size: cover;
       background-position: center;
-      background-attachment: scroll; /* iOS smoother than fixed */
+      background-attachment: scroll;
       min-height: 100vh;
     }
 
-    /* subtle snow dots overlay */
     .bg-snow::before{
       content:"";
       position: fixed;
       inset: -30%;
       background-image:
-        radial-gradient(rgba(255,255,255,.85) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,.80) 1px, transparent 1px),
         radial-gradient(rgba(255,255,255,.45) 1px, transparent 1px);
       background-size: 18px 18px, 28px 28px;
       background-position: 0 0, 9px 14px;
-      opacity: .15;
+      opacity: .14;
       transform: rotate(-8deg);
       pointer-events:none;
       z-index:0;
@@ -79,23 +80,28 @@
 
     .safe-bottom{ padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
 
-    /* small link row for destinations */
+    [v-cloak]{ display:none; }
+
+    /* hyperlink style for destinations / food */
     .maplink{
       display:flex;
       align-items:flex-start;
-      gap:.5rem;
-      padding:.55rem .75rem;
-      border-radius: 1rem;
-      border: 1px solid rgba(191,219,254,.12);
+      gap:.55rem;
+      padding:.65rem .80rem;
+      border-radius: 1.05rem;
+      border: 1px solid rgba(191,219,254,.14);
       background: rgba(255,255,255,.06);
       text-decoration: none;
       color: rgba(255,255,255,.92);
     }
     .maplink:active{ transform: scale(.99); }
-    .maplink small{ color: rgba(191,219,254,.72); display:block; margin-top:.15rem; }
-
-    /* prevent blank while Vue mounting */
-    [v-cloak]{ display:none; }
+    .maplink small{
+      color: rgba(191,219,254,.72);
+      display:block;
+      margin-top:.15rem;
+      line-height:1.25;
+    }
+    .muted{ color: rgba(191,219,254,.70); }
   </style>
 </head>
 
@@ -130,8 +136,9 @@
       <!-- Content -->
       <div class="mt-4 glass-2 rounded-3xl p-5 shadow-[0_18px_50px_rgba(3,20,60,.22)]">
 
-        <!-- ===== PLAN ===== -->
+        <!-- ========= VIEW: PLAN ========= -->
         <div v-if="view==='plan'" class="space-y-4">
+
           <!-- Weather -->
           <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
             <div class="flex items-center justify-between gap-3">
@@ -149,7 +156,7 @@
             </div>
           </div>
 
-          <!-- Day slider (clean) -->
+          <!-- Day slider -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <div class="font-semibold text-white">行程（按日）</div>
@@ -161,38 +168,41 @@
 
             <div class="hscroll">
               <div class="flex gap-2 pb-1">
-                <button v-for="d in days" :key="d.id"
-                        @click="selectedDayId=d.id"
-                        :class="dayChip(d.id)"
-                        class="shrink-0 rounded-2xl px-3 py-2 text-left min-w-[210px]">
-                  <div class="text-[11px] text-blue-100/70">Day {{ d.dayNo }} · {{ d.dateShort }}</div>
-                  <div class="text-sm font-semibold text-white truncate">{{ d.title || d.dateFull }}</div>
-                </button>
+                <div v-for="d in days" :key="d.id"
+                     class="shrink-0 rounded-3xl border border-blue-100/15 bg-white/5 p-3 min-w-[240px]"
+                     :class="selectedDayId===d.id ? 'bg-blue-500/20 border-blue-100/25' : 'hover:bg-white/10'">
+
+                  <div class="flex items-start justify-between gap-2">
+                    <button class="text-left min-w-0" @click="selectDay(d.id)">
+                      <div class="text-xs text-blue-100/70">Day {{ d.dayNo }} ・ {{ d.dateShort }}</div>
+                      <div class="mt-1 text-base font-semibold text-white break-words">
+                        {{ d.title }}
+                      </div>
+                    </button>
+
+                    <button class="pill rounded-2xl px-3 py-1.5 text-xs font-semibold hover:bg-white/10 shrink-0"
+                            @click.stop="goEdit('day', d.id)">
+                      Edit
+                    </button>
+                  </div>
+
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- Selected day content (NO big middle header card) -->
           <div v-if="!selectedDay" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
-            你未有 Day。按「＋ Day」先。
+            無 Day。你可以按右上角「＋ Day」新增。
           </div>
 
-          <!-- Timeslots -->
           <div v-else class="space-y-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="text-xs text-blue-100/70">Day {{ selectedDay.dayNo }} · {{ selectedDay.dateFull }}</div>
-                <div class="text-lg font-semibold text-white break-words">{{ selectedDay.title || '' }}</div>
-              </div>
-              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 shrink-0"
-                      @click="goEdit('day', selectedDay.id)">
-                Edit
-              </button>
-            </div>
 
+            <!-- Timeslots -->
             <div v-for="slot in slotOrder" :key="slot.key" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="font-semibold text-white">{{ slot.label }}</div>
+                  <div class="text-lg font-semibold text-white">{{ slot.label }}</div>
                   <div class="text-xs text-blue-100/60 mt-0.5">目的地可多個；餐飲只一個</div>
                 </div>
                 <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
@@ -201,27 +211,32 @@
                 </button>
               </div>
 
-              <!-- Destinations as map links -->
+              <!-- Destinations -->
               <div class="mt-3">
                 <div class="text-xs text-blue-100/60">目的地（可多個）</div>
 
-                <div v-if="selectedDay.slots[slot.key].destinations.length===0" class="mt-2 text-sm text-blue-100/55">
-                  未加目的地
+                <div v-if="selectedDay.slots[slot.key].destinations.length===0"
+                     class="mt-2 text-sm text-blue-100/55">
+                  （未加）
                 </div>
 
                 <div v-else class="mt-2 space-y-2">
-                  <div v-for="p in selectedDay.slots[slot.key].destinations" :key="p.id" class="flex items-start gap-2">
-                    <a class="maplink w-full" href="#" @click.prevent="openDirections(p.place)">
-                      <div class="text-base leading-none">📍</div>
+                  <div v-for="p in selectedDay.slots[slot.key].destinations" :key="p.id"
+                       class="rounded-2xl border border-blue-100/10 bg-white/5 p-3">
+                    <a class="maplink" :href="mapsDirUrl(p.place)" target="_blank" rel="noopener">
+                      <div>📍</div>
                       <div class="min-w-0">
-                        <div class="text-sm font-semibold break-words">{{ p.place }}</div>
+                        <div class="text-sm font-semibold text-white break-words">{{ p.place }}</div>
                         <small v-if="p.note" class="break-words">📝 {{ p.note }}</small>
                       </div>
                     </a>
-                    <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 shrink-0"
-                            @click="goEdit('destination', { dayId:selectedDay.id, slot:slot.key, id:p.id })">
-                      Edit
-                    </button>
+
+                    <div class="mt-2 flex justify-end">
+                      <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
+                              @click="goEdit('destination', { dayId:selectedDay.id, slot:slot.key, id:p.id })">
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -230,47 +245,49 @@
               <div class="mt-4 pt-3 border-t border-blue-100/10">
                 <div class="text-xs text-blue-100/60">餐飲（只一個）</div>
 
-                <div v-if="!selectedDay.slots[slot.key].food" class="mt-2 flex items-center justify-between gap-3">
-                  <div class="text-sm text-blue-100/55">未加餐飲</div>
+                <div v-if="!selectedDay.slots[slot.key].food"
+                     class="mt-2 flex items-center justify-between gap-3">
+                  <div class="text-sm text-blue-100/55">（未加）</div>
                   <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
                           @click="goAdd('food', { dayId:selectedDay.id, slot:slot.key })">
                     新增餐飲
                   </button>
                 </div>
 
-                <div v-else class="mt-2 flex items-start gap-2">
-                  <a class="maplink w-full" href="#" @click.prevent="openDirections(selectedDay.slots[slot.key].food.place)">
-                    <div class="text-base leading-none">🍜</div>
+                <div v-else class="mt-2 rounded-2xl border border-blue-100/10 bg-white/5 p-3">
+                  <a class="maplink" :href="mapsDirUrl(selectedDay.slots[slot.key].food.place)" target="_blank" rel="noopener">
+                    <div>🍜</div>
                     <div class="min-w-0">
-                      <div class="text-sm font-semibold break-words">{{ selectedDay.slots[slot.key].food.place }}</div>
+                      <div class="text-sm font-semibold text-white break-words">{{ selectedDay.slots[slot.key].food.place }}</div>
                       <small v-if="selectedDay.slots[slot.key].food.note" class="break-words">📝 {{ selectedDay.slots[slot.key].food.note }}</small>
                     </div>
                   </a>
-                  <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 shrink-0"
-                          @click="goEdit('food', { dayId:selectedDay.id, slot:slot.key })">
-                    Edit
-                  </button>
+                  <div class="mt-2 flex justify-end">
+                    <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
+                            @click="goEdit('food', { dayId:selectedDay.id, slot:slot.key })">
+                      Edit
+                    </button>
+                  </div>
                 </div>
+              </div>
+
+            </div>
+
+            <!-- Outfit at bottom -->
+            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
+              <div class="text-xs text-blue-100/60">米衣著（今日）</div>
+              <div class="mt-1 text-sm font-semibold text-white break-words">
+                {{ selectedDay.outfit || '（未填）' }}
               </div>
             </div>
 
-            <!-- Wear at bottom -->
-            <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
-              <div class="text-xs text-blue-100/70">米衣著（放每個 Day 最底）</div>
-              <div class="mt-1 text-sm text-white/90 whitespace-pre-wrap">{{ selectedDay.wear || '—' }}</div>
-              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 mt-3"
-                      @click="goEdit('day', selectedDay.id)">
-                Edit
-              </button>
-            </div>
-
             <div class="text-xs text-blue-100/55 text-center">
-              點 📍 / 🍜 會開 Google Maps 導航（起點：現時位置）
+              點 📍 / 🍜 會開 Google Maps（預設用你現時位置做起點）
             </div>
           </div>
         </div>
 
-        <!-- ===== FLIGHT ===== -->
+        <!-- ========= VIEW: FLIGHT ========= -->
         <div v-else-if="view==='flight'" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">航程</div>
@@ -281,7 +298,7 @@
           </div>
 
           <div v-if="flights.length===0" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
-            未有航程（應該唔會）。如果你見到空白，refresh 一次。
+            未有航程。
           </div>
 
           <div v-for="f in flights" :key="f.id" class="rounded-3xl border border-blue-100/20 bg-white/5 p-4">
@@ -310,7 +327,7 @@
                 <div class="text-xs text-blue-100/60">{{ f.duration || '' }}</div>
                 <div class="mt-2 flex items-center gap-2 justify-center">
                   <div class="h-[2px] w-10 bg-blue-100/30 rounded-full"></div>
-                  <div class="text-white/80">✈️</div>
+                  <div class="text-white/85">✈️</div>
                   <div class="h-[2px] w-10 bg-blue-100/30 rounded-full"></div>
                 </div>
               </div>
@@ -324,20 +341,20 @@
 
             <div v-if="f.note" class="mt-3 text-xs text-blue-100/65 whitespace-pre-wrap">{{ f.note }}</div>
 
-            <div class="mt-3 flex gap-2 flex-wrap">
-              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
-                      @click="openDirections(f.fromCity + ' Airport')">
+            <div class="mt-3 flex gap-2">
+              <a class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 inline-block"
+                 :href="mapsDirUrl(f.fromCity + ' Airport')" target="_blank" rel="noopener">
                 去出發機場
-              </button>
-              <button class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10"
-                      @click="openDirections(f.toCity + ' Airport')">
+              </a>
+              <a class="pill rounded-2xl px-3 py-2 text-xs font-semibold hover:bg-white/10 inline-block"
+                 :href="mapsDirUrl(f.toCity + ' Airport')" target="_blank" rel="noopener">
                 去到達機場
-              </button>
+              </a>
             </div>
           </div>
         </div>
 
-        <!-- ===== EXPENSE ===== -->
+        <!-- ========= VIEW: EXPENSE ========= -->
         <div v-else-if="view==='expense'" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">記帳</div>
@@ -348,7 +365,7 @@
           </div>
 
           <div class="pill rounded-2xl px-3 py-2 text-xs font-semibold">
-            本月合計：HK$ {{ monthTotal.toFixed(2) }}
+            本月合計：HK$ {{ monthTotalText }}
           </div>
 
           <div v-if="expenses.length===0" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
@@ -360,7 +377,7 @@
               <div>
                 <div class="text-sm font-semibold text-white">{{ e.title || '(未命名)' }}</div>
                 <div class="mt-1 text-sm text-blue-50/90">
-                  HK$ {{ Number(e.amount).toFixed(2) }}
+                  HK$ {{ formatMoney(e.amount) }}
                   <span class="pill rounded-xl px-2 py-0.5 text-[11px] font-semibold ml-2">{{ e.method }}</span>
                 </div>
                 <div class="text-xs text-blue-100/60 mt-1">{{ e.date }}</div>
@@ -373,7 +390,7 @@
           </div>
         </div>
 
-        <!-- ===== SHOP ===== -->
+        <!-- ========= VIEW: SHOP ========= -->
         <div v-else-if="view==='shop'" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">購物清單</div>
@@ -384,7 +401,7 @@
           </div>
 
           <div class="text-xs text-blue-100/60">
-            Tickbox 用途：你買咗就 tick，方便你即場掃清單（done = true 會排到下面 + 劃線）
+            ✅ checkbox 用嚟「mark 買咗未」；買咗就會排去下面，方便你旅行時掃清單。
           </div>
 
           <div v-if="shop.length===0" class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-sm text-blue-100/70">
@@ -398,7 +415,8 @@
                 <input type="checkbox" v-model="s.done" @change="persistAll"
                        class="mt-1 h-5 w-5 rounded border-blue-200 text-blue-500 focus:ring-blue-200/40">
                 <div class="min-w-0">
-                  <div :class="s.done ? 'line-through text-blue-100/40' : 'text-white'" class="text-sm font-semibold break-words">
+                  <div :class="s.done ? 'line-through text-blue-100/40' : 'text-white'"
+                       class="text-sm font-semibold break-words">
                     {{ s.item }}
                   </div>
                   <div v-if="s.where" class="mt-1 text-xs text-blue-100/70 break-words">🧭 {{ s.where }}</div>
@@ -414,7 +432,7 @@
           </div>
         </div>
 
-        <!-- ===== ADD ===== -->
+        <!-- ========= VIEW: ADD ========= -->
         <div v-else-if="view==='add'" class="space-y-4">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">新增</div>
@@ -424,11 +442,12 @@
             </button>
           </div>
 
+          <!-- Choose -->
           <div v-if="addMode==='choose'" class="grid grid-cols-2 gap-3">
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
                     @click="goAdd('slotItem', { dayId:selectedDayId, slot:'morning' })">
-              <div class="font-semibold">＋ 目的地 / 餐飲</div>
-              <div class="text-xs text-blue-100/60 mt-1">支援 A -> B -> C</div>
+              <div class="font-semibold">＋ 行程</div>
+              <div class="text-xs text-blue-100/60 mt-1">目的地 / 餐飲</div>
             </button>
 
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
@@ -446,13 +465,13 @@
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
                     @click="goAdd('shop')">
               <div class="font-semibold">＋ 購物</div>
-              <div class="text-xs text-blue-100/60 mt-1">Where + note</div>
+              <div class="text-xs text-blue-100/60 mt-1">哪裡買 + note</div>
             </button>
 
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10 col-span-2"
                     @click="goAdd('day')">
-              <div class="font-semibold">＋ Day</div>
-              <div class="text-xs text-blue-100/60 mt-1">新增一日</div>
+              <div class="font-semibold">＋ 新增 Day</div>
+              <div class="text-xs text-blue-100/60 mt-1">建立新一日</div>
             </button>
           </div>
 
@@ -466,12 +485,12 @@
                   <input type="date" v-model="form.day.date" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm">
                 </div>
                 <div>
-                  <label class="text-xs text-blue-100/70">標題（可空）</label>
+                  <label class="text-xs text-blue-100/70">標題</label>
                   <input v-model="form.day.title" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：小樽一日遊 / 札幌市區">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">米衣著（可空）</label>
-                  <input v-model="form.day.wear" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：黑色保暖外套 + 短boots">
+                  <input v-model="form.day.outfit" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：粉紅毛衣 白色長裙 米白襪褲">
                 </div>
               </div>
               <div class="mt-4">
@@ -488,7 +507,7 @@
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增到行程</div>
               <div class="text-xs text-blue-100/60 mt-1">
-                Day {{ getDayById(addCtx.dayId)?.dayNo }} · {{ slotLabel(addCtx.slot) }}
+                Day {{ getDayById(addCtx.dayId)?.dayNoText }} ・ {{ slotLabel(addCtx.slot) }}
               </div>
 
               <div class="mt-3 grid grid-cols-2 gap-2">
@@ -498,16 +517,12 @@
 
               <div class="mt-4 space-y-3">
                 <div>
-                  <label class="text-xs text-blue-100/70">
-                    {{ form.slot.kind==='food' ? '餐廳/食店' : '目的地（可用 -> 分隔多個）' }}
-                  </label>
-                  <input v-model="form.slot.place" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm"
-                         placeholder="例如：北海道神宮 -> 円山公園 -> 大通公園">
+                  <label class="text-xs text-blue-100/70">{{ form.slot.kind==='food' ? '餐廳/食店' : '目的地' }}</label>
+                  <input v-model="form.slot.place" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：狸小路 / 根室花 / 旭川動物園">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">備註（可空）</label>
-                  <input v-model="form.slot.note" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm"
-                         placeholder="例如：預約 / 營業時間 / 想買咩">
+                  <input v-model="form.slot.note" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：預約 / 售光時間 / 落車位">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">時段</label>
@@ -528,7 +543,7 @@
               </div>
 
               <div class="mt-3 text-xs text-blue-100/55">
-                餐飲每個時段只可以有一個；再加會覆蓋舊餐飲。
+                餐飲每個時段只可以有一個；再加會覆蓋舊餐飲（旅行用最順）。
               </div>
             </div>
           </div>
@@ -540,43 +555,47 @@
               <div class="mt-3 grid grid-cols-2 gap-3">
                 <div class="col-span-2">
                   <label class="text-xs text-blue-100/70">日期顯示</label>
-                  <input v-model="form.flight.dateLabel" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：Tue 13 Jan 2026">
+                  <input v-model="form.flight.dateLabel" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="例如：Thu 8 Jan 2026">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">航班號</label>
-                  <input v-model="form.flight.flightNo" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="CX581">
+                  <input v-model="form.flight.flightNo" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="UO856">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">Duration</label>
-                  <input v-model="form.flight.duration" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="5h 55m">
+                  <input v-model="form.flight.duration" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="4h 05m">
                 </div>
+
                 <div>
                   <label class="text-xs text-blue-100/70">From City</label>
-                  <input v-model="form.flight.fromCity" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Sapporo">
+                  <input v-model="form.flight.fromCity" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Hong Kong">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">To City</label>
-                  <input v-model="form.flight.toCity" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Hong Kong">
+                  <input v-model="form.flight.toCity" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Tokyo">
                 </div>
+
                 <div>
                   <label class="text-xs text-blue-100/70">From Code</label>
-                  <input v-model="form.flight.fromCode" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="CTS">
+                  <input v-model="form.flight.fromCode" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="HKG">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">To Code</label>
-                  <input v-model="form.flight.toCode" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="HKG">
+                  <input v-model="form.flight.toCode" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="NRT">
                 </div>
+
                 <div>
                   <label class="text-xs text-blue-100/70">Depart</label>
-                  <input v-model="form.flight.departTime" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="16:00">
+                  <input v-model="form.flight.departTime" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="02:00">
                 </div>
                 <div>
                   <label class="text-xs text-blue-100/70">Arrive</label>
-                  <input v-model="form.flight.arriveTime" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="20:55">
+                  <input v-model="form.flight.arriveTime" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="07:05">
                 </div>
+
                 <div class="col-span-2">
                   <label class="text-xs text-blue-100/70">備註（可空）</label>
-                  <textarea v-model="form.flight.note" rows="3" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm"></textarea>
+                  <textarea v-model="form.flight.note" rows="3" class="input mt-1 w-full rounded-2xl px-3 py-2 text-sm" placeholder="Terminal / check-in / transit…"></textarea>
                 </div>
               </div>
 
@@ -631,7 +650,7 @@
           </div>
         </div>
 
-        <!-- ===== EDIT ===== -->
+        <!-- ========= VIEW: EDIT ========= -->
         <div v-else-if="view==='edit'" class="space-y-4">
           <div class="flex items-center justify-between">
             <div class="font-semibold text-white">Edit</div>
@@ -648,12 +667,16 @@
             <div v-if="editMode==='day'" class="mt-3 space-y-3">
               <input v-model="editBuffer.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="標題">
               <input v-model="editBuffer.date" type="date" class="input w-full rounded-2xl px-3 py-2 text-sm">
-              <input v-model="editBuffer.wear" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="米衣著">
+              <input v-model="editBuffer.outfit" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="米衣著（可空）">
               <div class="flex gap-2 mt-3">
                 <button class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold hover:bg-blue-500"
-                        @click="saveEdit">保存</button>
+                        @click="saveEdit">
+                  保存
+                </button>
                 <button class="rounded-2xl bg-red-500/20 border border-red-300/20 px-4 py-2 text-sm font-semibold hover:bg-red-500/30 text-red-100"
-                        @click="deleteCurrent">刪除</button>
+                        @click="deleteCurrent">
+                  刪除
+                </button>
               </div>
             </div>
 
@@ -704,8 +727,7 @@
             <!-- Expense edit -->
             <div v-else-if="editMode==='expense'" class="mt-3 space-y-3">
               <input v-model="editBuffer.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="項目">
-              <input v-model.number="editBuffer.amount" type="number" min="0" step="0.01"
-                     class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="金額">
+              <input v-model.number="editBuffer.amount" type="number" min="0" step="0.01" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="金額">
               <select v-model="editBuffer.method" class="input w-full rounded-2xl px-3 py-2 text-sm">
                 <option value="現金">現金</option>
                 <option value="信用卡">信用卡</option>
@@ -737,15 +759,15 @@
           </div>
         </div>
 
-      </div>
-    </div>
+      </div><!-- /content card -->
+    </div><!-- /container -->
 
-    <!-- Bottom bar: one add only -->
+    <!-- Bottom bar: ONE add button only -->
     <div class="fixed bottom-0 left-0 right-0 z-20 safe-bottom">
       <div class="mx-auto max-w-md px-4">
         <div class="glass rounded-3xl px-4 py-3 flex items-center justify-between shadow-[0_18px_50px_rgba(3,20,60,.22)]">
           <div class="text-xs text-blue-100/70">
-            {{ view==='plan' ? ('Day ' + (selectedDay?.dayNo ?? '—')) : (viewLabel(view)) }}
+            {{ bottomLabel }}
           </div>
           <button class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
                   @click="goAdd('choose')">
@@ -755,648 +777,665 @@
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /z-10 -->
+</div><!-- /app -->
 
 <script>
-const { createApp } = Vue;
+(function(){
+  const { createApp } = Vue;
 
-function uid(){
-  try{
-    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now() + Math.random());
-  }catch{
-    return String(Date.now() + Math.random());
-  }
-}
-
-createApp({
-  data(){
-    const today = new Date();
-    const iso = (d)=> d.toISOString().slice(0,10);
-
-    return {
-      view: 'plan',
-      prevView: 'plan',
-      tab: 'plan',
-
-      hkClock: '',
-      clockTimer: null,
-
-      weather: { summary:'未取得天氣', temp:null, updatedAt:'' },
-
-      days: [],
-      selectedDayId: null,
-      slotOrder: [
-        { key:'morning', label:'上午' },
-        { key:'noon',    label:'中午' },
-        { key:'evening', label:'夜晚' },
-        { key:'late',    label:'深夜' },
-      ],
-
-      flights: [],
-      expenses: [],
-      shop: [],
-
-      addMode: 'choose',
-      addCtx: {},
-
-      editMode: '',
-      editCtx: {},
-      editBuffer: {},
-
-      form: {
-        day: { date: iso(today), title:'', wear:'' },
-        slot: { kind:'destination', place:'', note:'' },
-        flight: {
-          dateLabel:'', flightNo:'', duration:'',
-          fromCity:'', toCity:'', fromCode:'', toCode:'',
-          departTime:'', arriveTime:'', fromTerminal:'', toTerminal:'', note:''
-        },
-        expense: { title:'', amount:null, method:'現金', date: iso(today) },
-        shop: { item:'', where:'', note:'' }
-      },
-
-      originLatLng: ''
-    };
-  },
-
-  computed:{
-    selectedDay(){
-      return this.days.find(d => d.id === this.selectedDayId) || null;
-    },
-    monthTotal(){
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth()+1).padStart(2,'0');
-      const prefix = `${y}-${m}`;
-      return this.expenses
-        .filter(e => (e.date||'').startsWith(prefix))
-        .reduce((sum,e)=> sum + (Number(e.amount)||0), 0);
-    },
-    sortedExpenses(){
-      return [...this.expenses].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
-    },
-    sortedShop(){
-      return [...this.shop].sort((a,b)=> Number(a.done) - Number(b.done));
+  function uid(){
+    try{
+      return (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now() + Math.random());
+    }catch{
+      return String(Date.now() + Math.random());
     }
-  },
+  }
 
-  methods:{
-    tabBtn(key){
-      return this.view===key
-        ? 'bg-white/15 text-white border border-blue-100/20'
-        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
-    },
-    dayChip(id){
-      return this.selectedDayId===id
-        ? 'bg-blue-500/25 text-white border border-blue-100/20'
-        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
-    },
-    kindBtn(kind){
-      return this.form.slot.kind===kind
-        ? 'bg-blue-500/25 text-white border border-blue-100/20'
-        : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
-    },
-    slotLabel(k){
-      const m = { morning:'上午', noon:'中午', evening:'夜晚', late:'深夜' };
-      return m[k] || k;
-    },
-    viewLabel(v){
-      const m = { plan:'行程', flight:'航程', expense:'記帳', shop:'購物', add:'新增', edit:'Edit' };
-      return m[v] || v;
-    },
+  createApp({
+    data(){
+      const today = new Date();
+      const iso = (d)=> d.toISOString().slice(0,10);
 
-    /* ===== A -> B -> C parser for destinations ===== */
-    addDestinationsByArrow(day, slotKey, text, noteForLast=''){
-      const raw = String(text || '').trim();
-      if(!raw) return;
+      return {
+        // navigation
+        view: 'plan',
+        prevView: 'plan',
+        tab: 'plan',
 
-      const parts = raw.includes('->')
-        ? raw.split('->').map(s=>s.trim()).filter(Boolean)
-        : [raw];
+        hkClock: '',
+        clockTimer: null,
 
-      for(const p of parts){
-        day.slots[slotKey].destinations.push({ id: uid(), place: p, note:'' });
-      }
-      if(noteForLast){
-        const last = day.slots[slotKey].destinations[day.slots[slotKey].destinations.length - 1];
-        if(last) last.note = noteForLast;
-      }
-    },
+        // weather
+        weather: { summary:'未取得天氣', temp:null, updatedAt:'' },
 
-    /* ===== Storage ===== */
-    loadAll(){
-      const safe = (k, fallback)=> {
-        try { return JSON.parse(localStorage.getItem(k) || fallback); }
-        catch { return JSON.parse(fallback); }
-      };
-      this.days    = safe('sp_v2_days', '[]');
-      this.flights = safe('sp_v2_flights', '[]');
-      this.expenses= safe('sp_v2_expenses', '[]');
-      this.shop    = safe('sp_v2_shop', '[]');
+        // itinerary model
+        days: [],
+        selectedDayId: null,
+        slotOrder: [
+          { key:'morning', label:'上午' },
+          { key:'noon',    label:'中午' },
+          { key:'evening', label:'夜晚' },
+          { key:'late',    label:'深夜' },
+        ],
 
-      if(this.days.length>0 && !this.selectedDayId){
-        this.selectedDayId = this.days[0].id;
-      }
-    },
-    persistAll(){
-      localStorage.setItem('sp_v2_days', JSON.stringify(this.days));
-      localStorage.setItem('sp_v2_flights', JSON.stringify(this.flights));
-      localStorage.setItem('sp_v2_expenses', JSON.stringify(this.expenses));
-      localStorage.setItem('sp_v2_shop', JSON.stringify(this.shop));
-    },
+        // flights / expenses / shop
+        flights: [],
+        expenses: [],
+        shop: [],
 
-    /* ===== Navigation ===== */
-    navTo(v){
-      this.view = v;
-      this.tab = v;
-    },
-    back(){
-      this.view = this.prevView || 'plan';
-    },
-    goAdd(mode, ctx){
-      this.prevView = this.view;
-      this.view = 'add';
-      this.addMode = mode || 'choose';
-      this.addCtx = ctx || {};
+        // add/edit
+        addMode: 'choose',
+        addCtx: {},
 
-      if(mode==='slotItem' || mode==='food'){
-        this.form.slot.kind = (mode==='food') ? 'food' : 'destination';
-        this.form.slot.place = '';
-        this.form.slot.note = '';
-      }
-    },
-    goEdit(mode, ctx){
-      this.prevView = this.view;
-      this.view = 'edit';
-      this.editMode = mode;
-      this.editCtx = ctx;
-      this.editBuffer = this.buildEditBuffer(mode, ctx);
-    },
+        editMode: '',
+        editCtx: {},
+        editBuffer: {},
 
-    buildEditBuffer(mode, ctx){
-      if(mode==='day'){
-        const d = this.getDayById(ctx);
-        return { id:d.id, title:d.title, date:d.date, wear: d.wear || '' };
-      }
-      if(mode==='destination'){
-        const { dayId, slot, id } = ctx;
-        const d = this.getDayById(dayId);
-        const p = d.slots[slot].destinations.find(x=>x.id===id);
-        return { dayId, slot, id, place:p.place, note:p.note || '' };
-      }
-      if(mode==='food'){
-        const { dayId, slot } = ctx;
-        const d = this.getDayById(dayId);
-        const f = d.slots[slot].food;
-        return { dayId, slot, place:f?.place || '', note:f?.note || '' };
-      }
-      if(mode==='flight'){
-        const f = this.flights.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(f));
-      }
-      if(mode==='expense'){
-        const e = this.expenses.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(e));
-      }
-      if(mode==='shop'){
-        const s = this.shop.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(s));
-      }
-      return {};
-    },
-
-    saveEdit(){
-      const mode = this.editMode;
-      const b = this.editBuffer;
-
-      if(mode==='day'){
-        const d = this.getDayById(b.id);
-        d.title = (b.title||'').trim();
-        d.date = b.date || d.date;
-        d.wear = (b.wear||'').trim();
-        d.dateShort = this.formatDateShort(d.date);
-        d.dateFull = this.formatDateFull(d.date);
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='destination'){
-        const d = this.getDayById(b.dayId);
-        const arr = d.slots[b.slot].destinations;
-        const p = arr.find(x=>x.id===b.id);
-        p.place = (b.place||'').trim();
-        p.note = (b.note||'').trim();
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='food'){
-        const d = this.getDayById(b.dayId);
-        d.slots[b.slot].food = { place:(b.place||'').trim(), note:(b.note||'').trim() };
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='flight'){
-        const idx = this.flights.findIndex(x=>x.id===b.id);
-        if(idx>=0) this.flights[idx] = b;
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='expense'){
-        const idx = this.expenses.findIndex(x=>x.id===b.id);
-        if(idx>=0) this.expenses[idx] = b;
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='shop'){
-        const idx = this.shop.findIndex(x=>x.id===b.id);
-        if(idx>=0) this.shop[idx] = b;
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-    },
-
-    deleteCurrent(){
-      const mode = this.editMode;
-      const b = this.editBuffer;
-
-      if(mode==='day'){
-        this.days = this.days.filter(x=>x.id!==b.id);
-        if(this.selectedDayId===b.id) this.selectedDayId = this.days[0]?.id || null;
-        // re-number dayNo
-        this.days.forEach((d,i)=> d.dayNo = i+1);
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='destination'){
-        const d = this.getDayById(b.dayId);
-        d.slots[b.slot].destinations = d.slots[b.slot].destinations.filter(x=>x.id!==b.id);
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='food'){
-        const d = this.getDayById(b.dayId);
-        d.slots[b.slot].food = null;
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='flight'){
-        this.flights = this.flights.filter(x=>x.id!==b.id);
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='expense'){
-        this.expenses = this.expenses.filter(x=>x.id!==b.id);
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-
-      if(mode==='shop'){
-        this.shop = this.shop.filter(x=>x.id!==b.id);
-        this.persistAll();
-        this.view = this.prevView;
-        return;
-      }
-    },
-
-    /* ===== Add ===== */
-    submitAddDay(){
-      const date = this.form.day.date;
-      if(!date) return;
-
-      const dayNo = this.days.length + 1;
-      const d = {
-        id: uid(),
-        dayNo,
-        date,
-        dateShort: this.formatDateShort(date),
-        dateFull: this.formatDateFull(date),
-        title: (this.form.day.title||'').trim(),
-        wear: (this.form.day.wear||'').trim(),
-        slots: {
-          morning: { destinations: [], food: null },
-          noon:    { destinations: [], food: null },
-          evening: { destinations: [], food: null },
-          late:    { destinations: [], food: null }
+        form: {
+          day: { date: iso(today), title:'', outfit:'' },
+          slot: { kind:'destination', place:'', note:'' },
+          flight: {
+            dateLabel:'', flightNo:'', duration:'',
+            fromCity:'', toCity:'', fromCode:'', toCode:'',
+            departTime:'', arriveTime:'', fromTerminal:'', toTerminal:'', note:''
+          },
+          expense: { title:'', amount:null, method:'現金', date: iso(today) },
+          shop: { item:'', where:'', note:'' }
         }
       };
-
-      this.days.push(d);
-      this.selectedDayId = d.id;
-      this.persistAll();
-
-      this.form.day.title = '';
-      this.form.day.wear = '';
-      this.view = 'plan';
     },
 
-    submitAddSlotItem(){
-      const dayId = this.addCtx.dayId;
-      const slot = this.addCtx.slot;
-      const d = this.getDayById(dayId);
-      if(!d) return;
+    computed:{
+      selectedDay(){
+        for(let i=0;i<this.days.length;i++){
+          if(this.days[i].id===this.selectedDayId) return this.days[i];
+        }
+        return null;
+      },
 
-      const placeRaw = (this.form.slot.place||'').trim();
-      if(!placeRaw) return;
+      monthTotal(){
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth()+1).padStart(2,'0');
+        const prefix = y + '-' + m;
+        return this.expenses
+          .filter(e => (e.date||'').startsWith(prefix))
+          .reduce((sum,e)=> sum + (Number(e.amount)||0), 0);
+      },
 
-      const note = (this.form.slot.note||'').trim();
+      monthTotalText(){
+        return this.formatMoney(this.monthTotal);
+      },
 
-      if(this.form.slot.kind==='destination'){
-        // support A -> B -> C
-        this.addDestinationsByArrow(d, slot, placeRaw, note);
-      }else{
-        // food only one
-        d.slots[slot].food = { place: placeRaw, note };
+      sortedExpenses(){
+        return [...this.expenses].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+      },
+
+      sortedShop(){
+        return [...this.shop].sort((a,b)=> Number(a.done) - Number(b.done));
+      },
+
+      bottomLabel(){
+        if(this.view==='plan'){
+          const d = this.selectedDay;
+          return d ? ('Day ' + d.dayNo + ' ・ ' + d.dateShort) : '行程';
+        }
+        return this.viewLabel(this.view);
       }
-
-      this.persistAll();
-      this.view = 'plan';
     },
 
-    submitAddFlight(){
-      const f = { ...this.form.flight, id: uid() };
-      if(!f.fromCity && !f.toCity && !f.flightNo) return;
-      this.flights.push(f);
-      this.persistAll();
+    methods:{
+      // --- UI helpers ---
+      tabBtn(key){
+        return (this.view===key)
+          ? 'bg-white/15 text-white border border-blue-100/20'
+          : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
+      },
 
-      this.form.flight = {
-        dateLabel:'', flightNo:'', duration:'',
-        fromCity:'', toCity:'', fromCode:'', toCode:'',
-        departTime:'', arriveTime:'', fromTerminal:'', toTerminal:'', note:''
-      };
-      this.view = 'flight';
-    },
+      kindBtn(kind){
+        return (this.form.slot.kind===kind)
+          ? 'bg-blue-500/25 text-white border border-blue-100/20'
+          : 'bg-white/5 text-blue-100/80 hover:bg-white/10 border border-blue-100/10';
+      },
 
-    submitAddExpense(){
-      const e = { ...this.form.expense, id: uid() };
-      if(!e.amount || Number(e.amount)<=0) return;
-      e.title = (e.title||'').trim();
-      this.expenses.push(e);
-      this.persistAll();
+      slotLabel(k){
+        const m = { morning:'上午', noon:'中午', evening:'夜晚', late:'深夜' };
+        return m[k] || k;
+      },
 
-      this.form.expense.title='';
-      this.form.expense.amount=null;
-      this.form.expense.method='現金';
-      this.view = 'expense';
-    },
+      viewLabel(v){
+        const m = { plan:'行程', flight:'航程', expense:'記帳', shop:'購物', add:'新增', edit:'Edit' };
+        return m[v] || v;
+      },
 
-    submitAddShop(){
-      const s = { ...this.form.shop, id: uid(), done:false };
-      if(!s.item.trim()) return;
-      s.item = s.item.trim();
-      s.where = (s.where||'').trim();
-      s.note = (s.note||'').trim();
-      this.shop.push(s);
-      this.persistAll();
+      // --- storage keys (NEW) ---
+      K(key){ return 'sp_v3_' + key; },
 
-      this.form.shop = { item:'', where:'', note:'' };
-      this.view = 'shop';
-    },
+      loadAll(){
+        const safe = (k, fallback)=>{
+          try { return JSON.parse(localStorage.getItem(this.K(k)) || fallback); }
+          catch { return JSON.parse(fallback); }
+        };
+        this.days     = safe('days', '[]');
+        this.flights  = safe('flights', '[]');
+        this.expenses = safe('expenses', '[]');
+        this.shop     = safe('shop', '[]');
 
-    /* ===== Utils ===== */
-    getDayById(id){
-      return this.days.find(x=>x.id===id) || null;
-    },
-    formatDateShort(iso){
-      try{
-        const d = new Date(iso + 'T00:00:00');
-        return `${d.getMonth()+1}/${d.getDate()}`;
-      }catch{ return iso; }
-    },
-    formatDateFull(iso){
-      try{
-        const d = new Date(iso + 'T00:00:00');
-        const w = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
-        return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} (${w})`;
-      }catch{ return iso; }
-    },
+        if(this.days.length>0 && !this.selectedDayId){
+          this.selectedDayId = this.days[0].id;
+        }
+      },
 
-    /* ===== Directions ===== */
-    ensureOrigin(){
-      return new Promise((resolve)=>{
-        if(this.originLatLng){ resolve(this.originLatLng); return; }
-        if(!navigator.geolocation){ resolve(''); return; }
-        navigator.geolocation.getCurrentPosition(
-          (pos)=>{
-            this.originLatLng = `${pos.coords.latitude},${pos.coords.longitude}`;
-            resolve(this.originLatLng);
-          },
-          ()=> resolve(''),
-          { enableHighAccuracy:true, timeout:6000 }
-        );
-      });
-    },
-    async openDirections(destination){
-      const dest = encodeURIComponent(destination || 'Sapporo');
-      const origin = await this.ensureOrigin();
-      const originParam = origin ? `&origin=${encodeURIComponent(origin)}` : '';
-      const url = `https://www.google.com/maps/dir/?api=1${originParam}&destination=${dest}&travelmode=transit`;
-      window.open(url, '_blank');
-    },
+      persistAll(){
+        localStorage.setItem(this.K('days'), JSON.stringify(this.days));
+        localStorage.setItem(this.K('flights'), JSON.stringify(this.flights));
+        localStorage.setItem(this.K('expenses'), JSON.stringify(this.expenses));
+        localStorage.setItem(this.K('shop'), JSON.stringify(this.shop));
+      },
 
-    /* ===== Weather ===== */
-    async refreshWeather(){
-      if(!navigator.geolocation){
-        this.weather.summary = '此裝置不支援定位';
-        return;
-      }
-      this.weather.summary = '取得中…';
-      this.weather.temp = null;
+      // --- navigation ---
+      navTo(v){
+        this.view = v;
+        this.tab = v;
+      },
 
-      navigator.geolocation.getCurrentPosition(
-        async (pos)=>{
-          try{
-            const { latitude, longitude } = pos.coords;
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=Asia%2FHong_Kong`;
-            const res = await fetch(url);
-            const data = await res.json();
-            const temp = data?.current?.temperature_2m ?? null;
-            const code = data?.current?.weather_code ?? null;
+      back(){
+        this.view = this.prevView || 'plan';
+      },
 
-            this.weather.temp = (temp===null ? null : Math.round(temp));
-            this.weather.summary = this.codeToText(code);
-            this.weather.updatedAt = new Date().toLocaleString('zh-HK', { timeZone:'Asia/Hong_Kong' });
-          }catch{
-            this.weather.summary = '天氣取得失敗';
-          }
-        },
-        ()=> { this.weather.summary = '未授權定位，無法抓天氣'; },
-        { enableHighAccuracy:true, timeout:8000 }
-      );
-    },
-    codeToText(code){
-      const m = {
-        0:'晴朗', 1:'大致晴', 2:'多雲', 3:'陰天',
-        45:'霧', 48:'凍霧',
-        51:'毛毛雨', 53:'毛毛雨', 55:'毛毛雨（較大）',
-        61:'小雨', 63:'中雨', 65:'大雨',
-        71:'小雪', 73:'中雪', 75:'大雪',
-        80:'陣雨', 81:'陣雨（較大）', 82:'暴雨級陣雨',
-        95:'雷暴', 96:'雷暴（有冰雹）', 99:'猛烈雷暴（有冰雹）'
-      };
-      return (code in m) ? m[code] : '天氣狀況不明';
-    },
+      selectDay(id){
+        this.selectedDayId = id;
+        this.persistAll();
+      },
 
-    /* ===== Clock ===== */
-    startClock(){
-      const tick = ()=>{
-        this.hkClock = new Date().toLocaleTimeString('en-GB', {
-          timeZone:'Asia/Hong_Kong',
-          hour:'2-digit', minute:'2-digit', second:'2-digit'
-        });
-      };
-      tick();
-      this.clockTimer = setInterval(tick, 1000);
-    },
+      goAdd(mode, ctx){
+        this.prevView = this.view;
+        this.view = 'add';
+        this.addMode = mode || 'choose';
+        this.addCtx = ctx || {};
 
-    /* ===== Preset from your Excel (hardcode, not relying on Excel) ===== */
-    seedPresetIfMissing(){
-      // Days: only seed if empty (avoid overriding your edits)
-      if(this.days.length === 0){
-        const mkDay = (dayNo, date, title, wear) => ({
+        if(mode==='slotItem' || mode==='food'){
+          this.form.slot.kind = (mode==='food') ? 'food' : 'destination';
+          this.form.slot.place = '';
+          this.form.slot.note = '';
+        }
+      },
+
+      goEdit(mode, ctx){
+        this.prevView = this.view;
+        this.view = 'edit';
+        this.editMode = mode;
+        this.editCtx = ctx;
+        this.editBuffer = this.buildEditBuffer(mode, ctx);
+      },
+
+      buildEditBuffer(mode, ctx){
+        if(mode==='day'){
+          const d = this.getDayById(ctx);
+          return { id:d.id, title:d.title, date:d.date, outfit:d.outfit || '' };
+        }
+        if(mode==='destination'){
+          const dayId = ctx.dayId, slot = ctx.slot, id = ctx.id;
+          const d = this.getDayById(dayId);
+          const p = d.slots[slot].destinations.find(x=>x.id===id);
+          return { dayId, slot, id, place:p.place, note:p.note || '' };
+        }
+        if(mode==='food'){
+          const dayId = ctx.dayId, slot = ctx.slot;
+          const d = this.getDayById(dayId);
+          const f = d.slots[slot].food;
+          return { dayId, slot, place:(f?f.place:''), note:(f?f.note:'') };
+        }
+        if(mode==='flight'){
+          const f = this.flights.find(x=>x.id===ctx);
+          return JSON.parse(JSON.stringify(f));
+        }
+        if(mode==='expense'){
+          const e = this.expenses.find(x=>x.id===ctx);
+          return JSON.parse(JSON.stringify(e));
+        }
+        if(mode==='shop'){
+          const s = this.shop.find(x=>x.id===ctx);
+          return JSON.parse(JSON.stringify(s));
+        }
+        return {};
+      },
+
+      saveEdit(){
+        const mode = this.editMode;
+        const b = this.editBuffer;
+
+        if(mode==='day'){
+          const d = this.getDayById(b.id);
+          d.title = (b.title||'').trim();
+          d.date = b.date || d.date;
+          d.outfit = (b.outfit||'').trim();
+          d.dateShort = this.formatDateShort(d.date);
+          d.dateFull = this.formatDateFull(d.date);
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='destination'){
+          const d = this.getDayById(b.dayId);
+          const arr = d.slots[b.slot].destinations;
+          const p = arr.find(x=>x.id===b.id);
+          p.place = (b.place||'').trim();
+          p.note = (b.note||'').trim();
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='food'){
+          const d = this.getDayById(b.dayId);
+          d.slots[b.slot].food = { place:(b.place||'').trim(), note:(b.note||'').trim() };
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='flight'){
+          const idx = this.flights.findIndex(x=>x.id===b.id);
+          if(idx>=0) this.flights[idx] = b;
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='expense'){
+          const idx = this.expenses.findIndex(x=>x.id===b.id);
+          if(idx>=0) this.expenses[idx] = b;
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='shop'){
+          const idx = this.shop.findIndex(x=>x.id===b.id);
+          if(idx>=0) this.shop[idx] = b;
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+      },
+
+      deleteCurrent(){
+        const mode = this.editMode;
+        const b = this.editBuffer;
+
+        if(mode==='day'){
+          this.days = this.days.filter(x=>x.id!==b.id);
+          if(this.selectedDayId===b.id) this.selectedDayId = (this.days[0] ? this.days[0].id : null);
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='destination'){
+          const d = this.getDayById(b.dayId);
+          d.slots[b.slot].destinations = d.slots[b.slot].destinations.filter(x=>x.id!==b.id);
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='food'){
+          const d = this.getDayById(b.dayId);
+          d.slots[b.slot].food = null;
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='flight'){
+          this.flights = this.flights.filter(x=>x.id!==b.id);
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='expense'){
+          this.expenses = this.expenses.filter(x=>x.id!==b.id);
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+
+        if(mode==='shop'){
+          this.shop = this.shop.filter(x=>x.id!==b.id);
+          this.persistAll();
+          this.view = this.prevView;
+          return;
+        }
+      },
+
+      // --- add handlers ---
+      submitAddDay(){
+        const date = this.form.day.date;
+        const title = (this.form.day.title||'').trim();
+        if(!date || !title) return;
+
+        const dayNo = this.days.length + 1;
+        const d = {
           id: uid(),
           dayNo,
           date,
           dateShort: this.formatDateShort(date),
           dateFull: this.formatDateFull(date),
           title,
-          wear,
-          slots:{
-            morning:{ destinations:[], food:null },
-            noon:{ destinations:[], food:null },
-            evening:{ destinations:[], food:null },
-            late:{ destinations:[], food:null }
+          outfit: (this.form.day.outfit||'').trim(),
+          slots: {
+            morning: { destinations: [], food: null },
+            noon:    { destinations: [], food: null },
+            evening: { destinations: [], food: null },
+            late:    { destinations: [], food: null }
           }
-        });
-
-        // ===== Day 1 (Pre-Flight) =====
-        const d1 = mkDay(
-          1, '2026-01-08',
-          'Pre-Flight 去程 2026/1/8 星期四',
-          '黑色保暖外套 + 針織帽/頸巾（機場冷）'
-        );
-        // 主要活動（由你張表重點抽出，並支援 ->）
-        this.addDestinationsByArrow(d1, 'morning',
-          'HKG 機場 -> NRT 成田機場 -> CTS 新千歲機場 -> JR 札幌站 -> 酒店 Check-in'
-        );
-        d1.slots.morning.food = { place:'機場/途中簡單食', note:'（可空）' };
-
-        this.addDestinationsByArrow(d1, 'noon',
-          'Stellar Place（札幌站） -> PARCO（札幌）'
-        );
-        d1.slots.noon.food = { place:'Soup Curry KING / Sapporo Ichiryuan Ramen', note:'約¥1,500（optional）' };
-
-        this.addDestinationsByArrow(d1, 'evening',
-          '狸小路'
-        );
-        d1.slots.evening.food = { place:'Sapporo Tanukikoji', note:'已預約 17:30（如適用可改）' };
-
-        // ===== Day 2 =====
-        const d2 = mkDay(
-          2, '2026-01-09',
-          'Day 2 1/9 星期五',
-          '粉藍/白色毛衣 + 米白頸巾（白色好襯雪）'
-        );
-        this.addDestinationsByArrow(d2, 'morning', '北海道神宮');
-        d2.slots.noon.food = { place:'海鮮丼（札幌二條市場一帶）', note:'' };
-
-        this.addDestinationsByArrow(d2, 'noon', 'Stellar Place（札幌站） -> PARCO（札幌）');
-        this.addDestinationsByArrow(d2, 'evening', '大通公園');
-        d2.slots.evening.food = {
-          place:'Suage Soup Curry / Yakiniku Raurau / Toritori（焼鳥）',
-          note:'Wine & Sake 居酒屋（可按當日 mood 改）'
         };
 
-        // ===== Day 3 =====
-        const d3 = mkDay(
-          3, '2026-01-10',
-          'Day 3 1/10 星期六（Klook Tour）',
-          '心心毛衣 + 米白頸巾'
+        this.days.push(d);
+        this.selectedDayId = d.id;
+        this.persistAll();
+
+        this.form.day.title = '';
+        this.form.day.outfit = '';
+        this.view = 'plan';
+      },
+
+      submitAddSlotItem(){
+        const d = this.getDayById(this.addCtx.dayId);
+        const slot = this.addCtx.slot;
+        if(!d || !slot) return;
+
+        const place = (this.form.slot.place||'').trim();
+        if(!place) return;
+
+        const note = (this.form.slot.note||'').trim();
+
+        if(this.form.slot.kind==='destination'){
+          d.slots[slot].destinations.push({ id: uid(), place, note });
+        }else{
+          d.slots[slot].food = { place, note };
+        }
+
+        this.persistAll();
+        this.view = 'plan';
+      },
+
+      submitAddFlight(){
+        const f = { ...this.form.flight, id: uid() };
+        if(!f.fromCity && !f.toCity && !f.flightNo) return;
+        this.flights.push(f);
+        this.persistAll();
+
+        this.form.flight = {
+          dateLabel:'', flightNo:'', duration:'',
+          fromCity:'', toCity:'', fromCode:'', toCode:'',
+          departTime:'', arriveTime:'', fromTerminal:'', toTerminal:'', note:''
+        };
+        this.view = 'flight';
+      },
+
+      submitAddExpense(){
+        const e = { ...this.form.expense, id: uid() };
+        if(!e.amount || Number(e.amount)<=0) return;
+        e.title = (e.title||'').trim();
+        this.expenses.push(e);
+        this.persistAll();
+
+        this.form.expense.title='';
+        this.form.expense.amount=null;
+        this.form.expense.method='現金';
+        this.view = 'expense';
+      },
+
+      submitAddShop(){
+        const s = { ...this.form.shop, id: uid(), done:false };
+        if(!s.item || !String(s.item).trim()) return;
+        s.item = String(s.item).trim();
+        s.where = (s.where||'').trim();
+        s.note = (s.note||'').trim();
+        this.shop.push(s);
+        this.persistAll();
+
+        this.form.shop = { item:'', where:'', note:'' };
+        this.view = 'shop';
+      },
+
+      // --- formatting ---
+      formatMoney(x){
+        const n = Number(x)||0;
+        return n.toFixed(2);
+      },
+
+      getDayById(id){
+        return this.days.find(x=>x.id===id) || null;
+      },
+
+      formatDateShort(iso){
+        try{
+          const d = new Date(iso + 'T00:00:00');
+          return (d.getMonth()+1) + '/' + d.getDate();
+        }catch{ return iso; }
+      },
+
+      formatDateFull(iso){
+        try{
+          const d = new Date(iso + 'T00:00:00');
+          const w = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+          return d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + ' (' + w + ')';
+        }catch{ return iso; }
+      },
+
+      // --- maps ---
+      mapsDirUrl(destination){
+        const dest = encodeURIComponent(destination || 'Sapporo');
+        return 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=transit';
+      },
+
+      // --- weather ---
+      async refreshWeather(){
+        if(!navigator.geolocation){
+          this.weather.summary = '此裝置不支援定位';
+          return;
+        }
+        this.weather.summary = '取得中…';
+        this.weather.temp = null;
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos)=>{
+            try{
+              const latitude = pos.coords.latitude;
+              const longitude = pos.coords.longitude;
+              const url = 'https://api.open-meteo.com/v1/forecast'
+                + '?latitude=' + latitude
+                + '&longitude=' + longitude
+                + '&current=temperature_2m,weather_code'
+                + '&timezone=Asia%2FHong_Kong';
+
+              const res = await fetch(url);
+              const data = await res.json();
+              const temp = (data && data.current) ? data.current.temperature_2m : null;
+              const code = (data && data.current) ? data.current.weather_code : null;
+
+              this.weather.temp = (temp===null ? null : Math.round(temp));
+              this.weather.summary = this.codeToText(code);
+              this.weather.updatedAt = new Date().toLocaleString('zh-HK', { timeZone:'Asia/Hong_Kong' });
+            }catch(e){
+              this.weather.summary = '天氣取得失敗';
+            }
+          },
+          ()=> { this.weather.summary = '未授權定位，無法抓天氣'; },
+          { enableHighAccuracy:true, timeout:8000 }
         );
-        this.addDestinationsByArrow(d3, 'morning', 'Klook 一日團：小樽 -> 余市（按團內容）');
-        this.addDestinationsByArrow(d3, 'noon', '小樽運河（視行程）');
-        this.addDestinationsByArrow(d3, 'evening', '回札幌市區');
-        d3.slots.evening.food = {
-          place:'札幌駅前 ホルモン酒場風土 / SHINJUKU-TEI',
-          note:'Sapporo Hokkaido Suage Soup Curry / Yakiniku Restaurant（可改）'
+      },
+
+      codeToText(code){
+        const m = {
+          0:'晴朗', 1:'大致晴', 2:'多雲', 3:'陰天',
+          45:'霧', 48:'凍霧',
+          51:'毛毛雨', 53:'毛毛雨', 55:'毛毛雨（較大）',
+          61:'小雨', 63:'中雨', 65:'大雨',
+          71:'小雪', 73:'中雪', 75:'大雪',
+          80:'陣雨', 81:'陣雨（較大）', 82:'暴雨級陣雨',
+          95:'雷暴', 96:'雷暴（有冰雹）', 99:'猛烈雷暴（有冰雹）'
+        };
+        return (code in m) ? m[code] : '天氣狀況不明';
+      },
+
+      // --- clock ---
+      startClock(){
+        const tick = ()=>{
+          this.hkClock = new Date().toLocaleTimeString('en-GB', {
+            timeZone:'Asia/Hong_Kong',
+            hour:'2-digit', minute:'2-digit', second:'2-digit'
+          });
+        };
+        tick();
+        this.clockTimer = setInterval(tick, 1000);
+      },
+
+      // --- preset from your Excel (hardcoded; no excel dependency) ---
+      seedPresetIfMissing(){
+        if(this.days.length>0 || this.flights.length>0 || this.shop.length>0) return;
+
+        const makeDay = (dayNo, isoDate, title, outfit)=>{
+          return {
+            id: uid(),
+            dayNo,
+            date: isoDate,
+            dateShort: this.formatDateShort(isoDate),
+            dateFull: this.formatDateFull(isoDate),
+            title,
+            outfit: outfit || '',
+            slots: {
+              morning: { destinations: [], food: null },
+              noon:    { destinations: [], food: null },
+              evening: { destinations: [], food: null },
+              late:    { destinations: [], food: null }
+            }
+          };
         };
 
-        // ===== Day 4 =====
-        const d4 = mkDay(
-          4, '2026-01-11',
-          'Day 4 1/11 星期日（小樽日）',
-          '情侶毛衣 + 高筒厚底靴'
+        // Days from Sapporo.xlsx (Schedule)
+        const d1 = makeDay(1, '2026-01-08', 'Pre-Flight 去程', '黑色假兩件 瑜伽喇叭褲');
+        // morning: arrive + JR + check-in
+        d1.slots.morning.destinations.push(
+          { id: uid(), place:'香港國際機場 T1', note:'02:00 UO856 出發' },
+          { id: uid(), place:'成田機場 NRT', note:'07:05 抵達；轉機 T2→T1' },
+          { id: uid(), place:'新千歲機場 CTS', note:'12:25 抵達；取行李' },
+          { id: uid(), place:'札幌市中心（JR）', note:'約40分鐘；Check-in 飯店' }
         );
-        this.addDestinationsByArrow(d4, 'morning', '札幌站 -> 小樽（JR） -> 堺町通り');
-        this.addDestinationsByArrow(d4, 'noon', '小樽運河');
-        d4.slots.noon.food = { place:'海鮮丼（小樽）', note:'約¥1,500（參考）' };
+        d1.slots.morning.food = { place:'機場內海鮮飯', note:'午餐 約¥1,500（或隨意）' };
 
-        this.addDestinationsByArrow(d4, 'evening', '札幌市區');
-        d4.slots.evening.food = { place:'Zen（體驗/活動）', note:'（如你張表：可改成連結/備註）' };
-
-        // ===== Day 5 =====
-        const d5 = mkDay(
-          5, '2026-01-12',
-          'Day 5 1/12 星期一',
-          '黃粉/米色系毛衣 + 針織帽'
+        // noon: hotel rest / nearby
+        d1.slots.noon.destinations.push(
+          { id: uid(), place:'飯店休息 / 附近逛逛', note:'適應時差' },
+          { id: uid(), place:'Stellar Place（札幌站）', note:'逛街 / 可能買手信' }
         );
-        this.addDestinationsByArrow(d5, 'morning', '羊ヶ丘展望台');
-        this.addDestinationsByArrow(d5, 'noon', 'JOZANKEI（如果去）');
-        this.addDestinationsByArrow(d5, 'evening', '白色戀人公園');
-        d5.slots.evening.food = {
-          place:'Stellar Place（札幌站）',
-          note:'再食 Soup Curry KING / Sapporo Ichiryuan Ramen（optional）'
-        };
+        d1.slots.noon.food = { place:'根室花回轉壽司（Stellar Place）', note:'約¥2,000；備選：SOUP CURRY KING / Ichiryuan Ramen' };
 
-        // ===== Day 6 (Post-Flight) =====
-        const d6 = mkDay(
-          6, '2026-01-13',
-          'Post-Flight 回程 1/13 星期二',
-          '黑色保暖外套 + 針織帽'
+        // evening: dinner booking
+        d1.slots.evening.destinations.push(
+          { id: uid(), place:'狸小路 / 薄野', note:'散步 / 探路' }
         );
-        this.addDestinationsByArrow(d6, 'morning', '酒店 -> 新千歲機場');
-        d6.slots.morning.food = { place:'機場（簡單食）', note:'' };
+        d1.slots.evening.food = { place:'SYABU-YO Sapporo Tanukikoji', note:'已預約 17:30' };
+
+        const d2 = makeDay(2, '2026-01-09', 'Day 2', '粉紅毛衣 白色長裙 米白襪褲');
+        d2.slots.morning.destinations.push(
+          { id: uid(), place:'北海道神宮', note:'上午 OPTIONAL' }
+        );
+        d2.slots.noon.food = { place:'海膽專門店 世壱屋（札幌南二條店）', note:'中午 12:00 午餐' };
+
+        // afternoon/evening activities (主要活動有多點 ->)
+        d2.slots.evening.destinations.push(
+          { id: uid(), place:'Stellar Place / PARCO', note:'逛街購物' },
+          { id: uid(), place:'大通公園', note:'散步' },
+          { id: uid(), place:'狸小路商店街', note:'購物 / 小吃' },
+          { id: uid(), place:'薄野 Susukino', note:'夜晚氣氛' }
+        );
+        d2.slots.evening.food = { place:'（晚餐備選）札幌拉麵 / 湯咖喱 / 居酒屋', note:'你Excel有 list：HALAL ramen / 牡蠣屋 Wine&Sake 等（可再 edit 細化）' };
+
+        const d3 = makeDay(3, '2026-01-10', 'Day 3（Klook 一日遊）', '心心毛衣 啡色長裙 米白襪褲');
+        d3.slots.morning.destinations.push(
+          { id: uid(), place:'札幌出發（Klook 一日遊）', note:'10小時；冬季雪景重點' },
+          { id: uid(), place:'旭川動物園', note:'冬季企鵝散步' }
+        );
+        d3.slots.noon.destinations.push(
+          { id: uid(), place:'Ningle Terrace', note:'森林小屋' },
+          { id: uid(), place:'美瑛 / 青池（行程點）', note:'視乎當日路況' }
+        );
+        d3.slots.evening.destinations.push(
+          { id: uid(), place:'回札幌', note:'晚餐自由 / 休息' }
+        );
+        d3.slots.noon.food = { place:'自備食物', note:'Excel：需自備食物' };
+
+        const d4 = makeDay(4, '2026-01-11', 'Day 4（小樽日）', '情侶毛衣 灰/米啡長裙');
+        d4.slots.morning.destinations.push(
+          { id: uid(), place:'札幌 → 小樽（JR）', note:'全日 9:00 出發（約30分鐘）' },
+          { id: uid(), place:'小樽運河 / 堺町通', note:'逛街 / 手信' },
+          { id: uid(), place:'LeTAO（甜品）', note:'想食 / 想買' }
+        );
+        d4.slots.noon.food = { place:'小樽海鮮 / 壽司', note:'午餐約¥1,500（按當日）' };
+        d4.slots.evening.destinations.push(
+          { id: uid(), place:'回札幌', note:'晚 6:30 左右' }
+        );
+        d4.slots.evening.food = { place:'（晚餐備選）', note:'你Excel有 Klook 行程/店舖 link 可再補' };
+
+        const d5 = makeDay(5, '2026-01-12', 'Day 5', '黃綠羽毛衣 素灰厚長裙');
+        d5.slots.morning.destinations.push(
+          { id: uid(), place:'羊之丘展望台', note:'上午 9:00 開關（雪景）' }
+        );
+        d5.slots.noon.destinations.push(
+          { id: uid(), place:'返回市中心 → JOZANKei（可選）', note:'Excel：中午/下午 JOZANKEI（開發）' }
+        );
+        d5.slots.evening.destinations.push(
+          { id: uid(), place:'白之戀人公園', note:'下午 5pm 前入場（你Excel寫 close 5pm）' }
+        );
+        d5.slots.evening.food = { place:'（晚餐）Stellar Place / 札幌站附近', note:'Excel 有備選：SOUP CURRY KING / Ichiryuan Ramen' };
+
+        const d6 = makeDay(6, '2026-01-13', 'Post-Flight 回程', '黑色假兩件 瑜伽喇叭褲');
+        d6.slots.morning.destinations.push(
+          { id: uid(), place:'新千歲機場 CTS', note:'11:00 買手信 / 午餐；16:00 CX581 起飛' }
+        );
+        d6.slots.morning.food = { place:'機場內用餐', note:'回程前食' };
 
         this.days = [d1,d2,d3,d4,d5,d6];
-        this.selectedDayId = this.days[0].id;
-      }
+        this.selectedDayId = d1.id;
 
-      // Flights: seed if empty (this fixes “冇晒航程”)
-      if(this.flights.length === 0){
-        this.flights.push(
+        // Flights (transit split)
+        this.flights = [
           {
             id: uid(),
-            dateLabel:'Thu 08 Jan 2026',
+            dateLabel:'Thu 8 Jan 2026',
             flightNo:'UO856',
             fromCity:'Hong Kong',
-            toCity:'Tokyo (NRT)',
+            toCity:'Tokyo (Narita)',
             fromCode:'HKG',
             toCode:'NRT',
             departTime:'02:00',
             arriveTime:'07:05',
             duration:'',
-            fromTerminal:'',
-            toTerminal:'',
-            note:'轉機：NRT → CTS（你表內：12:25 到札幌）'
+            fromTerminal:'T1',
+            toTerminal:'T2',
+            note:'轉機：NRT T2 → T1'
+          },
+          {
+            id: uid(),
+            dateLabel:'Thu 8 Jan 2026',
+            flightNo:'（轉機後）',
+            fromCity:'Tokyo (Narita)',
+            toCity:'Sapporo (New Chitose)',
+            fromCode:'NRT',
+            toCode:'CTS',
+            departTime:'—',
+            arriveTime:'12:25',
+            duration:'',
+            fromTerminal:'T1',
+            toTerminal:'D',
+            note:'抵達後 JR 去札幌市中心（約40分鐘）'
           },
           {
             id: uid(),
@@ -1411,35 +1450,36 @@ createApp({
             duration:'5h 55m',
             fromTerminal:'Int’l Terminal',
             toTerminal:'Terminal 1',
-            note:'11:00 出發去機場買手信'
+            note:'11:00 去機場買手信 / 午餐'
           }
-        );
-      }
+        ];
 
-      // Shop: seed if empty (this fixes “冇晒購物”)
-      if(this.shop.length === 0){
-        this.shop.push(
-          { id: uid(), item:'小樽 魷魚絲', where:'小樽 ika Taro Honpo いか太郎本舗', note:'14:00 前可能售光', done:false },
+        // Shop list (from Sapporo.xlsx Shopping List)
+        this.shop = [
+          { id: uid(), item:'小樽 魷魚絲', where:'小樽 Ika Taro Honpo いか太郎本舗（14:00前會售光）', note:'', done:false },
           { id: uid(), item:'六花亭葡萄奶油夾心餅乾', where:'札幌車站附近 / 新千歲機場', note:'10個入 1450 YEN', done:false },
-          { id: uid(), item:'Le Tao 小樽色內通起司夾心餅乾', where:'小樽 / 新千歲機場', note:'9片裝1,134円；16片1,998円；20片2,484円（含稅）', done:false }
-        );
+          { id: uid(), item:'Le Tao 小樽色內通起司夾心餅乾', where:'小樽 / 新千歲機場', note:'9片裝1,134日圓；16片裝1,998日圓；20片裝2,484日圓（含稅）', done:false },
+          { id: uid(), item:'北海道これにまいった', where:'新千歲機場 JAL PLAZA', note:'1箱（20g×6袋入）930円', done:false },
+          { id: uid(), item:'炸玉米', where:'新千歲機場 JAL PLAZA', note:'6袋648日圓・10袋1029日圓（含稅）', done:false },
+          { id: uid(), item:'白色戀人', where:'機場 / 市區手信店', note:'（你可以再 edit 寫清楚買邊款/數量）', done:false }
+        ];
+
+        this.persistAll();
       }
+    },
 
-      this.persistAll();
+    mounted(){
+      this.loadAll();
+      this.seedPresetIfMissing();
+      this.startClock();
+      this.refreshWeather();
+    },
+
+    beforeUnmount(){
+      if(this.clockTimer) clearInterval(this.clockTimer);
     }
-  },
-
-  mounted(){
-    this.loadAll();
-    this.seedPresetIfMissing();   // <— hardcode preset (no Excel dependency)
-    this.startClock();
-    this.refreshWeather();
-  },
-
-  beforeUnmount(){
-    if(this.clockTimer) clearInterval(this.clockTimer);
-  }
-}).mount('#app');
+  }).mount('#app');
+})();
 </script>
 </body>
 </html>
