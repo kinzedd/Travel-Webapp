@@ -11,6 +11,8 @@
       theme: { extend: { boxShadow: { soft:"0 18px 50px rgba(3,20,60,.22)", glow:"0 0 0 1px rgba(191,219,254,.35), 0 18px 60px rgba(37,99,235,.14)" } } }
     }
   </script>
+
+  <!-- Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
   <style>
@@ -70,18 +72,16 @@
     }
     .input::placeholder{ color: rgba(255,255,255,.45); }
 
-    /* horizontal day slider: hide scrollbar but keep scroll */
     .hscroll{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
     .hscroll::-webkit-scrollbar{ height:0; }
 
-    /* bottom safe area */
     .safe-bottom{ padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
   </style>
 </head>
 
 <body class="bg-snow min-h-screen text-white/90">
 
-<!-- ✅ Error overlay (so you can see why Vue didn't mount, instead of seeing {{...}} ) -->
+<!-- Error overlay: if anything breaks, you SEE it -->
 <div id="err" style="display:none; position:fixed; inset:12px; z-index:9999; background:rgba(0,0,0,.78); color:#fff; padding:12px; border-radius:16px; font-size:12px; white-space:pre-wrap;"></div>
 <script>
   window.addEventListener('error', (e)=>{
@@ -450,7 +450,6 @@
             </button>
           </div>
 
-          <!-- Add Day -->
           <div v-else-if="addMode==='day'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增 Day</div>
@@ -473,7 +472,6 @@
             </div>
           </div>
 
-          <!-- Add Slot item -->
           <div v-else-if="addMode==='slotItem'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增到行程</div>
@@ -515,12 +513,11 @@
               </div>
 
               <div class="mt-3 text-xs text-blue-100/55">
-                餐飲每個時段只可以有一個；如果你再加會覆蓋舊餐飲（更貼旅行用）。
+                餐飲每個時段只可以有一個；如果你再加會覆蓋舊餐飲。
               </div>
             </div>
           </div>
 
-          <!-- Add Flight -->
           <div v-else-if="addMode==='flight'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增航程</div>
@@ -580,7 +577,6 @@
             </div>
           </div>
 
-          <!-- Add Expense -->
           <div v-else-if="addMode==='expense'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增支出</div>
@@ -603,7 +599,6 @@
             </div>
           </div>
 
-          <!-- Add Shop -->
           <div v-else-if="addMode==='shop'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增購物</div>
@@ -714,14 +709,12 @@
               </div>
             </div>
 
-            <div v-else class="mt-3 text-sm text-blue-100/70">
-              唔支援嘅 edit 類型。
-            </div>
+            <div v-else class="mt-3 text-sm text-blue-100/70">唔支援嘅 edit 類型。</div>
           </div>
         </div>
 
-      </div><!-- /content card -->
-    </div><!-- /container -->
+      </div>
+    </div>
 
     <!-- Bottom bar -->
     <div class="fixed bottom-0 left-0 right-0 z-20 safe-bottom">
@@ -738,13 +731,12 @@
       </div>
     </div>
 
-  </div><!-- /z-10 -->
-</div><!-- /app -->
+  </div>
+</div>
 
 <script>
 const { createApp } = Vue;
 
-/* ✅ SAFE uid: no crypto/randomUUID dependency */
 function uid(){
   return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
 }
@@ -846,7 +838,6 @@ createApp({
       return m[v] || v;
     },
 
-    /* ✅ SAFE storage (never throw) */
     safeGet(key, fallback){
       try{
         const v = localStorage.getItem(key);
@@ -859,7 +850,7 @@ createApp({
       try{
         localStorage.setItem(key, JSON.stringify(value));
       }catch(e){
-        // iOS Safari may block storage; ignore to avoid killing Vue mount
+        // ignore
       }
     },
 
@@ -916,7 +907,7 @@ createApp({
         const { dayId, slot, id } = ctx;
         const d = this.getDayById(dayId);
         const p = d.slots[slot].destinations.find(x=>x.id===id);
-        return { dayId, slot, id, place:p.place, note:p.note || '' };
+        return { dayId, slot, id, place:p?.place || '', note:p?.note || '' };
       }
       if(mode==='food'){
         const { dayId, slot } = ctx;
@@ -926,29 +917,32 @@ createApp({
       }
       if(mode==='flight'){
         const f = this.flights.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(f));
+        return JSON.parse(JSON.stringify(f || {}));
       }
       if(mode==='expense'){
         const e = this.expenses.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(e));
+        return JSON.parse(JSON.stringify(e || {}));
       }
       if(mode==='shop'){
         const s = this.shop.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(s));
+        return JSON.parse(JSON.stringify(s || {}));
       }
       return {};
     },
 
+    /* ✅ FIXED saveEdit (no syntax error, correct return/brace) */
     saveEdit(){
       const mode = this.editMode;
       const b = this.editBuffer;
 
       if(mode==='day'){
         const d = this.getDayById(b.id);
-        d.title = (b.title||'').trim();
-        d.date = b.date || d.date;
-        d.dateShort = this.formatDateShort(d.date);
-        d.dateFull = this.formatDateFull(d.date);
+        if(d){
+          d.title = (b.title||'').trim();
+          d.date = b.date || d.date;
+          d.dateShort = this.formatDateShort(d.date);
+          d.dateFull = this.formatDateFull(d.date);
+        }
         this.persistAll();
         this.view = this.prevView;
         return;
@@ -956,23 +950,24 @@ createApp({
 
       if(mode==='destination'){
         const d = this.getDayById(b.dayId);
-        const arr = d.slots[b.slot].destinations;
-        const p = arr.find(x=>x.id===b.id);
-      
-        if(p){
-          p.place = (b.place||'').trim();
-          p.note  = (b.note||'').trim();
+        if(d){
+          const arr = d.slots[b.slot].destinations;
+          const p = arr.find(x=>x.id===b.id);
+          if(p){
+            p.place = (b.place||'').trim();
+            p.note  = (b.note||'').trim();
+          }
         }
-      
         this.persistAll();
         this.view = this.prevView;
         return;
       }
 
-
       if(mode==='food'){
         const d = this.getDayById(b.dayId);
-        d.slots[b.slot].food = { place:(b.place||'').trim(), note:(b.note||'').trim() };
+        if(d){
+          d.slots[b.slot].food = { place:(b.place||'').trim(), note:(b.note||'').trim() };
+        }
         this.persistAll();
         this.view = this.prevView;
         return;
@@ -1017,7 +1012,9 @@ createApp({
 
       if(mode==='destination'){
         const d = this.getDayById(b.dayId);
-        d.slots[b.slot].destinations = d.slots[b.slot].destinations.filter(x=>x.id!==b.id);
+        if(d){
+          d.slots[b.slot].destinations = d.slots[b.slot].destinations.filter(x=>x.id!==b.id);
+        }
         this.persistAll();
         this.view = this.prevView;
         return;
@@ -1025,7 +1022,7 @@ createApp({
 
       if(mode==='food'){
         const d = this.getDayById(b.dayId);
-        d.slots[b.slot].food = null;
+        if(d) d.slots[b.slot].food = null;
         this.persistAll();
         this.view = this.prevView;
         return;
@@ -1288,5 +1285,6 @@ createApp({
   }
 }).mount('#app');
 </script>
+
 </body>
 </html>
