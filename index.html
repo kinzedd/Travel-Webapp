@@ -80,6 +80,27 @@
 </head>
 
 <body class="bg-snow min-h-screen text-white/90">
+
+<!-- ✅ Error overlay (so you can see why Vue didn't mount, instead of seeing {{...}} ) -->
+<div id="err" style="display:none; position:fixed; inset:12px; z-index:9999; background:rgba(0,0,0,.78); color:#fff; padding:12px; border-radius:16px; font-size:12px; white-space:pre-wrap;"></div>
+<script>
+  window.addEventListener('error', (e)=>{
+    const box = document.getElementById('err');
+    if(!box) return;
+    box.style.display = 'block';
+    box.textContent =
+      'JS Error:\n' + (e?.message || e) +
+      '\n\n' + (e?.filename || '') + ':' + (e?.lineno || '');
+  });
+  window.addEventListener('unhandledrejection', (e)=>{
+    const box = document.getElementById('err');
+    if(!box) return;
+    box.style.display = 'block';
+    box.textContent =
+      'Promise Rejection:\n' + (e?.reason?.message || e?.reason || e);
+  });
+</script>
+
 <div id="app" class="relative min-h-screen">
   <div class="relative z-10">
     <div class="mx-auto max-w-md px-4 pt-6 pb-36">
@@ -241,7 +262,6 @@
               </div>
             </div>
 
-            <!-- Add button moved to bottom (fixed global) -->
             <div class="text-xs text-blue-100/55 text-center">
               點目的地/餐廳會直接開 Google Maps（起點：現時位置）
             </div>
@@ -263,7 +283,6 @@
           </div>
 
           <div v-for="f in flights" :key="f.id" class="rounded-3xl border border-blue-100/20 bg-white/5 p-4">
-            <!-- top row -->
             <div class="flex items-center justify-between">
               <div class="text-xs text-blue-100/60">
                 {{ f.dateLabel }} <span class="mx-1">|</span> {{ f.flightNo || '—' }}
@@ -274,12 +293,10 @@
               </button>
             </div>
 
-            <!-- route title -->
             <div class="mt-2 text-lg font-semibold text-white">
               {{ f.fromCity }} <span class="text-blue-100/60">to</span> {{ f.toCity }}
             </div>
 
-            <!-- main line (like your screenshot) -->
             <div class="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
               <div>
                 <div class="text-sm font-semibold text-blue-50/95">{{ f.fromCode }}</div>
@@ -401,7 +418,6 @@
             </button>
           </div>
 
-          <!-- Choose type if not preset -->
           <div v-if="addMode==='choose'" class="grid grid-cols-2 gap-3">
             <button class="rounded-2xl border border-blue-100/20 bg-white/5 p-4 text-left hover:bg-white/10"
                     @click="goAdd('slotItem', { dayId:selectedDayId, slot:'morning' })">
@@ -457,7 +473,7 @@
             </div>
           </div>
 
-          <!-- Add Slot item (destination or food) -->
+          <!-- Add Slot item -->
           <div v-else-if="addMode==='slotItem'" class="space-y-3">
             <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
               <div class="font-semibold text-white">新增到行程</div>
@@ -619,23 +635,17 @@
           <div class="rounded-2xl border border-blue-100/20 bg-white/5 p-4">
             <div class="text-xs text-blue-100/60">類型：{{ editMode }}</div>
 
-            <!-- Day edit -->
             <div v-if="editMode==='day'" class="mt-3 space-y-3">
               <input v-model="editBuffer.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="標題">
               <input v-model="editBuffer.date" type="date" class="input w-full rounded-2xl px-3 py-2 text-sm">
               <div class="flex gap-2 mt-3">
                 <button class="rounded-2xl bg-blue-500/90 px-4 py-2 text-sm font-semibold hover:bg-blue-500"
-                        @click="saveEdit">
-                  保存
-                </button>
+                        @click="saveEdit">保存</button>
                 <button class="rounded-2xl bg-red-500/20 border border-red-300/20 px-4 py-2 text-sm font-semibold hover:bg-red-500/30 text-red-100"
-                        @click="deleteCurrent">
-                  刪除
-                </button>
+                        @click="deleteCurrent">刪除</button>
               </div>
             </div>
 
-            <!-- Destination edit -->
             <div v-else-if="editMode==='destination'" class="mt-3 space-y-3">
               <input v-model="editBuffer.place" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="目的地">
               <input v-model="editBuffer.note" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="備註（可空）">
@@ -646,7 +656,6 @@
               </div>
             </div>
 
-            <!-- Food edit -->
             <div v-else-if="editMode==='food'" class="mt-3 space-y-3">
               <input v-model="editBuffer.place" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="餐飲">
               <input v-model="editBuffer.note" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="備註（可空）">
@@ -657,7 +666,6 @@
               </div>
             </div>
 
-            <!-- Flight edit -->
             <div v-else-if="editMode==='flight'" class="mt-3 space-y-3">
               <input v-model="editBuffer.dateLabel" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="日期顯示">
               <input v-model="editBuffer.flightNo" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="航班號">
@@ -679,7 +687,6 @@
               </div>
             </div>
 
-            <!-- Expense edit -->
             <div v-else-if="editMode==='expense'" class="mt-3 space-y-3">
               <input v-model="editBuffer.title" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="項目">
               <input v-model.number="editBuffer.amount" type="number" min="0" step="0.01" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="金額">
@@ -695,7 +702,6 @@
               </div>
             </div>
 
-            <!-- Shop edit -->
             <div v-else-if="editMode==='shop'" class="mt-3 space-y-3">
               <input v-model="editBuffer.item" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="名稱">
               <input v-model="editBuffer.where" class="input w-full rounded-2xl px-3 py-2 text-sm" placeholder="邊度買">
@@ -717,7 +723,7 @@
       </div><!-- /content card -->
     </div><!-- /container -->
 
-    <!-- Bottom bar: ONE add button only -->
+    <!-- Bottom bar -->
     <div class="fixed bottom-0 left-0 right-0 z-20 safe-bottom">
       <div class="mx-auto max-w-md px-4">
         <div class="glass shadow-soft rounded-3xl px-4 py-3 flex items-center justify-between">
@@ -738,8 +744,9 @@
 <script>
 const { createApp } = Vue;
 
+/* ✅ SAFE uid: no crypto/randomUUID dependency */
 function uid(){
-  return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+  return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
 }
 
 createApp({
@@ -748,18 +755,15 @@ createApp({
     const iso = (d)=> d.toISOString().slice(0,10);
 
     return {
-      // navigation
-      view: 'plan',     // plan | flight | expense | shop | add | edit
+      view: 'plan',
       prevView: 'plan',
       tab: 'plan',
 
       hkClock: '',
       clockTimer: null,
 
-      // weather
       weather: { summary:'未取得天氣', temp:null, updatedAt:'' },
 
-      // itinerary model (days -> slots)
       days: [],
       selectedDayId: null,
       slotOrder: [
@@ -769,16 +773,10 @@ createApp({
         { key:'late',    label:'深夜' },
       ],
 
-      // flights
       flights: [],
-
-      // expenses
       expenses: [],
-
-      // shopping
       shop: [],
 
-      // add/edit state
       addMode: 'choose',
       addCtx: {},
 
@@ -798,8 +796,7 @@ createApp({
         shop: { item:'', where:'', note:'' }
       },
 
-      // geolocation for directions
-      originLatLng: '' // "lat,lng"
+      originLatLng: ''
     };
   },
 
@@ -825,7 +822,6 @@ createApp({
   },
 
   methods:{
-    // ------- UI helpers -------
     tabBtn(key){
       return this.view===key
         ? 'bg-white/15 text-white border border-blue-100/20'
@@ -850,30 +846,40 @@ createApp({
       return m[v] || v;
     },
 
-    // ------- storage -------
-    loadAll(){
-      const safe = (k, fallback)=> {
-        try { return JSON.parse(localStorage.getItem(k) || fallback); }
-        catch { return JSON.parse(fallback); }
-      };
+    /* ✅ SAFE storage (never throw) */
+    safeGet(key, fallback){
+      try{
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : JSON.parse(fallback);
+      }catch(e){
+        return JSON.parse(fallback);
+      }
+    },
+    safeSet(key, value){
+      try{
+        localStorage.setItem(key, JSON.stringify(value));
+      }catch(e){
+        // iOS Safari may block storage; ignore to avoid killing Vue mount
+      }
+    },
 
-      this.days    = safe('sp_v2_days', '[]');
-      this.flights = safe('sp_v2_flights', '[]');
-      this.expenses= safe('sp_v2_expenses', '[]');
-      this.shop    = safe('sp_v2_shop', '[]');
+    loadAll(){
+      this.days     = this.safeGet('sp_v2_days', '[]');
+      this.flights  = this.safeGet('sp_v2_flights', '[]');
+      this.expenses = this.safeGet('sp_v2_expenses', '[]');
+      this.shop     = this.safeGet('sp_v2_shop', '[]');
 
       if(this.days.length>0 && !this.selectedDayId){
         this.selectedDayId = this.days[0].id;
       }
     },
     persistAll(){
-      localStorage.setItem('sp_v2_days', JSON.stringify(this.days));
-      localStorage.setItem('sp_v2_flights', JSON.stringify(this.flights));
-      localStorage.setItem('sp_v2_expenses', JSON.stringify(this.expenses));
-      localStorage.setItem('sp_v2_shop', JSON.stringify(this.shop));
+      this.safeSet('sp_v2_days', this.days);
+      this.safeSet('sp_v2_flights', this.flights);
+      this.safeSet('sp_v2_expenses', this.expenses);
+      this.safeSet('sp_v2_shop', this.shop);
     },
 
-    // ------- navigation -------
     navTo(v){
       this.view = v;
       this.tab = v;
@@ -887,14 +893,10 @@ createApp({
       this.addMode = mode || 'choose';
       this.addCtx = ctx || {};
 
-      // small defaults
       if(mode==='slotItem' || mode==='food'){
         this.form.slot.kind = (mode==='food') ? 'food' : 'destination';
         this.form.slot.place = '';
         this.form.slot.note = '';
-      }
-      if(mode==='choose'){
-        // no-op
       }
     },
     goEdit(mode, ctx){
@@ -902,8 +904,6 @@ createApp({
       this.view = 'edit';
       this.editMode = mode;
       this.editCtx = ctx;
-
-      // build editBuffer from current data
       this.editBuffer = this.buildEditBuffer(mode, ctx);
     },
 
@@ -961,8 +961,9 @@ createApp({
         p.place = (b.place||'').trim();
         p.note = (b.note||'').trim();
         this.persistAll();
-        this.view = this.prevView;
-        return;
+        this.view = this
+
+      return;
       }
 
       if(mode==='food'){
@@ -1048,7 +1049,6 @@ createApp({
       }
     },
 
-    // ------- add handlers -------
     submitAddDay(){
       const date = this.form.day.date;
       if(!date) return;
@@ -1091,7 +1091,6 @@ createApp({
       if(this.form.slot.kind==='destination'){
         d.slots[slot].destinations.push({ id: uid(), place, note });
       }else{
-        // food only one — overwrite
         d.slots[slot].food = { place, note };
       }
 
@@ -1101,12 +1100,10 @@ createApp({
 
     submitAddFlight(){
       const f = { ...this.form.flight, id: uid() };
-      // minimal guard
       if(!f.fromCity && !f.toCity && !f.flightNo) return;
       this.flights.push(f);
       this.persistAll();
 
-      // reset
       this.form.flight = {
         dateLabel:'', flightNo:'', duration:'',
         fromCity:'', toCity:'', fromCode:'', toCode:'',
@@ -1141,12 +1138,10 @@ createApp({
       this.view = 'shop';
     },
 
-    // ------- utilities -------
     getDayById(id){
       return this.days.find(x=>x.id===id) || null;
     },
     formatDateShort(iso){
-      // YYYY-MM-DD -> M/D
       try{
         const d = new Date(iso + 'T00:00:00');
         return `${d.getMonth()+1}/${d.getDate()}`;
@@ -1160,7 +1155,6 @@ createApp({
       }catch{ return iso; }
     },
 
-    // ------- directions -------
     ensureOrigin(){
       return new Promise((resolve)=>{
         if(this.originLatLng){ resolve(this.originLatLng); return; }
@@ -1183,7 +1177,6 @@ createApp({
       window.open(url, '_blank');
     },
 
-    // ------- weather -------
     async refreshWeather(){
       if(!navigator.geolocation){
         this.weather.summary = '此裝置不支援定位';
@@ -1226,7 +1219,6 @@ createApp({
       return (code in m) ? m[code] : '天氣狀況不明';
     },
 
-    // ------- clock -------
     startClock(){
       const tick = ()=>{
         this.hkClock = new Date().toLocaleTimeString('en-GB', {
@@ -1238,11 +1230,9 @@ createApp({
       this.clockTimer = setInterval(tick, 1000);
     },
 
-    // ------- seed demo (optional) -------
     seedIfEmpty(){
       if(this.days.length>0 || this.shop.length>0 || this.flights.length>0) return;
 
-      // create Day 1 (example)
       const d1 = {
         id: uid(),
         dayNo: 1,
