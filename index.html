@@ -2,1555 +2,722 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- Your compiled CSS (Tailwind or custom) -->
-  <link rel="stylesheet" href="./assets/app.css" />
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="assets/app.css" />
 
-  <!-- Vue (local, stable) -->
-  <script src="./assets/vue.global.prod.js"></script>
-
-  <!-- Supabase JS (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
+  <!-- Fallback minimal styling (in case app.css fails) -->
   <style>
-    html, body { height:100%; }
-    body{
-      margin:0;
-      overscroll-behavior-y: auto;
+    html, body { height: 100%; }
+    body {
+      margin: 0;
       -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-      background: #0b1220;
+      overscroll-behavior-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", Arial, sans-serif;
       color: rgba(255,255,255,.92);
+      background: #0b1220;
     }
-
-    /* Background (use your repo bg.jpg) */
-    .bg-snow{
-      position: relative;
+    .bg-snow {
       min-height: 100vh;
       background-image:
         linear-gradient(180deg, rgba(2,6,23,.62), rgba(2,6,23,.78)),
-        radial-gradient(1100px 720px at 20% 0%, rgba(96,165,250,.25), rgba(2,6,23,0) 60%),
-        radial-gradient(900px 620px at 90% 10%, rgba(191,219,254,.16), rgba(2,6,23,0) 55%),
-        url("./bg.jpg");
+        radial-gradient(1100px 720px at 20% 8%, rgba(96,165,250,.25), rgba(2,6,23,0) 60%),
+        radial-gradient(900px 620px at 90% 18%, rgba(191,219,254,.16), rgba(2,6,23,0) 55%),
+        url("bg.jpg");
       background-size: cover;
       background-position: center;
-      /* iOS 最容易出事係 fixed，所以唔用 fixed */
-      background-attachment: scroll;
     }
-    .bg-snow::before{
-      content:"";
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px),
-        radial-gradient(rgba(255,255,255,.55) 1px, transparent 1px);
-      background-size: 18px 18px, 28px 28px;
-      background-position: 0 0, 9px 14px;
-      opacity: .14;
-      pointer-events:none;
-    }
-
-    .wrap{ position: relative; z-index: 1; }
-
-    .glass{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(191,219,254,.16);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+    .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+    .glass {
+      background: rgba(30, 58, 94, .45);
+      border: 1px solid rgba(255,255,255,.12);
       border-radius: 22px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    .glass-2{
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(191,219,254,.16);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 22px;
-    }
-    .pill{
-      background: rgba(191,219,254,.10);
-      border: 1px solid rgba(191,219,254,.22);
-      border-radius: 16px;
-    }
-    .btn{
-      border-radius: 16px;
-      border: 1px solid rgba(191,219,254,.18);
-      background: rgba(255,255,255,.07);
+    .row { display:flex; gap:12px; flex-wrap: wrap; align-items:center; }
+    .spacer { flex: 1; }
+    .title { font-size: 40px; font-weight: 800; letter-spacing: .5px; margin: 6px 0 0; }
+    .subtitle { opacity: .9; margin: 8px 0 0; font-size: 18px; }
+    .btn {
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
       color: rgba(255,255,255,.92);
-      padding: 10px 12px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
       font-weight: 700;
-      font-size: 12px;
     }
-    .btnPrimary{
-      border-radius: 16px;
-      border: 1px solid rgba(147,197,253,.22);
-      background: rgba(59,130,246,.75);
-      color: white;
-      padding: 10px 14px;
-      font-weight: 800;
-      font-size: 12px;
-    }
-    .btnDanger{
-      border-radius: 16px;
-      border: 1px solid rgba(248,113,113,.22);
-      background: rgba(239,68,68,.22);
-      color: rgba(254,226,226,.95);
-      padding: 10px 14px;
-      font-weight: 800;
-      font-size: 12px;
-    }
-    .input{
-      width: 100%;
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(191,219,254,.18);
-      color: rgba(255,255,255,.92);
-      outline:none;
-      border-radius: 16px;
-      padding: 10px 12px;
-      font-size: 14px;
-    }
-    .input::placeholder{ color: rgba(255,255,255,.45); }
-
-    .hscroll{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
-    .hscroll::-webkit-scrollbar{ height:0; }
-
-    .safe-bottom{ padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-    .container{ max-width: 420px; margin: 0 auto; padding: 18px 16px 120px; }
-
-    /* day chip (2 lines, no () ) */
-    .daychip{
-      min-width: 160px;
-      padding: 10px 12px;
+    .btn.active { background: rgba(59,130,246,.35); border-color: rgba(147,197,253,.45); }
+    .pill {
+      padding: 12px 14px;
       border-radius: 18px;
-      border: 1px solid rgba(191,219,254,.14);
-      background: rgba(255,255,255,.06);
-      text-align: left;
-      color: rgba(219,234,254,.92);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(15,23,42,.30);
     }
-    .daychipActive{
-      background: rgba(59,130,246,.18);
-      border-color: rgba(191,219,254,.24);
-      color: rgba(255,255,255,.95);
-    }
-    .muted{ color: rgba(219,234,254,.60); }
-    .tiny{ font-size: 12px; }
-    .small{ font-size: 13px; }
-    .title{ font-size: 20px; font-weight: 900; }
-    .subtitle{ font-size: 13px; color: rgba(219,234,254,.65); }
-
-    /* list cards */
-    .card{
-      border-radius: 20px;
-      border: 1px solid rgba(191,219,254,.12);
-      background: rgba(255,255,255,.06);
+    .muted { opacity: .8; }
+    .small { font-size: 13px; opacity: .9; }
+    .h2 { font-size: 22px; font-weight: 800; margin: 0; }
+    .card {
       padding: 14px;
-    }
-
-    /* destination link style */
-    a.maplink{
-      color: rgba(255,255,255,.94);
-      text-decoration: none;
-      font-weight: 800;
-    }
-    a.maplink:hover{ text-decoration: underline; }
-
-    .rowBetween{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .gap8{ display:flex; gap:8px; align-items:center; }
-    .gap10{ display:flex; gap:10px; align-items:center; }
-    .mt8{ margin-top: 8px; }
-    .mt10{ margin-top: 10px; }
-    .mt12{ margin-top: 12px; }
-    .mt14{ margin-top: 14px; }
-    .mt16{ margin-top: 16px; }
-    .mb8{ margin-bottom: 8px; }
-
-    .errorBox{
       border-radius: 18px;
-      border: 1px solid rgba(248,113,113,.25);
-      background: rgba(239,68,68,.12);
-      padding: 12px;
-      font-size: 13px;
-      color: rgba(254,226,226,.95);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.25);
+    }
+    .err {
+      border: 1px solid rgba(248,113,113,.45);
+      background: rgba(127,29,29,.35);
+      padding: 12px 14px;
+      border-radius: 16px;
       white-space: pre-wrap;
+      line-height: 1.35;
     }
-    .okBox{
-      border-radius: 18px;
-      border: 1px solid rgba(34,197,94,.20);
-      background: rgba(34,197,94,.10);
-      padding: 10px 12px;
-      font-size: 12px;
-      color: rgba(220,252,231,.95);
-    }
+    a { color: #93c5fd; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .grid2 { display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 860px) { .grid2 { grid-template-columns: 1.1fr .9fr; } }
+    .list { display:flex; flex-direction:column; gap:10px; }
+    .tag { display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.10); }
+    .line { height:1px; background: rgba(255,255,255,.10); margin: 10px 0; }
+    .right { text-align:right; }
   </style>
+
+  <!-- Vue (LOCAL, stable). This MUST exist: assets/vue.global.prod.js -->
+  <script src="assets/vue.global.prod.js"></script>
+
+  <!-- Supabase (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="bg-snow">
-<div id="app" class="wrap">
-  <div class="container">
-
-    <!-- Header -->
+  <div id="app" class="wrap">
+    <!-- If Vue didn't mount, you will still see this raw content.
+         When Vue mounts, it will replace everything. -->
     <div class="glass" style="padding:16px;">
-      <div class="rowBetween">
-        <div>
-          <div class="tiny muted" style="letter-spacing:.22em; text-transform:uppercase;">Sapporo • Snow • First Love vibe</div>
-          <div class="title">札幌旅行 App</div>
-          <div class="subtitle mt8">行程 / 航程 / 記帳 / 購物</div>
-        </div>
-        <div class="pill" style="padding:10px 12px; text-align:right;">
-          <div class="tiny muted">HK Time</div>
-          <div style="font-weight:900;">{{ hkClock }}</div>
-        </div>
-      </div>
-
-      <!-- Tabs -->
-      <div class="mt12" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
-        <button @click="navTo('plan')"    :class="tabBtn('plan')"    class="btn">行程</button>
-        <button @click="navTo('flight')"  :class="tabBtn('flight')"  class="btn">航程</button>
-        <button @click="navTo('expense')" :class="tabBtn('expense')" class="btn">記帳</button>
-        <button @click="navTo('shop')"    :class="tabBtn('shop')"    class="btn">購物</button>
-      </div>
-
-      <!-- Connection / status -->
-      <div class="mt12" v-if="statusText" :class="statusIsError ? 'errorBox' : 'okBox'">
-        {{ statusText }}
-      </div>
-    </div>
-
-    <!-- Main -->
-    <div class="mt12 glass-2" style="padding:16px;">
-
-      <!-- PLAN -->
-      <div v-if="view==='plan'" class="space-y-4">
-
-        <div class="rowBetween">
-          <div>
-            <div style="font-weight:900;">行程（按日）</div>
-            <div class="tiny muted mt8">左右滑：揀 Day；每個時段可新增/編輯/刪除</div>
-          </div>
-          <button class="btn" @click="goAdd('day')">＋ Day</button>
-        </div>
-
-        <div class="hscroll mt10">
-          <div class="gap10" style="padding-bottom:6px;">
-            <button v-for="d in days" :key="d.id"
-                    @click="selectedDayId=d.id"
-                    class="daychip"
-                    :class="selectedDayId===d.id ? 'daychipActive' : ''">
-              <div class="tiny muted">Day {{ d.dayNo }} · {{ d.dateShort || '—' }}</div>
-              <div style="font-weight:950; font-size:15px; margin-top:4px;">
-                {{ d.title || d.dateFull || '未命名' }}
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <div v-if="!selectedDay" class="card tiny muted">
-          未有 Day。按右上角「＋ Day」新增。
-        </div>
-
-        <div v-else>
-          <!-- Remove the middle big box: keep only simple header row -->
-          <div class="card">
-            <div class="rowBetween">
-              <div>
-                <div class="tiny muted">Day {{ selectedDay.dayNo }}</div>
-                <div style="font-weight:950; font-size:18px; margin-top:4px;">
-                  {{ selectedDay.title || selectedDay.dateFull }}
-                </div>
-                <div class="tiny muted mt8">{{ selectedDay.dateFull }}</div>
-              </div>
-              <button class="btn" @click="goEdit('day', selectedDay.id)">Edit</button>
-            </div>
-          </div>
-
-          <!-- Slots: morning/noon/evening only -->
-          <div class="mt12" v-for="slot in slotOrder" :key="slot.key" class="card">
-            <div class="rowBetween">
-              <div>
-                <div style="font-weight:950;">{{ slot.label }}</div>
-                <div class="tiny muted mt8">目的地可多個；餐飲只一個</div>
-              </div>
-              <button class="btn" @click="goAdd('slotItem', { dayId:selectedDay.id, slot:slot.key })">＋</button>
-            </div>
-
-            <!-- Destinations: hyperlink with 📍 -->
-            <div class="mt12">
-              <div class="tiny muted">目的地（可多個）</div>
-
-              <div v-if="selectedDay.slots[slot.key].destinations.length===0" class="tiny muted mt8">
-                未加目的地
-              </div>
-
-              <div v-else class="mt10" style="display:flex; flex-direction:column; gap:10px;">
-                <div v-for="p in selectedDay.slots[slot.key].destinations" :key="p.id" class="pill" style="padding:12px;">
-                  <div class="rowBetween">
-                    <div style="min-width:0;">
-                      <div style="font-size:14px; font-weight:950;">
-                        <a class="maplink" :href="mapUrl(p.place)" target="_blank" rel="noopener">
-                          📍 {{ p.place }}
-                        </a>
-                      </div>
-                      <div v-if="p.note" class="tiny muted mt8">📝 {{ p.note }}</div>
-                    </div>
-                    <button class="btn" @click="goEdit('destination', { dayId:selectedDay.id, slot:slot.key, id:p.id })">Edit</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Food (single) -->
-            <div class="mt14" style="border-top: 1px solid rgba(191,219,254,.10); padding-top:12px;">
-              <div class="tiny muted">餐飲（只一個）</div>
-
-              <div v-if="!selectedDay.slots[slot.key].food" class="rowBetween mt10">
-                <div class="tiny muted">未加餐飲</div>
-                <button class="btn" @click="goAdd('food', { dayId:selectedDay.id, slot:slot.key })">新增餐飲</button>
-              </div>
-
-              <div v-else class="pill mt10" style="padding:12px;">
-                <div class="rowBetween">
-                  <div style="min-width:0;">
-                    <div style="font-size:14px; font-weight:950;">
-                      <a class="maplink" :href="mapUrl(selectedDay.slots[slot.key].food.place)" target="_blank" rel="noopener">
-                        🍜 {{ selectedDay.slots[slot.key].food.place }}
-                      </a>
-                    </div>
-                    <div v-if="selectedDay.slots[slot.key].food.note" class="tiny muted mt8">📝 {{ selectedDay.slots[slot.key].food.note }}</div>
-                  </div>
-                  <button class="btn" @click="goEdit('food', { dayId:selectedDay.id, slot:slot.key })">Edit</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Outfit at bottom of day -->
-          <div class="card mt12">
-            <div class="rowBetween">
-              <div style="font-weight:950;">衣著</div>
-              <button class="btn" @click="goEdit('outfit', selectedDay.id)">Edit</button>
-            </div>
-            <div class="mt10 tiny muted">米衣著：</div>
-            <div style="font-weight:900; margin-top:6px;">{{ selectedDay.miOutfit || '—' }}</div>
-            <div class="mt12 tiny muted">Wol衣著：</div>
-            <div style="font-weight:900; margin-top:6px;">{{ selectedDay.wolOutfit || '—' }}</div>
-          </div>
-
-          <div class="tiny muted mt12" style="text-align:center;">
-            點 📍 / 🍜 會開 Google Maps（起點：現時位置）
-          </div>
-        </div>
-      </div>
-
-      <!-- FLIGHT -->
-      <div v-else-if="view==='flight'">
-        <div class="rowBetween">
-          <div style="font-weight:950;">航程</div>
-          <button class="btn" @click="goAdd('flight')">＋</button>
-        </div>
-
-        <div v-if="flights.length===0" class="card mt12 tiny muted">
-          未有航程。按右上角「＋」新增。
-        </div>
-
-        <div v-else class="mt12" style="display:flex; flex-direction:column; gap:12px;">
-          <div v-for="f in flights" :key="f.id" class="card">
-            <div class="rowBetween">
-              <div class="tiny muted">{{ f.dateLabel || '—' }} <span class="muted">|</span> {{ f.flightNo || '—' }}</div>
-              <button class="btn" @click="goEdit('flight', f.id)">Edit</button>
-            </div>
-
-            <div style="font-weight:950; font-size:18px; margin-top:10px;">
-              {{ f.fromCity || '—' }} <span class="muted">to</span> {{ f.toCity || '—' }}
-            </div>
-
-            <div class="mt12" style="display:grid; grid-template-columns: 1fr auto 1fr; gap:12px; align-items:center;">
-              <div>
-                <div class="small" style="font-weight:900;">{{ f.fromCode || '' }}</div>
-                <div style="font-size:30px; font-weight:950; line-height:1;">{{ f.departTime || '—' }}</div>
-                <div class="tiny muted mt8">{{ f.fromTerminal || '' }}</div>
-              </div>
-
-              <div style="text-align:center;">
-                <div class="tiny muted">{{ f.duration || '' }}</div>
-                <div class="mt10 gap8" style="justify-content:center;">
-                  <div style="height:2px; width:40px; background: rgba(219,234,254,.25); border-radius:99px;"></div>
-                  <div>✈️</div>
-                  <div style="height:2px; width:40px; background: rgba(219,234,254,.25); border-radius:99px;"></div>
-                </div>
-              </div>
-
-              <div style="text-align:right;">
-                <div class="small" style="font-weight:900;">{{ f.toCode || '' }}</div>
-                <div style="font-size:30px; font-weight:950; line-height:1;">{{ f.arriveTime || '—' }}</div>
-                <div class="tiny muted mt8">{{ f.toTerminal || '' }}</div>
-              </div>
-            </div>
-
-            <div v-if="f.note" class="tiny muted mt12" style="white-space:pre-wrap;">{{ f.note }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EXPENSE -->
-      <div v-else-if="view==='expense'">
-        <div class="rowBetween">
-          <div style="font-weight:950;">記帳</div>
-          <button class="btn" @click="goAdd('expense')">＋</button>
-        </div>
-
-        <div class="pill mt12" style="padding:10px 12px; font-weight:950;">
-          本月合計：HK$ {{ monthTotal.toFixed(2) }}
-        </div>
-
-        <div v-if="expenses.length===0" class="card mt12 tiny muted">
-          未有紀錄。
-        </div>
-
-        <div v-else class="mt12" style="display:flex; flex-direction:column; gap:10px;">
-          <div v-for="e in sortedExpenses" :key="e.id" class="card">
-            <div class="rowBetween">
-              <div>
-                <div style="font-weight:950;">{{ e.title || '(未命名)' }}</div>
-                <div class="mt8" style="font-weight:950;">
-                  HK$ {{ Number(e.amount || 0).toFixed(2) }}
-                  <span class="pill" style="padding:4px 10px; font-size:11px; font-weight:900; margin-left:8px;">{{ e.method }}</span>
-                </div>
-                <div class="tiny muted mt8">{{ e.date || '—' }}</div>
-                <div v-if="e.note" class="tiny muted mt8">{{ e.note }}</div>
-              </div>
-              <button class="btn" @click="goEdit('expense', e.id)">Edit</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SHOP -->
-      <div v-else-if="view==='shop'">
-        <div class="rowBetween">
-          <div style="font-weight:950;">購物清單</div>
-          <button class="btn" @click="goAdd('shop')">＋</button>
-        </div>
-
-        <div v-if="shop.length===0" class="card mt12 tiny muted">
-          清單空空地～按右上角「＋」新增。
-        </div>
-
-        <div v-else class="mt12" style="display:flex; flex-direction:column; gap:12px;">
-          <div v-for="s in sortedShop" :key="s.id" class="card">
-            <div class="rowBetween">
-              <label class="gap10" style="min-width:0;">
-                <!-- checkbox is useful: mark bought/done, and Aline will see immediately -->
-                <input type="checkbox" v-model="s.done" @change="toggleShopDone(s)"
-                       style="width:22px; height:22px; border-radius:6px;">
-                <div style="min-width:0;">
-                  <div :style="{fontWeight: 950, textDecoration: s.done?'line-through':'none', opacity: s.done?0.55:1}">
-                    {{ s.item }}
-                  </div>
-                  <div v-if="s.where" class="tiny muted mt8">🧭 {{ s.where }}</div>
-                  <div v-if="s.note" class="tiny muted mt8" style="white-space:pre-wrap;">📝 {{ s.note }}</div>
-                </div>
-              </label>
-              <button class="btn" @click="goEdit('shop', s.id)">Edit</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ADD -->
-      <div v-else-if="view==='add'">
-        <div class="rowBetween">
-          <div style="font-weight:950;">新增</div>
-          <button class="btn" @click="back()">返回</button>
-        </div>
-
-        <!-- choose -->
-        <div v-if="addMode==='choose'" class="mt12" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <button class="card" style="text-align:left;" @click="goAdd('slotItem', { dayId:selectedDayId, slot:'morning' })">
-            <div style="font-weight:950;">＋ 目的地/餐飲</div>
-            <div class="tiny muted mt8">加到某日某時段</div>
-          </button>
-
-          <button class="card" style="text-align:left;" @click="goAdd('flight')">
-            <div style="font-weight:950;">＋ 航程</div>
-            <div class="tiny muted mt8">Flight card</div>
-          </button>
-
-          <button class="card" style="text-align:left;" @click="goAdd('expense')">
-            <div style="font-weight:950;">＋ 記帳</div>
-            <div class="tiny muted mt8">現金/信用卡</div>
-          </button>
-
-          <button class="card" style="text-align:left;" @click="goAdd('shop')">
-            <div style="font-weight:950;">＋ 購物</div>
-            <div class="tiny muted mt8">哪裡買 + note</div>
-          </button>
-
-          <button class="card" style="text-align:left; grid-column: 1 / span 2;" @click="goAdd('day')">
-            <div style="font-weight:950;">＋ 新增 Day</div>
-            <div class="tiny muted mt8">建立 Day 1 / Day 2 …</div>
-          </button>
-        </div>
-
-        <!-- add day -->
-        <div v-else-if="addMode==='day'" class="card mt12">
-          <div style="font-weight:950;">新增 Day</div>
-          <div class="mt12">
-            <div class="tiny muted">日期</div>
-            <input type="date" v-model="form.day.date" class="input mt8">
-          </div>
-          <div class="mt12">
-            <div class="tiny muted">標題（可空）</div>
-            <input v-model="form.day.title" class="input mt8" placeholder="例如：小樽一日遊 / 札幌市區">
-          </div>
-          <div class="mt12">
-            <button class="btnPrimary" @click="submitAddDay">新增</button>
-          </div>
-        </div>
-
-        <!-- add slot item -->
-        <div v-else-if="addMode==='slotItem' || addMode==='food'" class="card mt12">
-          <div style="font-weight:950;">新增到行程</div>
-          <div class="tiny muted mt8">
-            Day {{ getDayById(addCtx.dayId)?.dayNo || '—' }} · {{ slotLabel(addCtx.slot) }}
-          </div>
-
-          <div class="mt12 gap10">
-            <button class="btn" @click="form.slot.kind='destination'" :style="kindStyle('destination')">目的地</button>
-            <button class="btn" @click="form.slot.kind='food'"        :style="kindStyle('food')">餐飲</button>
-          </div>
-
-          <div class="mt12">
-            <div class="tiny muted">{{ form.slot.kind==='food' ? '餐廳/食店' : '目的地' }}</div>
-            <input v-model="form.slot.place" class="input mt8" placeholder="可直接輸入店名/地點名">
-          </div>
-          <div class="mt12">
-            <div class="tiny muted">備註（可空）</div>
-            <input v-model="form.slot.note" class="input mt8" placeholder="例如：預約、營業時間、想買咩">
-          </div>
-
-          <div class="mt12">
-            <div class="tiny muted">時段</div>
-            <select v-model="addCtx.slot" class="input mt8">
-              <option value="morning">上午</option>
-              <option value="noon">中午</option>
-              <option value="evening">夜晚</option>
-            </select>
-          </div>
-
-          <div class="mt12">
-            <button class="btnPrimary" @click="submitAddSlotItem">新增</button>
-          </div>
-
-          <div class="tiny muted mt12">
-            餐飲每個時段只可以有一個；再加會覆蓋舊餐飲。
-          </div>
-        </div>
-
-        <!-- add flight -->
-        <div v-else-if="addMode==='flight'" class="card mt12">
-          <div style="font-weight:950;">新增航程</div>
-
-          <div class="mt12">
-            <div class="tiny muted">日期顯示</div>
-            <input v-model="form.flight.dateLabel" class="input mt8" placeholder="例如：Tue 13 Jan 2026">
-          </div>
-
-          <div class="mt12" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div>
-              <div class="tiny muted">航班號</div>
-              <input v-model="form.flight.flightNo" class="input mt8" placeholder="CX581">
-            </div>
-            <div>
-              <div class="tiny muted">Duration</div>
-              <input v-model="form.flight.duration" class="input mt8" placeholder="5h 55m">
-            </div>
-
-            <div>
-              <div class="tiny muted">From City</div>
-              <input v-model="form.flight.fromCity" class="input mt8" placeholder="Sapporo">
-            </div>
-            <div>
-              <div class="tiny muted">To City</div>
-              <input v-model="form.flight.toCity" class="input mt8" placeholder="Hong Kong">
-            </div>
-
-            <div>
-              <div class="tiny muted">From Code</div>
-              <input v-model="form.flight.fromCode" class="input mt8" placeholder="CTS">
-            </div>
-            <div>
-              <div class="tiny muted">To Code</div>
-              <input v-model="form.flight.toCode" class="input mt8" placeholder="HKG">
-            </div>
-
-            <div>
-              <div class="tiny muted">Depart</div>
-              <input v-model="form.flight.departTime" class="input mt8" placeholder="16:00">
-            </div>
-            <div>
-              <div class="tiny muted">Arrive</div>
-              <input v-model="form.flight.arriveTime" class="input mt8" placeholder="20:55">
-            </div>
-
-            <div>
-              <div class="tiny muted">From Terminal</div>
-              <input v-model="form.flight.fromTerminal" class="input mt8" placeholder="T1">
-            </div>
-            <div>
-              <div class="tiny muted">To Terminal</div>
-              <input v-model="form.flight.toTerminal" class="input mt8" placeholder="T1">
-            </div>
-          </div>
-
-          <div class="mt12">
-            <div class="tiny muted">備註（可空）</div>
-            <textarea v-model="form.flight.note" rows="3" class="input mt8" placeholder="Terminal / check-in / luggage…"></textarea>
-          </div>
-
-          <div class="mt12">
-            <button class="btnPrimary" @click="submitAddFlight">新增</button>
-          </div>
-        </div>
-
-        <!-- add expense -->
-        <div v-else-if="addMode==='expense'" class="card mt12">
-          <div style="font-weight:950;">新增支出</div>
-
-          <div class="mt12">
-            <input v-model="form.expense.title" class="input" placeholder="項目，例如：拉麵 / JR">
-          </div>
-          <div class="mt12">
-            <input v-model.number="form.expense.amount" type="number" min="0" step="0.01" class="input" placeholder="金額 HKD">
-          </div>
-          <div class="mt12">
-            <select v-model="form.expense.method" class="input">
-              <option value="現金">現金</option>
-              <option value="信用卡">信用卡</option>
-            </select>
-          </div>
-          <div class="mt12">
-            <input v-model="form.expense.date" type="date" class="input">
-          </div>
-          <div class="mt12">
-            <input v-model="form.expense.note" class="input" placeholder="備註（可空）">
-          </div>
-
-          <div class="mt12">
-            <button class="btnPrimary" @click="submitAddExpense">新增</button>
-          </div>
-        </div>
-
-        <!-- add shop -->
-        <div v-else-if="addMode==='shop'" class="card mt12">
-          <div style="font-weight:950;">新增購物</div>
-
-          <div class="mt12">
-            <input v-model="form.shop.item" class="input" placeholder="名稱">
-          </div>
-          <div class="mt12">
-            <input v-model="form.shop.where" class="input" placeholder="邊度買（Where to buy）">
-          </div>
-          <div class="mt12">
-            <textarea v-model="form.shop.note" rows="3" class="input" placeholder="Note（價錢、售光時間…）"></textarea>
-          </div>
-
-          <div class="mt12">
-            <button class="btnPrimary" @click="submitAddShop">新增</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- EDIT -->
-      <div v-else-if="view==='edit'">
-        <div class="rowBetween">
-          <div style="font-weight:950;">Edit</div>
-          <button class="btn" @click="back()">返回</button>
-        </div>
-
-        <div class="card mt12">
-          <div class="tiny muted">類型：{{ editMode }}</div>
-
-          <!-- Day -->
-          <div v-if="editMode==='day'" class="mt12">
-            <div class="tiny muted">標題</div>
-            <input v-model="editBuffer.title" class="input mt8" placeholder="標題">
-            <div class="mt12 tiny muted">日期</div>
-            <input v-model="editBuffer.date" type="date" class="input mt8">
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-              <button class="btnDanger" @click="deleteCurrent">刪除</button>
-            </div>
-          </div>
-
-          <!-- Outfit -->
-          <div v-else-if="editMode==='outfit'" class="mt12">
-            <div class="tiny muted">米衣著</div>
-            <input v-model="editBuffer.miOutfit" class="input mt8" placeholder="例如：黑色保暖衫 + 白色長褲">
-            <div class="mt12 tiny muted">Wol衣著</div>
-            <input v-model="editBuffer.wolOutfit" class="input mt8" placeholder="例如：直髮 + 大褸">
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-            </div>
-          </div>
-
-          <!-- Destination -->
-          <div v-else-if="editMode==='destination'" class="mt12">
-            <div class="tiny muted">目的地</div>
-            <input v-model="editBuffer.place" class="input mt8" placeholder="目的地">
-            <div class="mt12 tiny muted">備註（可空）</div>
-            <input v-model="editBuffer.note" class="input mt8" placeholder="備註（可空）">
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-              <button class="btnDanger" @click="deleteCurrent">刪除</button>
-            </div>
-          </div>
-
-          <!-- Food -->
-          <div v-else-if="editMode==='food'" class="mt12">
-            <div class="tiny muted">餐飲</div>
-            <input v-model="editBuffer.place" class="input mt8" placeholder="餐飲">
-            <div class="mt12 tiny muted">備註（可空）</div>
-            <input v-model="editBuffer.note" class="input mt8" placeholder="備註（可空）">
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-              <button class="btnDanger" @click="deleteCurrent">刪除</button>
-            </div>
-          </div>
-
-          <!-- Flight -->
-          <div v-else-if="editMode==='flight'" class="mt12">
-            <input v-model="editBuffer.dateLabel" class="input" placeholder="日期顯示">
-            <div class="mt12">
-              <input v-model="editBuffer.flightNo" class="input" placeholder="航班號">
-            </div>
-
-            <div class="mt12" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-              <input v-model="editBuffer.fromCity" class="input" placeholder="From city">
-              <input v-model="editBuffer.toCity" class="input" placeholder="To city">
-              <input v-model="editBuffer.fromCode" class="input" placeholder="From code">
-              <input v-model="editBuffer.toCode" class="input" placeholder="To code">
-              <input v-model="editBuffer.departTime" class="input" placeholder="Depart">
-              <input v-model="editBuffer.arriveTime" class="input" placeholder="Arrive">
-              <input v-model="editBuffer.duration" class="input" placeholder="Duration">
-              <input v-model="editBuffer.fromTerminal" class="input" placeholder="From terminal">
-              <input v-model="editBuffer.toTerminal" class="input" placeholder="To terminal">
-            </div>
-
-            <div class="mt12">
-              <textarea v-model="editBuffer.note" rows="3" class="input" placeholder="備註"></textarea>
-            </div>
-
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-              <button class="btnDanger" @click="deleteCurrent">刪除</button>
-            </div>
-          </div>
-
-          <!-- Expense -->
-          <div v-else-if="editMode==='expense'" class="mt12">
-            <input v-model="editBuffer.title" class="input" placeholder="項目">
-            <div class="mt12">
-              <input v-model.number="editBuffer.amount" type="number" min="0" step="0.01" class="input" placeholder="金額">
-            </div>
-            <div class="mt12">
-              <select v-model="editBuffer.method" class="input">
-                <option value="現金">現金</option>
-                <option value="信用卡">信用卡</option>
-              </select>
-            </div>
-            <div class="mt12">
-              <input v-model="editBuffer.date" type="date" class="input">
-            </div>
-            <div class="mt12">
-              <input v-model="editBuffer.note" class="input" placeholder="備註（可空）">
-            </div>
-
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-              <button class="btnDanger" @click="deleteCurrent">刪除</button>
-            </div>
-          </div>
-
-          <!-- Shop -->
-          <div v-else-if="editMode==='shop'" class="mt12">
-            <input v-model="editBuffer.item" class="input" placeholder="名稱">
-            <div class="mt12">
-              <input v-model="editBuffer.where" class="input" placeholder="邊度買">
-            </div>
-            <div class="mt12">
-              <textarea v-model="editBuffer.note" rows="3" class="input" placeholder="Note"></textarea>
-            </div>
-
-            <div class="mt12 gap10">
-              <button class="btnPrimary" @click="saveEdit">保存</button>
-              <button class="btnDanger" @click="deleteCurrent">刪除</button>
-            </div>
-          </div>
-
-          <div v-else class="mt12 tiny muted">
-            唔支援嘅 edit 類型。
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /main -->
-  </div><!-- /container -->
-
-  <!-- Bottom bar -->
-  <div class="fixed bottom-0 left-0 right-0 safe-bottom" style="position:fixed; bottom:0; left:0; right:0; z-index:99;">
-    <div class="container" style="padding: 0 16px;">
-      <div class="glass" style="padding:12px 14px; display:flex; align-items:center; justify-content:space-between;">
-        <div class="tiny muted">
-          {{ view==='plan' ? ('Day ' + (selectedDay?.dayNo ?? '—')) : (viewLabel(view)) }}
-        </div>
-        <button class="btnPrimary" @click="goAdd('choose')">＋ Add</button>
-      </div>
+      <div class="muted">Loading… 如果你一直見到呢句，就代表 Vue 未 mount。</div>
     </div>
   </div>
-</div>
 
-<script>
-const { createApp } = Vue;
+  <script>
+  ;(() => {
+    // -----------------------------
+    // 0) Hard fail messages (so you don't see blank + {{}})
+    // -----------------------------
+    const bootErrors = [];
+    if (!window.Vue) bootErrors.push("Vue 未 load：請確認 assets/vue.global.prod.js 路徑存在，而且 GitHub Pages 有成功 serve。");
+    if (!window.supabase) bootErrors.push("Supabase SDK 未 load：請確認 CDN 可用，或你公司網絡 block 咗 jsdelivr。");
 
-const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b2dvamR5eWtnb3R1aXRqa2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0NjIwMzksImV4cCI6MjA4MjAzODAzOX0.HTGA2Gjru0smaVU0ZKbHh0-hDr-tL6OcR7EuGPmpfLg";
+    // Put your Supabase URL + anon key here
+    // Project URL format: https://<project-ref>.supabase.co
+    const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b2dvamR5eWtnb3R1aXRqa2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0NjIwMzksImV4cCI6MjA4MjAzODAzOX0.HTGA2Gjru0smaVU0ZKbHh0-hDr-tL6OcR7EuGPmpfLg";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false }
-});
+    // -----------------------------
+    // 1) If core libs missing, render error panel without Vue
+    // -----------------------------
+    if (bootErrors.length) {
+      const el = document.getElementById("app");
+      el.innerHTML = `
+        <div class="glass" style="padding:16px;">
+          <div class="h2">Boot Error</div>
+          <div class="line"></div>
+          <div class="err">${bootErrors.join("\n\n")}</div>
+          <div class="line"></div>
+          <div class="small muted">
+            你可以開 DevTools Console 試：
+            <br/>- window.Vue
+            <br/>- window.supabase
+          </div>
+        </div>
+      `;
+      return;
+    }
 
-function uid(){
-  return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
-}
+    // -----------------------------
+    // 2) Create Supabase client (avoid name collision!)
+    // -----------------------------
+    const { createClient } = window.supabase;
+    const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-createApp({
-  data(){
-    const today = new Date();
-    const iso = (d)=> d.toISOString().slice(0,10);
+    // -----------------------------
+    // 3) Vue App
+    // -----------------------------
+    const { createApp, computed } = window.Vue;
 
-    return {
-      view: 'plan',
-      prevView: 'plan',
-      tab: 'plan',
+    createApp({
+      template: `
+        <div class="glass" style="padding:16px;">
+          <div class="row" style="align-items:flex-start;">
+            <div style="min-width: 260px;">
+              <div class="muted small" style="letter-spacing:.22em;">SAPPORO • SNOW • FIRST LOVE VIBE</div>
+              <div class="title">札幌旅行 App</div>
+              <div class="subtitle">行程 / 航程 / 記帳 / 購物</div>
+            </div>
+            <div class="spacer"></div>
 
-      hkClock: '',
-      clockTimer: null,
+            <div class="pill right" style="min-width: 160px;">
+              <div class="small muted">HK Time</div>
+              <div style="font-size:26px; font-weight:900;">{{ hkClock }}</div>
+              <div class="small muted">{{ statusText }}</div>
+            </div>
+          </div>
 
-      statusText: '',
-      statusIsError: false,
+          <div class="line"></div>
 
-      // data
-      days: [],
-      selectedDayId: null,
-      slotOrder: [
-        { key:'morning', label:'上午' },
-        { key:'noon',    label:'中午' },
-        { key:'evening', label:'夜晚' },
-      ],
+          <div class="row">
+            <button class="btn" :class="{active:view==='plan'}" @click="view='plan'">行程</button>
+            <button class="btn" :class="{active:view==='flight'}" @click="view='flight'">航程</button>
+            <button class="btn" :class="{active:view==='expense'}" @click="view='expense'">記帳</button>
+            <button class="btn" :class="{active:view==='shop'}" @click="view='shop'">購物</button>
 
-      flights: [],
-      expenses: [],
-      shop: [],
+            <div class="spacer"></div>
+            <button class="btn" @click="reloadAll()">↻ Reload</button>
+          </div>
+        </div>
 
-      // add/edit
-      addMode: 'choose',
-      addCtx: {},
+        <div style="height:14px;"></div>
 
-      editMode: '',
-      editCtx: {},
-      editBuffer: {},
+        <div class="grid2">
+          <!-- LEFT: main content -->
+          <div class="glass" style="padding:16px;">
+            <div v-if="view==='plan'">
+              <div class="row">
+                <div>
+                  <div class="h2">行程（按日）</div>
+                  <div class="small muted">由 database 讀取；Edit/新增/刪除 之後會直接改 DB。</div>
+                </div>
+                <div class="spacer"></div>
+                <button class="btn" @click="addDay()">+ Day</button>
+              </div>
 
-      form: {
-        day: { date: iso(today), title:'' },
-        slot: { kind:'destination', place:'', note:'' },
-        flight: {
-          dateLabel:'', flightNo:'', duration:'',
-          fromCity:'', toCity:'', fromCode:'', toCode:'',
-          departTime:'', arriveTime:'', fromTerminal:'', toTerminal:'', note:''
-        },
-        expense: { title:'', amount:null, method:'現金', date: iso(today), note:'' },
-        shop: { item:'', where:'', note:'' }
+              <div class="line"></div>
+
+              <!-- Slider-like day pills -->
+              <div class="row" style="overflow:auto; flex-wrap:nowrap; padding-bottom:6px;">
+                <div v-for="d in days" :key="d.id"
+                     class="pill"
+                     :style="{
+                       minWidth: '230px',
+                       cursor:'pointer',
+                       borderColor: selectedDayId===d.id ? 'rgba(147,197,253,.55)' : 'rgba(255,255,255,.12)',
+                       background: selectedDayId===d.id ? 'rgba(59,130,246,.22)' : 'rgba(15,23,42,.30)'
+                     }"
+                     @click="selectDay(d.id)">
+                  <div class="small muted">{{ d.date_short || '—' }}</div>
+                  <div style="font-size:18px; font-weight:900; margin-top:2px;">
+                    Day {{ d.day_no }} · {{ d.title || d.date_full || '未命名' }}
+                  </div>
+                </div>
+
+                <div v-if="!days.length" class="pill muted">未有 Day · 按右上角「+ Day」新增。</div>
+              </div>
+
+              <div class="line"></div>
+
+              <div v-if="selectedDay">
+                <div class="row">
+                  <div>
+                    <div class="tag">Day {{ selectedDay.day_no }}</div>
+                    <div style="font-size:26px; font-weight:950; margin-top:6px;">
+                      {{ selectedDay.title || selectedDay.date_full || '未命名' }}
+                    </div>
+                    <div class="small muted">{{ selectedDay.date_full || '' }}</div>
+                  </div>
+                  <div class="spacer"></div>
+                  <button class="btn" @click="editDay(selectedDay)">Edit</button>
+                  <button class="btn" @click="deleteDay(selectedDay)">Delete</button>
+                </div>
+
+                <div class="line"></div>
+
+                <!-- Slots -->
+                <div class="row">
+                  <div class="h2" style="font-size:18px;">時段 / 主要活動</div>
+                  <div class="spacer"></div>
+                  <button class="btn" @click="addSlot(selectedDay)">+ Add</button>
+                </div>
+
+                <div style="height:10px;"></div>
+
+                <div class="list">
+                  <div v-for="s in slotsBySelectedDay" :key="s.id" class="card">
+                    <div class="row">
+                      <div class="tag">{{ s.time_label || '未填時間' }}</div>
+                      <div class="spacer"></div>
+                      <button class="btn" @click="editSlot(s)">Edit</button>
+                      <button class="btn" @click="deleteSlot(s)">Delete</button>
+                    </div>
+
+                    <div style="height:8px;"></div>
+
+                    <div style="font-weight:900; font-size:18px;">
+                      {{ s.activity || '（未填主要活動）' }}
+                    </div>
+
+                    <div style="height:8px;"></div>
+
+                    <!-- Destinations: show pin-link if have google_query -->
+                    <div class="small muted" v-if="s.dest_text">
+                      <span>📍</span>
+                      <a :href="googleMapsLink(s.dest_text)" target="_blank" rel="noopener">
+                        {{ s.dest_text }}
+                      </a>
+                    </div>
+
+                    <div class="small muted" v-if="s.notes" style="margin-top:6px;">
+                      📝 {{ s.notes }}
+                    </div>
+
+                    <!-- Outfit at bottom (per your request) -->
+                    <div class="small" v-if="s.outfit" style="margin-top:10px; opacity:.92;">
+                      👕 米衣著：{{ s.outfit }}
+                    </div>
+                  </div>
+
+                  <div v-if="slotsBySelectedDay.length===0" class="card muted">
+                    呢一日未有時段內容。按「+ Add」加 record。
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="card muted">
+                未選 Day。請喺上面揀一日。
+              </div>
+            </div>
+
+            <div v-else-if="view==='flight'">
+              <div class="row">
+                <div class="h2">航程</div>
+                <div class="spacer"></div>
+                <button class="btn" @click="addFlight()">+ Add</button>
+              </div>
+              <div class="line"></div>
+
+              <div class="list">
+                <div v-for="f in flights" :key="f.id" class="card">
+                  <div class="row">
+                    <div class="tag">{{ f.date || '—' }}</div>
+                    <div class="spacer"></div>
+                    <button class="btn" @click="editFlight(f)">Edit</button>
+                    <button class="btn" @click="deleteFlight(f)">Delete</button>
+                  </div>
+                  <div style="height:8px;"></div>
+                  <div style="font-weight:950; font-size:18px;">
+                    {{ f.title || (f.from_airport + " → " + f.to_airport) }}
+                  </div>
+                  <div class="small muted" style="margin-top:6px;">
+                    ✈️ {{ f.flight_no || '—' }} · {{ f.dep_time || '—' }} → {{ f.arr_time || '—' }}
+                    <span v-if="f.note"> · {{ f.note }}</span>
+                  </div>
+                </div>
+
+                <div v-if="!flights.length" class="card muted">未有航程 record。</div>
+              </div>
+            </div>
+
+            <div v-else-if="view==='expense'">
+              <div class="row">
+                <div class="h2">記帳</div>
+                <div class="spacer"></div>
+                <button class="btn" @click="addExpense()">+ Add</button>
+              </div>
+              <div class="line"></div>
+
+              <div class="row">
+                <div class="tag">本月合計：HK$ {{ expenseTotalHKD.toFixed(2) }}</div>
+              </div>
+
+              <div style="height:10px;"></div>
+
+              <div class="list">
+                <div v-for="e in expenses" :key="e.id" class="card">
+                  <div class="row">
+                    <div class="tag">{{ e.date || '—' }}</div>
+                    <div class="spacer"></div>
+                    <button class="btn" @click="editExpense(e)">Edit</button>
+                    <button class="btn" @click="deleteExpense(e)">Delete</button>
+                  </div>
+                  <div style="height:8px;"></div>
+                  <div style="font-weight:950; font-size:18px;">{{ e.title || '（未填項目）' }}</div>
+                  <div class="small muted" style="margin-top:6px;">
+                    💳 {{ e.method || '—' }} · {{ e.ccy || 'HKD' }} {{ (e.amount || 0) }}
+                    <span v-if="e.place"> · 📍 {{ e.place }}</span>
+                  </div>
+                </div>
+
+                <div v-if="!expenses.length" class="card muted">未有記帳 record。</div>
+              </div>
+            </div>
+
+            <div v-else-if="view==='shop'">
+              <div class="row">
+                <div class="h2">購物清單</div>
+                <div class="spacer"></div>
+                <button class="btn" @click="addShop()">+ Add</button>
+              </div>
+              <div class="line"></div>
+
+              <div class="list">
+                <div v-for="it in shopping" :key="it.id" class="card">
+                  <div class="row">
+                    <input type="checkbox" v-model="it.done" @change="toggleShopDone(it)" />
+                    <div style="font-weight:950; font-size:18px;">{{ it.item || '（未填）' }}</div>
+                    <div class="spacer"></div>
+                    <button class="btn" @click="editShop(it)">Edit</button>
+                    <button class="btn" @click="deleteShop(it)">Delete</button>
+                  </div>
+
+                  <div class="small muted" style="margin-top:8px;" v-if="it.where">
+                    🧭 {{ it.where }}
+                  </div>
+                  <div class="small muted" style="margin-top:6px;" v-if="it.note">
+                    📝 {{ it.note }}
+                  </div>
+                  <div class="small muted" style="margin-top:6px;" v-if="it.price_text">
+                    💴 {{ it.price_text }}
+                  </div>
+                </div>
+
+                <div v-if="!shopping.length" class="card muted">未有購物 record。</div>
+              </div>
+            </div>
+
+            <div v-else class="card muted">
+              Unknown view: {{ view }}
+            </div>
+          </div>
+
+          <!-- RIGHT: debug/status -->
+          <div class="glass" style="padding:16px;">
+            <div class="h2">Debug</div>
+            <div class="line"></div>
+
+            <div class="small muted">Vue:</div>
+            <div class="tag">{{ vueVersion }}</div>
+
+            <div style="height:10px;"></div>
+
+            <div class="small muted">Supabase connected:</div>
+            <div class="tag">{{ supabaseOk ? "YES" : "NO" }}</div>
+
+            <div style="height:10px;"></div>
+
+            <div class="small muted">Last error:</div>
+            <div class="err" v-if="lastError">{{ lastError }}</div>
+            <div class="card muted" v-else>—</div>
+
+            <div class="line"></div>
+            <div class="small muted">
+              如果你再見到 <b>{{"{{"}}</b> 文字直接顯示，9成係 Vue 未 mount（script path / cache / JS error）。
+            </div>
+          </div>
+        </div>
+      `,
+
+      data() {
+        return {
+          view: "plan",
+          hkClock: "--:--:--",
+          statusText: "booting…",
+          lastError: "",
+          supabaseOk: false,
+
+          days: [],
+          slots: [],
+          flights: [],
+          expenses: [],
+          shopping: [],
+
+          selectedDayId: null,
+        };
       },
 
-      originLatLng: '',
-      realtimeChannel: null
-    };
-  },
-
-  computed:{
-    selectedDay(){
-      return this.days.find(d => d.id === this.selectedDayId) || null;
-    },
-    monthTotal(){
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth()+1).padStart(2,'0');
-      const prefix = `${y}-${m}`;
-      return this.expenses
-        .filter(e => (e.date||'').startsWith(prefix))
-        .reduce((sum,e)=> sum + (Number(e.amount)||0), 0);
-    },
-    sortedExpenses(){
-      return [...this.expenses].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
-    },
-    sortedShop(){
-      return [...this.shop].sort((a,b)=> Number(a.done) - Number(b.done) || (a.sortOrder||0) - (b.sortOrder||0));
-    }
-  },
-
-  methods:{
-    // UI helpers
-    tabBtn(key){
-      return this.view===key
-        ? 'btnPrimary'
-        : 'btn';
-    },
-    kindStyle(kind){
-      if(this.form.slot.kind===kind){
-        return { background:'rgba(59,130,246,.22)', borderColor:'rgba(191,219,254,.25)' };
-      }
-      return {};
-    },
-    slotLabel(k){
-      const m = { morning:'上午', noon:'中午', evening:'夜晚' };
-      return m[k] || k;
-    },
-    viewLabel(v){
-      const m = { plan:'行程', flight:'航程', expense:'記帳', shop:'購物', add:'新增', edit:'Edit' };
-      return m[v] || v;
-    },
-
-    // navigation
-    navTo(v){
-      this.view = v;
-      this.tab = v;
-    },
-    back(){
-      this.view = this.prevView || 'plan';
-    },
-    goAdd(mode, ctx){
-      this.prevView = this.view;
-      this.view = 'add';
-      this.addMode = mode || 'choose';
-      this.addCtx = ctx || {};
-
-      if(mode==='slotItem' || mode==='food'){
-        this.form.slot.kind = (mode==='food') ? 'food' : 'destination';
-        this.form.slot.place = '';
-        this.form.slot.note = '';
-        if(!this.addCtx.slot) this.addCtx.slot = 'morning';
-      }
-    },
-    goEdit(mode, ctx){
-      this.prevView = this.view;
-      this.view = 'edit';
-      this.editMode = mode;
-      this.editCtx = ctx;
-      this.editBuffer = this.buildEditBuffer(mode, ctx);
-    },
-
-    // map hyperlink
-    mapUrl(destination){
-      const dest = encodeURIComponent(destination || 'Sapporo');
-      // keep it simple (no origin required for hyperlink)
-      return `https://www.google.com/maps/search/?api=1&query=${dest}`;
-    },
-
-    // formatting
-    formatDateShort(iso){
-      try{
-        const d = new Date(iso + 'T00:00:00');
-        return `${d.getMonth()+1}/${d.getDate()}`;
-      }catch{ return iso; }
-    },
-    formatDateFull(iso){
-      try{
-        const d = new Date(iso + 'T00:00:00');
-        const w = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
-        return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} (${w})`;
-      }catch{ return iso; }
-    },
-
-    // DB -> app model mapping
-    emptySlots(){
-      return {
-        morning: { destinations: [], food: null },
-        noon:    { destinations: [], food: null },
-        evening: { destinations: [], food: null }
-      };
-    },
-
-    async refreshAll(){
-      try{
-        this.statusIsError = false;
-        this.statusText = 'Sync…';
-
-        const [daysRes, planRes, flightRes, expenseRes, shopRes] = await Promise.all([
-          supabase.from('days').select('*').order('day_no', { ascending: true }),
-          supabase.from('plan_items').select('*').order('day_id', { ascending: true }).order('slot', { ascending: true }).order('sort_order', { ascending: true }),
-          supabase.from('flights').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }),
-          supabase.from('expenses').select('*').order('expense_date', { ascending: false }).order('created_at', { ascending: false }),
-          supabase.from('shopping_items').select('*').order('is_done', { ascending: true }).order('sort_order', { ascending: true }).order('created_at', { ascending: true })
-        ]);
-
-        const anyErr = daysRes.error || planRes.error || flightRes.error || expenseRes.error || shopRes.error;
-        if(anyErr){
-          throw new Error(
-            (daysRes.error?.message || '') + '\n' +
-            (planRes.error?.message || '') + '\n' +
-            (flightRes.error?.message || '') + '\n' +
-            (expenseRes.error?.message || '') + '\n' +
-            (shopRes.error?.message || '')
-          );
+      computed: {
+        vueVersion() {
+          return (window.Vue && window.Vue.version) ? window.Vue.version : "unknown";
+        },
+        selectedDay() {
+          return this.days.find(d => d.id === this.selectedDayId) || null;
+        },
+        slotsBySelectedDay() {
+          if (!this.selectedDayId) return [];
+          return this.slots
+            .filter(s => s.day_id === this.selectedDayId)
+            .sort((a,b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
+        },
+        expenseTotalHKD() {
+          // If you store HKD already, sum it. Otherwise this is placeholder.
+          return this.expenses
+            .filter(e => (e.ccy || "HKD") === "HKD")
+            .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
         }
+      },
 
-        const rawDays = daysRes.data || [];
-        const rawItems = planRes.data || [];
+      methods: {
+        googleMapsLink(q) {
+          return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+        },
 
-        // build day objects
-        const dayMap = new Map();
-        const builtDays = rawDays.map(d => {
-          const obj = {
-            id: d.id,
-            dayNo: d.day_no,
-            date: d.day_date,
-            dateShort: d.day_date ? this.formatDateShort(d.day_date) : '',
-            dateFull: d.day_date ? this.formatDateFull(d.day_date) : '',
-            title: d.title || '',
-            miOutfit: d.mi_outfit || '',
-            wolOutfit: d.wol_outfit || '',
-            slots: this.emptySlots()
-          };
-          dayMap.set(obj.id, obj);
-          return obj;
-        });
+        setError(e) {
+          const msg = (e && e.message) ? e.message : String(e || "");
+          this.lastError = msg;
+          this.statusText = "ERR";
+          console.error(e);
+        },
 
-        // fill plan items
-        for(const it of rawItems){
-          const day = dayMap.get(it.day_id);
-          if(!day) continue;
-          const slot = it.slot;
-          if(!day.slots[slot]) continue;
-
-          if(it.item_type === 'destination'){
-            day.slots[slot].destinations.push({
-              id: it.id,
-              place: it.place,
-              note: it.note || '',
-              sortOrder: it.sort_order || 0
-            });
-          }else if(it.item_type === 'food'){
-            // only one food: keep the last by sort_order
-            const food = { id: it.id, place: it.place, note: it.note || '', sortOrder: it.sort_order || 0 };
-            if(!day.slots[slot].food || food.sortOrder >= (day.slots[slot].food.sortOrder || 0)){
-              day.slots[slot].food = food;
-            }
+        async pingSupabase() {
+          try {
+            // Simple lightweight call
+            const { data, error } = await supa.from("days").select("id").limit(1);
+            if (error) throw error;
+            this.supabaseOk = true;
+            return true;
+          } catch (e) {
+            this.supabaseOk = false;
+            this.setError("Supabase ping failed: " + (e.message || e));
+            return false;
           }
-        }
+        },
 
-        // normalize flights
-        this.flights = (flightRes.data || []).map(f => ({
-          id: f.id,
-          dateLabel: f.date_label || '',
-          flightNo: f.flight_no || '',
-          duration: f.duration || '',
-          fromCity: f.from_city || '',
-          toCity: f.to_city || '',
-          fromCode: f.from_code || '',
-          toCode: f.to_code || '',
-          departTime: f.depart_time || '',
-          arriveTime: f.arrive_time || '',
-          fromTerminal: f.from_terminal || '',
-          toTerminal: f.to_terminal || '',
-          note: f.note || '',
-          sortOrder: f.sort_order || 0
-        }));
+        async reloadAll() {
+          this.lastError = "";
+          this.statusText = "loading…";
 
-        // normalize expenses
-        this.expenses = (expenseRes.data || []).map(e => ({
-          id: e.id,
-          title: e.title || '',
-          amount: e.amount ?? 0,
-          method: e.method || '現金',
-          date: e.expense_date || '',
-          note: e.note || ''
-        }));
+          const ok = await this.pingSupabase();
+          if (!ok) return;
 
-        // normalize shop
-        this.shop = (shopRes.data || []).map(s => ({
-          id: s.id,
-          item: s.item || '',
-          where: s.where_to_buy || '',
-          note: s.note || '',
-          done: !!s.is_done,
-          sortOrder: s.sort_order || 0
-        }));
+          try {
+            // ---- days
+            let r1 = await supa.from("days")
+              .select("*")
+              .order("day_no", { ascending: true });
+            if (r1.error) throw r1.error;
+            this.days = r1.data || [];
+            if (!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
 
-        this.days = builtDays;
-        if(this.days.length>0 && !this.selectedDayId){
-          this.selectedDayId = this.days[0].id;
-        }else if(this.selectedDayId && !this.days.find(d=>d.id===this.selectedDayId)){
-          this.selectedDayId = this.days[0]?.id || null;
-        }
+            // ---- slots
+            let r2 = await supa.from("slots")
+              .select("*")
+              .order("day_id", { ascending: true })
+              .order("sort_order", { ascending: true });
+            if (r2.error) throw r2.error;
+            this.slots = r2.data || [];
 
-        this.statusText = 'Synced ✅';
-        this.statusIsError = false;
-      }catch(err){
-        this.statusIsError = true;
-        this.statusText = 'Sync ERR(save)\n' + (err?.message || String(err));
-      }
-    },
+            // ---- flights (include transit as separate record => you can insert 2 rows for transfer)
+            let r3 = await supa.from("flights")
+              .select("*")
+              .order("sort_order", { ascending: true });
+            if (r3.error) throw r3.error;
+            this.flights = r3.data || [];
 
-    // Build editBuffer from current state
-    getDayById(id){
-      return this.days.find(x=>x.id===id) || null;
-    },
-    buildEditBuffer(mode, ctx){
-      if(mode==='day'){
-        const d = this.getDayById(ctx);
-        return { id:d.id, title:d.title, date:d.date };
-      }
-      if(mode==='outfit'){
-        const d = this.getDayById(ctx);
-        return { id:d.id, miOutfit: d.miOutfit || '', wolOutfit: d.wolOutfit || '' };
-      }
-      if(mode==='destination'){
-        const { dayId, slot, id } = ctx;
-        const d = this.getDayById(dayId);
-        const p = d.slots[slot].destinations.find(x=>x.id===id);
-        return { dayId, slot, id, place:p.place, note:p.note || '' };
-      }
-      if(mode==='food'){
-        const { dayId, slot } = ctx;
-        const d = this.getDayById(dayId);
-        const f = d.slots[slot].food;
-        return { dayId, slot, id: f?.id || null, place:f?.place || '', note:f?.note || '' };
-      }
-      if(mode==='flight'){
-        const f = this.flights.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(f));
-      }
-      if(mode==='expense'){
-        const e = this.expenses.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(e));
-      }
-      if(mode==='shop'){
-        const s = this.shop.find(x=>x.id===ctx);
-        return JSON.parse(JSON.stringify(s));
-      }
-      return {};
-    },
+            // ---- expenses
+            let r4 = await supa.from("expenses")
+              .select("*")
+              .order("date", { ascending: true })
+              .order("created_at", { ascending: true });
+            if (r4.error) throw r4.error;
+            this.expenses = r4.data || [];
 
-    // CRUD: Add
-    async submitAddDay(){
-      const date = this.form.day.date;
-      if(!date) return;
+            // ---- shopping
+            let r5 = await supa.from("shopping")
+              .select("*")
+              .order("done", { ascending: true })
+              .order("sort_order", { ascending: true });
+            if (r5.error) throw r5.error;
+            this.shopping = r5.data || [];
 
-      const dayNo = (this.days.length ? Math.max(...this.days.map(d=>d.dayNo||0)) : 0) + 1;
-
-      const { error } = await supabase.from('days').insert([{
-        day_no: dayNo,
-        day_date: date,
-        title: (this.form.day.title||'').trim()
-      }]);
-
-      if(error){
-        this.statusIsError = true;
-        this.statusText = 'Add Day ERR\n' + error.message;
-        return;
-      }
-
-      this.form.day.title = '';
-      this.view = 'plan';
-      await this.refreshAll();
-    },
-
-    async submitAddSlotItem(){
-      const dayId = this.addCtx.dayId;
-      const slot = this.addCtx.slot;
-      const place = (this.form.slot.place||'').trim();
-      const note = (this.form.slot.note||'').trim();
-      if(!dayId || !slot || !place) return;
-
-      const type = this.form.slot.kind === 'food' ? 'food' : 'destination';
-
-      // food only one: delete existing food for that day+slot first
-      if(type==='food'){
-        await supabase.from('plan_items')
-          .delete()
-          .eq('day_id', dayId)
-          .eq('slot', slot)
-          .eq('item_type', 'food');
-      }
-
-      const { error } = await supabase.from('plan_items').insert([{
-        day_id: dayId,
-        slot,
-        item_type: type,
-        place,
-        note,
-        sort_order: Date.now()
-      }]);
-
-      if(error){
-        this.statusIsError = true;
-        this.statusText = 'Add Plan Item ERR\n' + error.message;
-        return;
-      }
-
-      this.view = 'plan';
-      await this.refreshAll();
-    },
-
-    async submitAddFlight(){
-      const f = { ...this.form.flight };
-      if(!f.fromCity && !f.toCity && !f.flightNo) return;
-
-      const { error } = await supabase.from('flights').insert([{
-        date_label: f.dateLabel || '',
-        flight_no: f.flightNo || '',
-        duration: f.duration || '',
-        from_city: f.fromCity || '',
-        to_city: f.toCity || '',
-        from_code: f.fromCode || '',
-        to_code: f.toCode || '',
-        depart_time: f.departTime || '',
-        arrive_time: f.arriveTime || '',
-        from_terminal: f.fromTerminal || '',
-        to_terminal: f.toTerminal || '',
-        note: f.note || '',
-        sort_order: Date.now()
-      }]);
-
-      if(error){
-        this.statusIsError = true;
-        this.statusText = 'Add Flight ERR\n' + error.message;
-        return;
-      }
-
-      // reset
-      this.form.flight = {
-        dateLabel:'', flightNo:'', duration:'',
-        fromCity:'', toCity:'', fromCode:'', toCode:'',
-        departTime:'', arriveTime:'', fromTerminal:'', toTerminal:'', note:''
-      };
-      this.view = 'flight';
-      await this.refreshAll();
-    },
-
-    async submitAddExpense(){
-      const e = { ...this.form.expense };
-      if(!e.amount || Number(e.amount)<=0) return;
-
-      const { error } = await supabase.from('expenses').insert([{
-        title: (e.title||'').trim(),
-        amount: Number(e.amount || 0),
-        method: e.method || '現金',
-        expense_date: e.date || null,
-        note: (e.note||'').trim()
-      }]);
-
-      if(error){
-        this.statusIsError = true;
-        this.statusText = 'Add Expense ERR\n' + error.message;
-        return;
-      }
-
-      this.form.expense.title='';
-      this.form.expense.amount=null;
-      this.form.expense.method='現金';
-      this.form.expense.note='';
-      this.view = 'expense';
-      await this.refreshAll();
-    },
-
-    async submitAddShop(){
-      const s = { ...this.form.shop };
-      if(!s.item || !s.item.trim()) return;
-
-      const { error } = await supabase.from('shopping_items').insert([{
-        item: s.item.trim(),
-        where_to_buy: (s.where||'').trim(),
-        note: (s.note||'').trim(),
-        is_done: false,
-        sort_order: Date.now()
-      }]);
-
-      if(error){
-        this.statusIsError = true;
-        this.statusText = 'Add Shop ERR\n' + error.message;
-        return;
-      }
-
-      this.form.shop = { item:'', where:'', note:'' };
-      this.view = 'shop';
-      await this.refreshAll();
-    },
-
-    // CRUD: Edit save
-    async saveEdit(){
-      const mode = this.editMode;
-      const b = this.editBuffer;
-
-      try{
-        if(mode==='day'){
-          const { error } = await supabase.from('days')
-            .update({
-              title: (b.title||'').trim(),
-              day_date: b.date || null
-            })
-            .eq('id', b.id);
-
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='outfit'){
-          const { error } = await supabase.from('days')
-            .update({
-              mi_outfit: (b.miOutfit||'').trim(),
-              wol_outfit: (b.wolOutfit||'').trim()
-            })
-            .eq('id', b.id);
-
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='destination'){
-          const { error } = await supabase.from('plan_items')
-            .update({ place:(b.place||'').trim(), note:(b.note||'').trim() })
-            .eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='food'){
-          if(!b.place || !b.place.trim()){
-            // treat empty as delete food
-            await this.deleteCurrent();
-            return;
+            this.statusText = "OK";
+          } catch (e) {
+            this.setError(e);
           }
+        },
 
-          if(b.id){
-            const { error } = await supabase.from('plan_items')
-              .update({ place:(b.place||'').trim(), note:(b.note||'').trim() })
-              .eq('id', b.id);
-            if(error) throw error;
-          }else{
-            // if no id, insert new food (and delete old just in case)
-            await supabase.from('plan_items')
-              .delete()
-              .eq('day_id', b.dayId)
-              .eq('slot', b.slot)
-              .eq('item_type', 'food');
+        selectDay(id) { this.selectedDayId = id; },
 
-            const { error } = await supabase.from('plan_items').insert([{
-              day_id: b.dayId,
-              slot: b.slot,
-              item_type: 'food',
-              place: (b.place||'').trim(),
-              note: (b.note||'').trim(),
-              sort_order: Date.now()
-            }]);
-            if(error) throw error;
-          }
+        // ----------------
+        // CRUD placeholders (you can keep UI, later we refine forms)
+        // ----------------
+        async addDay() {
+          try {
+            const nextNo = (this.days.reduce((m,d)=>Math.max(m, d.day_no||0), 0) || 0) + 1;
+            const payload = { day_no: nextNo, title: "", date_full: "", date_short: "" };
+            const { data, error } = await supa.from("days").insert(payload).select("*").single();
+            if (error) throw error;
+            this.days.push(data);
+            this.selectedDayId = data.id;
+          } catch(e) { this.setError(e); }
+        },
+        async editDay(d) {
+          const title = prompt("Day title / date", d.title || d.date_full || "");
+          if (title === null) return;
+          try {
+            const { error } = await supa.from("days").update({ title }).eq("id", d.id);
+            if (error) throw error;
+            d.title = title;
+          } catch(e) { this.setError(e); }
+        },
+        async deleteDay(d) {
+          if (!confirm("Delete this Day? (will also remove its slots if you set FK cascade)")) return;
+          try {
+            const { error } = await supa.from("days").delete().eq("id", d.id);
+            if (error) throw error;
+            this.days = this.days.filter(x => x.id !== d.id);
+            if (this.selectedDayId === d.id) this.selectedDayId = this.days[0]?.id || null;
+          } catch(e) { this.setError(e); }
+        },
 
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
+        async addSlot(day) {
+          try {
+            const payload = {
+              day_id: day.id,
+              sort_order: (this.slotsBySelectedDay.length + 1) * 10,
+              time_label: "",
+              activity: "",
+              dest_text: "",
+              notes: "",
+              outfit: ""
+            };
+            const { data, error } = await supa.from("slots").insert(payload).select("*").single();
+            if (error) throw error;
+            this.slots.push(data);
+          } catch(e) { this.setError(e); }
+        },
+        async editSlot(s) {
+          const activity = prompt("主要活動", s.activity || "");
+          if (activity === null) return;
+          const dest = prompt("目的地（會自動變 Google Maps link）", s.dest_text || "");
+          if (dest === null) return;
+          const time = prompt("時間/時段", s.time_label || "");
+          if (time === null) return;
+          const notes = prompt("備註", s.notes || "");
+          if (notes === null) return;
+          const outfit = prompt("米衣著（放最底）", s.outfit || "");
+          if (outfit === null) return;
 
-        if(mode==='flight'){
-          const { error } = await supabase.from('flights')
-            .update({
-              date_label: b.dateLabel || '',
-              flight_no: b.flightNo || '',
-              duration: b.duration || '',
-              from_city: b.fromCity || '',
-              to_city: b.toCity || '',
-              from_code: b.fromCode || '',
-              to_code: b.toCode || '',
-              depart_time: b.departTime || '',
-              arrive_time: b.arriveTime || '',
-              from_terminal: b.fromTerminal || '',
-              to_terminal: b.toTerminal || '',
-              note: b.note || ''
-            })
-            .eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
+          try {
+            const patch = { activity, dest_text: dest, time_label: time, notes, outfit };
+            const { error } = await supa.from("slots").update(patch).eq("id", s.id);
+            if (error) throw error;
+            Object.assign(s, patch);
+          } catch(e) { this.setError(e); }
+        },
+        async deleteSlot(s) {
+          if (!confirm("Delete this slot?")) return;
+          try {
+            const { error } = await supa.from("slots").delete().eq("id", s.id);
+            if (error) throw error;
+            this.slots = this.slots.filter(x => x.id !== s.id);
+          } catch(e) { this.setError(e); }
+        },
 
-        if(mode==='expense'){
-          const { error } = await supabase.from('expenses')
-            .update({
-              title: (b.title||'').trim(),
-              amount: Number(b.amount || 0),
-              method: b.method || '現金',
-              expense_date: b.date || null,
-              note: (b.note||'').trim()
-            })
-            .eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
+        async addFlight() {
+          try {
+            const payload = { sort_order: (this.flights.length+1)*10, date:"", title:"", flight_no:"", from_airport:"", to_airport:"", dep_time:"", arr_time:"", note:"" };
+            const { data, error } = await supa.from("flights").insert(payload).select("*").single();
+            if (error) throw error;
+            this.flights.push(data);
+          } catch(e) { this.setError(e); }
+        },
+        async editFlight(f) {
+          const title = prompt("航程標題 / 路線", f.title || "");
+          if (title === null) return;
+          try {
+            const { error } = await supa.from("flights").update({ title }).eq("id", f.id);
+            if (error) throw error;
+            f.title = title;
+          } catch(e) { this.setError(e); }
+        },
+        async deleteFlight(f) {
+          if (!confirm("Delete this flight record?")) return;
+          try {
+            const { error } = await supa.from("flights").delete().eq("id", f.id);
+            if (error) throw error;
+            this.flights = this.flights.filter(x => x.id !== f.id);
+          } catch(e) { this.setError(e); }
+        },
 
-        if(mode==='shop'){
-          const { error } = await supabase.from('shopping_items')
-            .update({
-              item: (b.item||'').trim(),
-              where_to_buy: (b.where||'').trim(),
-              note: (b.note||'').trim(),
-              is_done: !!b.done
-            })
-            .eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
+        async addExpense() {
+          try {
+            const payload = { date:"", title:"", ccy:"HKD", amount:0, method:"", place:"" };
+            const { data, error } = await supa.from("expenses").insert(payload).select("*").single();
+            if (error) throw error;
+            this.expenses.push(data);
+          } catch(e) { this.setError(e); }
+        },
+        async editExpense(e) {
+          const title = prompt("項目", e.title || "");
+          if (title === null) return;
+          try {
+            const { error } = await supa.from("expenses").update({ title }).eq("id", e.id);
+            if (error) throw error;
+            e.title = title;
+          } catch(err) { this.setError(err); }
+        },
+        async deleteExpense(e) {
+          if (!confirm("Delete expense?")) return;
+          try {
+            const { error } = await supa.from("expenses").delete().eq("id", e.id);
+            if (error) throw error;
+            this.expenses = this.expenses.filter(x => x.id !== e.id);
+          } catch(err) { this.setError(err); }
+        },
 
-      }catch(err){
-        this.statusIsError = true;
-        this.statusText = 'Save ERR\n' + (err?.message || String(err));
+        async addShop() {
+          try {
+            const payload = { sort_order:(this.shopping.length+1)*10, done:false, item:"", where:"", note:"", price_text:"" };
+            const { data, error } = await supa.from("shopping").insert(payload).select("*").single();
+            if (error) throw error;
+            this.shopping.push(data);
+          } catch(e) { this.setError(e); }
+        },
+        async editShop(it) {
+          const item = prompt("Item", it.item || "");
+          if (item === null) return;
+          try {
+            const { error } = await supa.from("shopping").update({ item }).eq("id", it.id);
+            if (error) throw error;
+            it.item = item;
+          } catch(e) { this.setError(e); }
+        },
+        async toggleShopDone(it) {
+          try {
+            const { error } = await supa.from("shopping").update({ done: !!it.done }).eq("id", it.id);
+            if (error) throw error;
+          } catch(e) { this.setError(e); }
+        },
+        async deleteShop(it) {
+          if (!confirm("Delete shopping item?")) return;
+          try {
+            const { error } = await supa.from("shopping").delete().eq("id", it.id);
+            if (error) throw error;
+            this.shopping = this.shopping.filter(x => x.id !== it.id);
+          } catch(e) { this.setError(e); }
+        },
+      },
+
+      async mounted() {
+        // HK clock
+        const tick = () => {
+          const now = new Date();
+          // format as HK time (UTC+8) without relying on device tz
+          const hk = new Date(now.getTime() + (8 * 60 - now.getTimezoneOffset()) * 60000);
+          const hh = String(hk.getHours()).padStart(2,"0");
+          const mm = String(hk.getMinutes()).padStart(2,"0");
+          const ss = String(hk.getSeconds()).padStart(2,"0");
+          this.hkClock = `${hh}:${mm}:${ss}`;
+        };
+        tick();
+        setInterval(tick, 1000);
+
+        // Initial load
+        await this.reloadAll();
       }
-    },
-
-    // CRUD: Delete
-    async deleteCurrent(){
-      const mode = this.editMode;
-      const b = this.editBuffer;
-
-      try{
-        if(mode==='day'){
-          const { error } = await supabase.from('days').delete().eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='destination'){
-          const { error } = await supabase.from('plan_items').delete().eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='food'){
-          if(b.id){
-            const { error } = await supabase.from('plan_items').delete().eq('id', b.id);
-            if(error) throw error;
-          }else{
-            await supabase.from('plan_items')
-              .delete()
-              .eq('day_id', b.dayId)
-              .eq('slot', b.slot)
-              .eq('item_type', 'food');
-          }
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='flight'){
-          const { error } = await supabase.from('flights').delete().eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='expense'){
-          const { error } = await supabase.from('expenses').delete().eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-        if(mode==='shop'){
-          const { error } = await supabase.from('shopping_items').delete().eq('id', b.id);
-          if(error) throw error;
-          this.view = this.prevView;
-          await this.refreshAll();
-          return;
-        }
-
-      }catch(err){
-        this.statusIsError = true;
-        this.statusText = 'Delete ERR\n' + (err?.message || String(err));
-      }
-    },
-
-    async toggleShopDone(s){
-      const { error } = await supabase.from('shopping_items')
-        .update({ is_done: !!s.done })
-        .eq('id', s.id);
-      if(error){
-        this.statusIsError = true;
-        this.statusText = 'Shop toggle ERR\n' + error.message;
-        return;
-      }
-      // no need refreshAll; but keep consistent
-      await this.refreshAll();
-    },
-
-    // Clock
-    startClock(){
-      const tick = ()=>{
-        this.hkClock = new Date().toLocaleTimeString('en-GB', {
-          timeZone:'Asia/Hong_Kong',
-          hour:'2-digit', minute:'2-digit', second:'2-digit'
-        });
-      };
-      tick();
-      this.clockTimer = setInterval(tick, 1000);
-    },
-
-    // Realtime subscribe (optional but nice: Aline update you instantly see)
-    startRealtime(){
-      try{
-        if(this.realtimeChannel) return;
-
-        this.realtimeChannel = supabase
-          .channel('app_state_changes')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'days' }, () => this.refreshAll())
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'plan_items' }, () => this.refreshAll())
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'flights' }, () => this.refreshAll())
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => this.refreshAll())
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items' }, () => this.refreshAll())
-          .subscribe();
-      }catch(e){
-        // if realtime not enabled, ignore
-      }
-    }
-  },
-
-  async mounted(){
-    this.startClock();
-    await this.refreshAll();
-    this.startRealtime();
-  },
-
-  beforeUnmount(){
-    if(this.clockTimer) clearInterval(this.clockTimer);
-    if(this.realtimeChannel) supabase.removeChannel(this.realtimeChannel);
-  }
-}).mount('#app');
-</script>
+    }).mount("#app");
+  })();
+  </script>
 </body>
 </html>
