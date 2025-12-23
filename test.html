@@ -23,7 +23,7 @@
 
         out("client created ✅");
 
-        const { data, error, status } = await sb.from("flights").select("*").limit(1);
+        const { data, error, status } = await sb.from("expenses").select("*").limit(1);
         out("status=" + status);
         out("data=" + JSON.stringify(data));
         out("error=" + JSON.stringify(error));
