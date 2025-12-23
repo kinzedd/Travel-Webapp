@@ -1,95 +1,38 @@
 <!doctype html>
-<html lang="zh-HK">
+<html>
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Supabase Minimal Test</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 16px; }
-    pre { white-space: pre-wrap; word-break: break-word; background: #111; color: #0f0; padding: 12px; border-radius: 10px; }
-    .ok { color: #0a0; font-weight: 700; }
-    .bad { color: #a00; font-weight: 700; }
-    code { background:#eee; padding:2px 6px; border-radius:6px; }
-  </style>
-
-  <!-- Supabase JS (UMD build) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <h2>Supabase Minimal Test</h2>
+  <pre id="out">running...</pre>
 
-  <div>
-    Project URL: <code id="u"></code><br/>
-    Status: <span id="s">…</span>
-  </div>
-
-  <h3>Result</h3>
-  <pre id="out">Waiting...</pre>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ✅ MUST be the API base (NOT dashboard URL)
-    const SUPABASE_URL = "https://qvogojdykgotuitjkhj.supabase.co";
+    const out = (msg) => (document.getElementById('out').textContent += "\n" + msg);
 
-    // ✅ Your anon key (safe for browser)
-    const SUPABASE_ANON_KEY =
-      "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF";
+    const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF";
 
-    document.getElementById("u").textContent = SUPABASE_URL;
-
-    const out = (msg) => (document.getElementById("out").textContent = msg);
-    const setStatus = (ok, msg) => {
-      const el = document.getElementById("s");
-      el.className = ok ? "ok" : "bad";
-      el.textContent = msg;
-    };
-
-    // Supabase is exposed as window.supabase (from the CDN script)
-    // It contains createClient()
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function run() {
+    (async () => {
       try {
-        setStatus(true, "Connecting...");
+        const { createClient } = window.supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- Option A: if you ALREADY created a table (e.g. app_state) ---
-        // Change this to an existing table name in your DB.
-        const TABLE = "app_state";
+        out("client created ✅");
 
-        // Try a simple select
-        const { data, error } = await supabaseClient
-          .from(TABLE)
-          .select("*")
-          .limit(5);
+        const { data, error, status } = await sb.from("days").select("*").limit(1);
+        out("status=" + status);
+        out("data=" + JSON.stringify(data));
+        out("error=" + JSON.stringify(error));
 
-        if (error) {
-          setStatus(false, "ERROR");
-          out(
-            "❌ Query error\n\n" +
-            "table = " + TABLE + "\n\n" +
-            JSON.stringify(error, null, 2) +
-            "\n\nTips:\n" +
-            "- 如果 error 係「Could not find the table」，即係 table 未建立 / schema 唔同名。\n" +
-            "- 如果 error 係 401/403，通常係 RLS policy 未開 / key/URL 用錯。\n"
-          );
-          return;
-        }
-
-        setStatus(true, "OK");
-        out("✅ Connected + Query success\n\n" + JSON.stringify(data, null, 2));
       } catch (e) {
-        setStatus(false, "FAILED TO FETCH");
-        out(
-          "❌ Exception (通常係 network/CORS/URL 錯)\n\n" +
-          (e && e.message ? e.message : String(e)) +
-          "\n\nTips:\n" +
-          "- 確認 SUPABASE_URL 係 https://<ref>.supabase.co\n" +
-          "- 唔好用 dashboard URL\n" +
-          "- 打開 DevTools → Network 睇 /rest/v1 有冇 request\n"
-        );
+        out("EXCEPTION=" + (e && e.message ? e.message : String(e)));
+        console.error(e);
       }
-    }
-
-    run();
+    })();
   </script>
 </body>
 </html>
