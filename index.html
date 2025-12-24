@@ -31,6 +31,10 @@
       --r2: 16px;
       --safeBottom: env(safe-area-inset-bottom);
       --safeTop: env(safe-area-inset-top);
+
+      /* alignment tokens */
+      --cardPad: 14px;
+      --innerPad: 12px;
     }
 
     html,body{height:100%;}
@@ -86,6 +90,11 @@
       line-height:1.02;
       font-weight:900;
       margin: 8px 0 2px;
+
+      /* force one-line title on mobile */
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .subTitle{ font-size:16px; font-weight:700; opacity:.8; margin-top:4px; }
 
@@ -96,6 +105,11 @@
       align-items:flex-end;
       gap:8px;
       min-width: 180px;
+    }
+
+    /* hide geo coord pill on mobile */
+    @media (max-width:420px){
+      .headerRight .pill.muted.mono{ display:none; }
     }
 
     .pill{
@@ -148,7 +162,8 @@
 
     /* ====== day slider (FIX wrap + thinner) ====== */
     .daySlider{
-      padding: 12px 14px 14px;
+      /* align left edge with period content (14 + 12 = 26px) */
+      padding: 8px calc(var(--cardPad) + var(--innerPad));
       overflow-x:auto;
       display:flex;
       gap:10px;
@@ -336,21 +351,20 @@
       font-size:13px;
     }
     .flightRoute{
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 10px;
+      display:grid;
+      grid-template-columns: 1fr 90px 1fr;
+      align-items:center;
+      gap:12px;
     }
-    .flightSide{ min-width:0; }
+    .flightSide{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+    }
     .flightCode{ font-size:18px; font-weight:1000; letter-spacing:.02em; }
     .flightTime{ font-size:32px; font-weight:1000; line-height:1; margin-top: 4px; }  /* smaller */
     .flightTerminal{ opacity:.72; font-weight:900; margin-top: 6px; font-size:12px; }
-    .flightMid{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      min-width: 90px;
-    }
+    .flightMid{ display:flex; align-items:center; justify-content:center; }
     .flightLine{
       width: 100%;
       height: 6px;
@@ -1311,7 +1325,6 @@
           <div class="modalTop">
             <div class="modalTitle">{{ editTitle() }}</div>
             <div class="spacer"></div>
-            <div class="btn small" @click="showDelete = !showDelete">{{ showDelete ? '隱藏刪除' : '顯示刪除' }}</div>
             <div class="btn small" @click="closeEdit()">關閉</div>
           </div>
 
@@ -1531,7 +1544,7 @@
           <div class="modalBtns">
             <div class="btn" @click="saveEdit()">{{ loading ? '儲存中...' : '儲存' }}</div>
             <div class="btn ghost" @click="closeEdit()">取消</div>
-            <div class="btn danger" v-if="showDelete && editing.mode==='update' && editing.row.id" @click="delRow(editing.table, editing.row.id)">
+            <div class="btn danger" v-if="editing.mode==='update' && editing.row.id" @click="delRow(editing.table, editing.row.id)">
               刪除
             </div>
           </div>
