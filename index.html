@@ -993,6 +993,7 @@
         this.showDebug = !this.showDebug;
       },
       async reload(){
+        await this.ping();
         await this.loadAll();
       },
     },
