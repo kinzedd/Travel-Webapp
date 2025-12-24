@@ -625,6 +625,13 @@
   const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
   if (!sb) console.error("Supabase init failed: window.supabase missing");
 
+  // Ensure Supabase is available before any DB calls; if the CDN is blocked we surface
+  // a clear error instead of throwing TypeErrors from undefined clients.
+  const getSb = () => {
+    if (!sb) throw new Error("Supabase client unavailable. Check network / CDN access.");
+    return sb;
+  };
+
   // ============
   // Helpers
   // ============
@@ -817,7 +824,8 @@
 
       async ping(){
         try {
-          const { data, error, status } = await sb
+          const client = getSb();
+          const { data, error, status } = await client
             .from("days")
             .select("id,day_no")
             .order("day_no", { ascending:true })
@@ -840,7 +848,9 @@
         this.statusText = "loading...";
 
         try{
-          const qDays = await sb
+          const client = getSb();
+
+          const qDays = await client
             .from("days")
             .select("id,day_no,date,title,note,sort_order,created_at,updated_at")
             .order("day_no", { ascending:true });
@@ -849,7 +859,7 @@
           this.days = qDays.data || [];
           if (!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
 
-          const qPlan = await sb
+          const qPlan = await client
             .from("plan_items")
             .select("id,day_id,time_label,kind,title,note,maps_query,order_no,created_at,updated_at")
             .order("order_no", { ascending:true });
@@ -857,7 +867,7 @@
           if (qPlan.error) throw qPlan.error;
           this.planItems = qPlan.data || [];
 
-          const qFlights = await sb
+          const qFlights = await client
             .from("flights")
             .select("id,seg_no,flight_no,carrier,depart_airport,arrive_airport,depart_time,arrive_time,note,created_at,updated_at")
             .order("seg_no", { ascending:true });
@@ -865,7 +875,7 @@
           if (qFlights.error) throw qFlights.error;
           this.flights = qFlights.data || [];
 
-          const qShop = await sb
+          const qShop = await client
             .from("shopping_items")
             .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
             .order("order_no", { ascending:true });
@@ -873,7 +883,7 @@
           if (qShop.error) throw qShop.error;
           this.shopping = qShop.data || [];
 
-          const qExp = await sb
+          const qExp = await client
             .from("expenses")
             .select("id,day_id,happened_on,category,merchant,amount,currency,paid_by,note,created_at,updated_at")
             .order("happened_on", { ascending:true });
@@ -1053,7 +1063,8 @@
             payload.done = !!payload.done;
           }
 
-          const { error } = await sb.from(table).upsert(payload);
+          const client = getSb();
+          const { error } = await client.from(table).upsert(payload);
           if (error) throw error;
 
           this.statusText = "saved";
@@ -1071,7 +1082,8 @@
         this.loading = true;
         this.lastError = null;
         try{
-          const { error } = await sb.from(table).delete().eq("id", id);
+          const client = getSb();
+          const { error } = await client.from(table).delete().eq("id", id);
           if (error) throw error;
           this.statusText = "deleted";
           this.closeEdit();
@@ -1086,7 +1098,8 @@
       // Shopping checkbox quick update
       async toggleShopDone(item){
         try{
-          const { error } = await sb.from("shopping_items").upsert({ id: item.id, done: !item.done });
+          const client = getSb();
+          const { error } = await client.from("shopping_items").upsert({ id: item.id, done: !item.done });
           if (error) throw error;
           item.done = !item.done;
         } catch(e){
