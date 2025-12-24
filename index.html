@@ -5,189 +5,207 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- your CSS (optional; keep if you have it) -->
-  <link rel="stylesheet" href="./assets/app.css" />
-
   <!-- Vue (global build) -->
   <script src="./assets/vue.global.prod.js"></script>
-
   <!-- Supabase JS v2 (UMD global: window.supabase) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* ====== page + bg ====== */
     :root{
-      --bg1: rgba(12,18,32,.78);
-      --bg2: rgba(12,18,32,.62);
-      --card: rgba(255,255,255,.07);
-      --card2: rgba(255,255,255,.05);
-      --bd: rgba(255,255,255,.10);
-      --bd2: rgba(255,255,255,.14);
-      --txt: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.70);
-      --ok: rgba(191,255,209,.40);
-      --danger: rgba(255,180,180,.45);
-      --shadow: 0 14px 40px rgba(0,0,0,.35);
-      --r: 20px;
-      --r2: 16px;
-      --safeBottom: env(safe-area-inset-bottom);
-      --safeTop: env(safe-area-inset-top);
+      --bg1:#07101f;
+      --card:rgba(255,255,255,.075);
+      --card2:rgba(255,255,255,.055);
+      --stroke:rgba(255,255,255,.14);
+      --stroke2:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --ok:#bfffd1;
+      --danger:#ffb4b4;
+      --shadow: 0 16px 40px rgba(0,0,0,.35);
+      --r:22px;
+      --r2:16px;
+      --pad:14px;
+      --safeB: env(safe-area-inset-bottom);
+      --safeT: env(safe-area-inset-top);
     }
 
-    html,body{height:100%;}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      color:var(--txt);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(60,140,255,.18), transparent 60%),
-        radial-gradient(900px 600px at 90% 30%, rgba(255,255,255,.06), transparent 60%),
-        linear-gradient(180deg, rgba(8,12,22,.92), rgba(8,12,22,.78)),
-        url("./bg.jpg") center/cover no-repeat fixed; /* bg.jpg at same level as index.html */
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "PingFang HK", "Hiragino Sans", "Microsoft JhengHei", Arial, sans-serif;
+      background: var(--bg1);
       overflow-x:hidden;
     }
 
-    a{ color:inherit; text-decoration:none; }
-    .muted{color:var(--muted);}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px;}
+    /* bg.jpg is OUTSIDE assets folder */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        radial-gradient(1200px 600px at 30% 10%, rgba(70,120,255,.18), transparent 60%),
+        linear-gradient(180deg, rgba(6,12,24,.82), rgba(6,12,24,.74)),
+        url("./bg.jpg");
+      background-size: cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      filter:saturate(1.02);
+      z-index:-2;
+      transform: translateZ(0);
+    }
+    body::after{
+      content:"";
+      position:fixed; inset:0;
+      background: radial-gradient(900px 500px at 70% 30%, rgba(255,255,255,.08), transparent 55%);
+      z-index:-1;
+      pointer-events:none;
+    }
 
-    /* ====== layout ====== */
-    #app{ min-height:100vh; }
+    a{ color:inherit; text-decoration:none; }
     .wrap{
-      max-width: 820px;
+      max-width: 920px;
       margin: 0 auto;
-      padding: calc(14px + var(--safeTop)) 12px calc(110px + var(--safeBottom));
+      padding: calc(12px + var(--safeT)) 12px calc(110px + var(--safeB));
     }
 
     .card{
-      background: linear-gradient(180deg, var(--card), var(--card2));
-      border: 1px solid var(--bd);
+      background: var(--card);
+      border: 1px solid var(--stroke2);
       border-radius: var(--r);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .header{
-      padding: 14px;
-      display:flex;
-      gap:12px;
-      align-items:stretch;
+      padding: 16px;
+      position:relative;
+      overflow:hidden;
     }
-
     .kicker{
+      letter-spacing:.32em;
       font-size:12px;
-      letter-spacing:.22em;
-      opacity:.75;
+      color:rgba(255,255,255,.7);
+      margin-bottom:10px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .titleRow{ display:flex; gap:10px; align-items:flex-start; }
-    .appTitle{
-      font-size:44px;
-      line-height:1.02;
-      font-weight:900;
-      margin: 8px 0 2px;
+    .titleRow{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
     }
-    .subTitle{ font-size:16px; font-weight:700; opacity:.8; margin-top:4px; }
+    .appTitle{
+      font-weight:900;
+      font-size:44px;
+      line-height:1;
+      letter-spacing:.02em;
+    }
+    .subTitle{
+      margin-top:10px;
+      color:var(--muted);
+      font-weight:700;
+    }
 
     .headerRight{
-      margin-left:auto;
       display:flex;
       flex-direction:column;
+      gap:10px;
       align-items:flex-end;
-      gap:8px;
-      min-width: 180px;
+      min-width: 190px;
     }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
 
     .pill{
       display:inline-flex;
-      gap:8px;
       align-items:center;
-      padding: 8px 12px;
+      gap:8px;
+      padding: 10px 12px;
       border-radius: 999px;
-      border: 1px solid var(--bd);
-      background: rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      font-weight:800;
+      line-height:1;
       white-space:nowrap;
     }
-    .pill.ok{ border-color: var(--ok); }
-    .pill.bad{ border-color: var(--danger); }
+    .pill.small{ padding:8px 10px; font-size:13px; font-weight:800; }
+    .pill.ok{ border-color: rgba(191,255,209,.35); color: var(--ok); }
+    .pill.bad{ border-color: rgba(255,180,180,.35); color: var(--danger); }
+    .muted{ color:var(--muted); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
     .btn{
       user-select:none;
       cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--bd2);
-      background: rgba(255,255,255,.06);
-      transition: transform .08s ease, background .15s ease;
-      font-weight:800;
+      transition: transform .05s ease, opacity .2s ease;
+      -webkit-tap-highlight-color: transparent;
     }
     .btn:active{ transform: scale(.98); }
-    .btn.ghost{ background: transparent; }
-    .btn.small{ padding: 8px 10px; font-weight:800; font-size:13px; }
-    .btn.icon{
-      width: 38px; height: 38px; padding:0;
-      justify-content:center;
-      border-radius: 14px;
-    }
-    .btn.danger{ border-color: var(--danger); color: #ffd3d3; }
-
-    .tabs{
-      display:flex; gap:10px; flex-wrap:wrap;
-      padding: 12px 14px 14px;
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-    .tab{
-      padding: 10px 16px;
-      border-radius: 18px;
-      border: 1px solid var(--bd);
-      background: rgba(255,255,255,.06);
-      font-weight:900;
-    }
-    .tab.active{
-      background: rgba(255,255,255,.12);
-      border-color: rgba(191,255,209,.35);
-    }
-
-    /* ====== section card ====== */
-    .section{ margin-top: 12px; }
-    .sectionHeader{
-      padding: 12px 14px;
-      display:flex;
-      gap:10px;
+    .iconBtn{
+      width: 40px; height: 40px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      display:inline-flex;
       align-items:center;
-      justify-content:space-between;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      justify-content:center;
+      background: rgba(0,0,0,.18);
+    }
+    .iconBtn.small{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.16);
+    }
+
+    /* Top right debug button replacing DB YES */
+    .repairBtn{
+      width: 40px; height: 40px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+
+    /* Days slider */
+    .section{
+      margin-top:14px;
+      padding: 14px;
+    }
+    .sectionHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:10px;
     }
     .sectionTitle{
-      font-size:22px;
+      font-size:24px;
       font-weight:900;
+      margin:0;
+      letter-spacing:.02em;
     }
 
-    /* ====== day slider ====== */
-    .daySlider{
-      padding: 12px 14px 14px;
-      overflow-x:auto;
+    .dayRail{
       display:flex;
       gap:10px;
-      scroll-snap-type: x mandatory;
+      overflow-x:auto;
+      padding: 6px 2px 10px;
+      scroll-snap-type:x mandatory;
       -webkit-overflow-scrolling: touch;
     }
-    .daySlider::-webkit-scrollbar{ height: 6px; }
-    .daySlider::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.10); border-radius: 999px; }
-
+    .dayRail::-webkit-scrollbar{ height:6px; }
+    .dayRail::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.18); border-radius:999px; }
     .dayCard{
-      min-width: 210px;
-      max-width: 240px;
-      scroll-snap-align: start;
-      padding: 10px 12px;
+      min-width: 220px;
+      max-width: 220px;
+      padding: 10px 12px;  /* thinner */
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
+      border:1px solid var(--stroke2);
+      background: rgba(0,0,0,.18);
+      scroll-snap-align:start;
       position:relative;
     }
     .dayCard.active{
@@ -195,403 +213,332 @@
       background: rgba(191,255,209,.06);
     }
     .dayTop{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 6px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:8px;
     }
-    .dayChip{
+    .dayBadge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    .tag{
       display:inline-flex;
       align-items:center;
       padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.20);
-      font-weight:900;
-    }
-    .dayDate{ font-weight:900; opacity:.8; }
-    .dayName{
-      font-size:20px;
-      font-weight:900;
-      line-height:1.15;
-      margin-top: 2px;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-    }
-    .editMini{
-      margin-left:auto;
-      width:34px;height:34px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    .editMini svg{ width:16px; height:16px; opacity:.92; }
-
-    /* ====== plan columns (mobile-friendly) ====== */
-    .planGrid{
-      padding: 12px 14px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .period{
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.05);
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .dayDate{ font-weight:900; color: rgba(255,255,255,.80); }
+    .dayTitle{
+      font-weight:900;
+      font-size:18px;
+      line-height:1.15;
+      margin-top:4px;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
       overflow:hidden;
     }
-    .periodHeader{
-      padding: 12px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .periodTitle{ font-size:22px; font-weight:900; }
-    .periodBtns{ display:flex; gap:10px; }
 
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    /* Plan periods */
+    .period{
+      margin-top:12px;
       padding: 12px;
-    }
-
-    .itemCard{
-      border: 1px solid rgba(255,255,255,.10);
       border-radius: 18px;
-      background: rgba(255,255,255,.04);
+      border:1px solid var(--stroke2);
+      background: rgba(0,0,0,.14);
+    }
+    .periodHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      margin-bottom:10px;
+    }
+    .periodName{
+      font-size:22px;
+      font-weight:1000;
+      margin:0;
+    }
+    .chipRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .chipBtn{
+      display:inline-flex; gap:8px; align-items:center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.16);
+      font-weight:900;
+    }
+
+    /* Items */
+    .list{ display:flex; flex-direction:column; gap:10px; }
+    .item{
       padding: 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
       position:relative;
     }
     .itemTop{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
     }
-    .badgeEmoji{
-      width: 26px;
-      text-align:center;
-      font-size:18px;
-      line-height:1;
-      margin-top:2px;
-      flex:0 0 26px;
-    }
-    .itemMain{ flex:1; min-width:0; }
+    .itemLeft{ min-width:0; }
     .itemTitle{
-      font-weight:900;
-      font-size:20px;
-      line-height:1.2;
-      margin: 0 0 6px;
-      word-break: break-word;
+      font-weight:1000;
+      font-size:18px;
+      line-height:1.25;
+      word-break:break-word;
     }
     .itemNote{
-      white-space: pre-wrap;
-      opacity:.82;
+      margin-top:8px;
+      color: rgba(255,255,255,.72);
+      white-space:pre-wrap;
       line-height:1.35;
     }
-    .itemActions{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex:0 0 auto;
-    }
-    .penBtn{
-      width:34px;height:34px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    .penBtn svg{ width:16px; height:16px; opacity:.92; }
-    .delBtn{
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid var(--danger);
-      background: rgba(255,180,180,.10);
-      color:#ffd3d3;
-      font-weight:900;
-      cursor:pointer;
-      font-size:13px;
-    }
-
-    .mapLink{
+    .emoji{
+      width: 26px; height: 26px;
       display:inline-flex;
       align-items:center;
-      gap:8px;
-      margin-top:10px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      font-weight:900;
-      max-width: 100%;
+      justify-content:center;
+      font-size:18px;
+      flex:0 0 auto;
+      margin-top:2px;
     }
-    .mapLink span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .rightActions{ display:flex; gap:10px; flex:0 0 auto; }
+    .penSvg{
+      width:18px; height:18px;
+      opacity:.95;
+    }
 
-    /* ====== flights ====== */
-    .flightList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:12px; }
+    /* Flight card (compact style) */
     .flightCard{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
       padding: 14px;
+      border-radius: 20px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
       overflow:hidden;
-      position:relative;
     }
-    .flightMeta{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      margin-bottom: 10px;
-      font-weight:900; opacity:.9;
+    .flightTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:10px;
     }
-    .flightRoute{
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 12px;
+    .flightTop .meta{
+      font-weight:900;
+      color: rgba(255,255,255,.78);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .flightSide{ min-width:0; }
-    .flightCode{ font-size:22px; font-weight:1000; letter-spacing:.02em; }
-    .flightTime{ font-size:44px; font-weight:1000; line-height:1; margin-top: 4px; }
-    .flightTerminal{ opacity:.72; font-weight:900; margin-top: 6px; }
-    .flightMid{
-      flex:1;
+    .flightBody{
+      display:grid;
+      grid-template-columns: 1fr 52px 1fr;
+      gap: 10px;
+      align-items:center;
+    }
+    .ap{
+      font-weight:1000;
+      font-size:22px;
+    }
+    .tm{
+      font-weight:1000;
+      font-size:34px;
+      line-height:1;
+    }
+    .sub{
+      color: rgba(255,255,255,.72);
+      font-weight:800;
+      margin-top:6px;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .midLine{
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:10px;
-      min-width: 120px;
-    }
-    .flightDur{ opacity:.8; font-weight:900; }
-    .flightLine{
-      width: 100%;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.16);
-      position:relative;
-    }
-    .flightLine:before{
-      content:"";
-      position:absolute;
-      left:0; top:0;
-      width: 55%;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(191,255,209,.38);
-    }
-    .plane{
-      font-size: 18px;
-      position:absolute;
-      left: 40%;
-      top: -11px;
-    }
-
-    /* ====== shopping ====== */
-    .shopList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
-    .shopRow{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .shopRow.done{
-      opacity:.62;
-    }
-    .shopRow.done .shopName{
-      text-decoration: line-through;
-    }
-    .check{
-      width: 22px; height: 22px;
-      margin-top: 2px;
-      accent-color: #bfffd1;
-    }
-    .shopMain{ flex:1; min-width:0; }
-    .shopName{ font-weight:1000; font-size:18px; }
-    .shopMeta{ opacity:.75; margin-top: 4px; }
-
-    /* ====== expenses ====== */
-    .expList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
-    .expRow{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .expLeft{ min-width:0; }
-    .expTitle{ font-weight:1000; font-size:18px; }
-    .expMeta{ opacity:.75; margin-top: 4px; }
-    .expAmt{ font-weight:1000; font-size:18px; white-space:nowrap; }
-
-    /* ====== bottom toolbar ====== */
-    .bottomBar{
-      position: fixed;
-      left: 12px; right: 12px;
-      bottom: calc(12px + var(--safeBottom));
-      z-index: 30;
-      display:flex;
-      justify-content:center;
-      pointer-events:none;
-    }
-    .barInner{
-      pointer-events:auto;
-      width:min(520px, 100%);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(10,14,24,.72);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 45px rgba(0,0,0,.38);
-      padding: 10px;
-      display:flex;
-      justify-content:space-between;
       gap:8px;
     }
-    .navBtn{
-      flex:1;
-      border-radius: 18px;
-      padding: 10px 6px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      text-align:center;
+    .bar{
+      width:100%;
+      height:6px;
+      border-radius:999px;
+      background: rgba(255,255,255,.14);
+      position:relative;
+      overflow:hidden;
+    }
+    .bar::after{
+      content:"";
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width:55%;
+      background: rgba(191,255,209,.30);
+    }
+    .plane{ font-size:20px; opacity:.92; }
+
+    /* Expenses */
+    .expRow{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .money{
       font-weight:1000;
+      white-space:nowrap;
+    }
+
+    /* Shopping */
+    .shopRow{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .chk{
+      display:flex; gap:12px; align-items:flex-start;
+      min-width:0;
+    }
+    input[type="checkbox"]{
+      width:22px; height:22px;
+      margin-top:2px;
+      accent-color: #bfffd1;
       cursor:pointer;
     }
-    .navBtn.active{
-      border-color: rgba(191,255,209,.35);
-      background: rgba(191,255,209,.08);
+    .strike{
+      text-decoration: line-through;
+      opacity:.65;
     }
-    .navIcon{ font-size:20px; line-height:1; display:block; margin-bottom:6px; }
 
-    /* ====== edit modal ====== */
+    /* Bottom toolbar */
+    .bottomBar{
+      position:fixed;
+      left:0; right:0;
+      bottom:0;
+      padding: 10px 12px calc(12px + var(--safeB));
+      pointer-events:none;
+      z-index:50;
+    }
+    .dock{
+      max-width: 920px;
+      margin: 0 auto;
+      pointer-events:auto;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 20px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 14px 35px rgba(0,0,0,.38);
+      padding: 8px;
+      display:flex;
+      gap:8px;
+      align-items:stretch;
+      justify-content:space-between;
+    }
+    .dockBtn{
+      flex:1;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      padding: 10px 8px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      font-weight:1000;
+      min-width:0;
+    }
+    .dockBtn.active{
+      border-color: rgba(191,255,209,.35);
+      background: rgba(191,255,209,.07);
+    }
+    .dockIcon{ font-size:20px; }
+    .dockText{ font-size:14px; white-space:nowrap; }
+
+    /* Modal */
     .overlay{
-      position: fixed;
-      inset: 0;
-      z-index: 60;
-      background: rgba(0,0,0,.52);
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
       display:flex;
       align-items:center;
       justify-content:center;
       padding: 14px;
+      z-index:100;
     }
     .modal{
-      width: min(560px, 96vw);
-      max-height: 86vh;
+      width: min(920px, 96vw);
+      max-height: 84vh;
       overflow:auto;
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(14,18,30,.76);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 20px 55px rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(10,16,28,.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
       padding: 14px;
     }
-    .modalTop{
-      display:flex;
-      align-items:center;
-      gap:10px;
+    .modalHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       margin-bottom: 10px;
     }
     .modalTitle{
       font-weight:1000;
       font-size:18px;
+      margin:0;
     }
-    .spacer{ flex:1; }
     .grid2{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:12px;
+      margin-top:12px;
     }
     .grid1{
       display:grid;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap:12px;
+      margin-top:12px;
     }
-    label{ display:block; font-weight:900; opacity:.86; margin-bottom: 6px; }
+    label{
+      display:block;
+      color: rgba(255,255,255,.75);
+      font-weight:900;
+      margin-bottom:6px;
+      font-size:13px;
+    }
     input, textarea, select{
       width:100%;
-      box-sizing:border-box;
-      background: rgba(255,255,255,.06);
-      color: var(--txt);
-      border: 1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
       border-radius: 14px;
-      padding: 10px 12px;
+      padding: 12px 12px;
       outline:none;
       font-size: 15px;
     }
     textarea{ min-height: 110px; resize: vertical; }
-    .modalBtns{ display:flex; gap:10px; margin-top: 12px; flex-wrap:wrap; }
-    .hint{ opacity:.75; font-size: 13px; line-height: 1.35; }
-
-    /* ====== debug ====== */
-    .debugFab{
-      position: fixed;
-      right: 12px;
-      bottom: calc(78px + var(--safeBottom));
-      z-index: 55;
-      width: 42px;
-      height: 42px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(10,14,24,.68);
-      backdrop-filter: blur(10px);
+    .modalActions{
       display:flex;
+      gap:10px;
       align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      box-shadow: 0 14px 35px rgba(0,0,0,.35);
+      margin-top:14px;
+      flex-wrap:wrap;
     }
-    .debugFab span{ font-size: 18px; }
-
-    .debugPanel{
-      position: fixed;
-      right: 12px;
-      bottom: calc(130px + var(--safeBottom));
-      z-index: 56;
-      width: min(360px, 92vw);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(10,14,24,.82);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 22px 60px rgba(0,0,0,.45);
-      padding: 12px;
-    }
-    .debugRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .debugTitle{ font-weight:1000; }
-    .debugBox{
-      margin-top: 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      padding: 10px;
-      max-height: 180px;
-      overflow:auto;
+    .dangerBtn{
+      border-color: rgba(255,180,180,.35) !important;
+      color: var(--danger) !important;
     }
 
-    /* ====== small screens tuning ====== */
-    @media (max-width: 420px){
-      .appTitle{ font-size: 40px; }
+    /* Tiny responsive */
+    @media (max-width:520px){
+      .appTitle{ font-size:42px; }
       .headerRight{ min-width: 150px; }
-      .dayCard{ min-width: 200px; }
-      .flightTime{ font-size: 40px; }
+      .dayCard{ min-width: 200px; max-width: 200px; }
+      .flightBody{ grid-template-columns: 1fr 44px 1fr; }
+      .tm{ font-size:32px; }
+      .grid2{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
-<div id="app"></div>
+  <div id="app"></div>
 
 <script>
 (() => {
@@ -607,160 +554,217 @@
   if (!sb) console.error("Supabase client init failed: window.supabase missing?");
 
   const safeStr = (v) => (v == null ? "" : String(v));
-  const enc = (s) => encodeURIComponent(String(s ?? ""));
 
-  // Open-Meteo weather codes -> emoji
+  const fmtDateZh = (yyyy_mm_dd) => {
+    if (!yyyy_mm_dd) return "";
+    // Keep simple and stable for your existing data
+    return yyyy_mm_dd;
+  };
+
+  const encode = (s) => encodeURIComponent(s || "");
+
+  // Google Maps directions from current location
+  const gmapDirUrl = (destination) =>
+    destination ? `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${encode(destination)}` : "";
+
+  // weather emoji (Open-Meteo weathercode)
   const wEmoji = (code) => {
+    // https://open-meteo.com/en/docs
     if (code == null) return "⛅️";
     const c = Number(code);
-    if (c === 0) return "☀️";
-    if ([1,2,3].includes(c)) return "⛅️";
+    if ([0].includes(c)) return "☀️";
+    if ([1].includes(c)) return "🌤️";
+    if ([2].includes(c)) return "⛅️";
+    if ([3].includes(c)) return "☁️";
     if ([45,48].includes(c)) return "🌫️";
     if ([51,53,55,56,57].includes(c)) return "🌦️";
     if ([61,63,65,66,67].includes(c)) return "🌧️";
-    if ([71,73,75,77,85,86].includes(c)) return "❄️";
+    if ([71,73,75,77].includes(c)) return "🌨️";
     if ([80,81,82].includes(c)) return "🌧️";
+    if ([85,86].includes(c)) return "🌨️";
     if ([95,96,99].includes(c)) return "⛈️";
     return "⛅️";
   };
 
-  // time bucket helpers
-  const bucketOf = (timeLabel = "") => {
-    const t = String(timeLabel || "");
-    if (t.includes("上午") || t.includes("早") || t.includes("凌晨")) return "am";
-    if (t.includes("下午")) return "pm";
-    if (t.includes("晚上") || t.includes("夜") || t.includes("宵")) return "night";
-    // fallback: if contains "中午" treat as pm
-    if (t.includes("中午")) return "pm";
-    return "am";
+  // Plan item emoji: destination pin vs meal
+  const itemEmoji = (item) => {
+    const k = (item?.kind || "").toLowerCase();
+    if (k === "food") return "🍽️";
+    if (k === "wear") return "👕";
+    // default destinations / activities / transport / hotel etc
+    return "📍";
   };
 
+  const periodFromTimeLabel = (t) => {
+    const s = (t || "").trim();
+    if (s.includes("上午")) return "上午";
+    if (s.includes("下午")) return "下午";
+    if (s.includes("晚上")) return "晚上";
+    // tolerate old values
+    if (s.toLowerCase().includes("morning")) return "上午";
+    if (s.toLowerCase().includes("afternoon")) return "下午";
+    if (s.toLowerCase().includes("night") || s.toLowerCase().includes("evening")) return "晚上";
+    return "上午"; // fallback
+  };
+
+  const segLabel = (n) => `SEG ${n}`;
+
   createApp({
-    data() {
+    data(){
       return {
         view: "plan", // plan | flights | expenses | shopping
-
-        // status
         connected: false,
+        loading: false,
         statusText: "ready",
         lastError: null,
-        loading: false,
 
-        // geo + weather (no clock)
-        geo: { ok:false, lat:null, lon:null, label:"" },
-        weather: { ok:false, temp:null, wind:null, code:null },
+        // location + weather
+        weather: { ok:false, temp:null, wind:null, code:null, lat:null, lon:null },
 
         // data
         days: [],
         selectedDayId: null,
         planItems: [],
         flights: [],
-        shopping: [],
         expenses: [],
+        shopping: [],
 
-        // edit
-        editing: null, // {table, mode, row, uiDayNo}
+        // modals
+        editing: null,      // { table, mode, row, title }
         showDelete: false,
-
-        // debug
-        debugOpen: false,
+        showDebug: false,
       };
     },
 
-    computed: {
-      selectedDay() {
+    computed:{
+      selectedDay(){
         return this.days.find(d => d.id === this.selectedDayId) || null;
       },
 
-      // plan items of selected day
-      planForDay() {
-        if (!this.selectedDayId) return [];
-        return (this.planItems || [])
-          .filter(x => x.day_id === this.selectedDayId)
-          .sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
+      planForDay(){
+        const dayId = this.selectedDayId;
+        const rows = (this.planItems || []).filter(x => x.day_id === dayId);
+        rows.sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
+        return rows;
       },
 
-      // group: destinations first then meal (one meal displayed)
-      planAM() { return this.groupPeriod("am"); },
-      planPM() { return this.groupPeriod("pm"); },
-      planNight() { return this.groupPeriod("night"); },
+      // per period: destinations first then meal (only one meal)
+      periods(){
+        const base = this.planForDay || [];
+        const periods = ["上午","下午","晚上"].map(p => {
+          const rows = base.filter(x => periodFromTimeLabel(x.time_label) === p);
 
-      headerDbText() {
-        return this.connected ? "DB OK" : "DB ERR";
+          const dest = rows.filter(x => (x.kind || "").toLowerCase() !== "food" && (x.kind || "").toLowerCase() !== "wear");
+          const meal = rows.filter(x => (x.kind || "").toLowerCase() === "food");
+          const wear = rows.filter(x => (x.kind || "").toLowerCase() === "wear");
+
+          return {
+            name: p,
+            dest,
+            meal: meal.length ? [meal[0]] : [],
+            wear
+          };
+        });
+        return periods;
+      },
+
+      wearList(){
+        // separate section for 衣著: all wear items for the day (regardless of time_label)
+        const base = this.planForDay || [];
+        return base.filter(x => (x.kind || "").toLowerCase() === "wear");
+      },
+
+      shoppingSorted(){
+        const arr = (this.shopping || []).slice();
+        // unchecked first, checked moved down
+        arr.sort((a,b) => {
+          const ad = !!a.done, bd = !!b.done;
+          if (ad !== bd) return ad ? 1 : -1;
+          return (a.order_no ?? 0) - (b.order_no ?? 0);
+        });
+        return arr;
       }
     },
 
-    methods: {
-      // ====== FIX: this was missing and caused your crash ======
-      itemEmoji(kind) {
-        const k = String(kind || "").toLowerCase();
-
-        // normalize common values
-        if (k.includes("meal") || k.includes("用餐") || k.includes("食")) return "🍴";
-        if (k.includes("wear") || k.includes("衣") || k.includes("衣著")) return "👕";
-        if (k.includes("hotel") || k.includes("住宿") || k.includes("酒店")) return "🏨";
-        if (k.includes("transport") || k.includes("交通")) return "🚇";
-        // default destination
-        return "📍";
-      },
-      wEmoji(code) {
-        if (code == null) return "⛅️";
-        const c = Number(code);
-        if (c === 0) return "☀️";
-        if ([1,2,3].includes(c)) return "⛅️";
-        if ([45,48].includes(c)) return "🌫️";
-        if ([51,53,55,56,57].includes(c)) return "🌦️";
-        if ([61,63,65,66,67].includes(c)) return "🌧️";
-        if ([71,73,75,77,85,86].includes(c)) return "❄️";
-        if ([80,81,82].includes(c)) return "🌧️";
-        if ([95,96,99].includes(c)) return "⛈️";
-        return "⛅️";
-      },
-
-      penSvg() {
-        // small pen icon
-        return `
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"/>
-            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-          </svg>`;
-      },
-
-      setErr(e) {
+    methods:{
+      setErr(e){
         this.lastError = (e && (e.message || e.error_description)) ? e : { message: String(e) };
         this.statusText = "ERR: " + safeStr(this.lastError.message || this.lastError);
         console.error(e);
       },
 
-      async ping() {
-        try {
+      penIcon(){
+        return `
+          <svg class="penSvg" viewBox="0 0 24 24" fill="none">
+            <path d="M12 20h9" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+              stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        `;
+      },
+
+      // ===== Weather =====
+      async loadWeather(){
+        try{
+          this.weather.ok = false;
+          const pos = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject(new Error("geolocation not supported"));
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy:false, timeout:8000, maximumAge: 600000 });
+          });
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=Asia%2FHong_Kong`;
+          const r = await fetch(url);
+          const j = await r.json();
+
+          const cur = j.current || {};
+          this.weather = {
+            ok: true,
+            temp: cur.temperature_2m,
+            wind: cur.wind_speed_10m,
+            code: cur.weather_code,
+            lat: Number(lat.toFixed(2)),
+            lon: Number(lon.toFixed(2))
+          };
+        }catch(e){
+          // don't hard fail UI
+          this.weather.ok = false;
+          this.weather.lat = null; this.weather.lon = null;
+          console.warn("weather failed", e);
+        }
+      },
+
+      // ===== DB =====
+      async ping(){
+        try{
           const { data, error, status } = await sb
             .from("days")
             .select("id,day_no")
-            .order("day_no", { ascending: true })
+            .order("day_no", { ascending:true })
             .limit(1);
 
           if (error) throw error;
           this.connected = true;
           this.statusText = `OK (${status})`;
           return data;
-        } catch (e) {
+        }catch(e){
           this.connected = false;
           this.setErr(e);
           return null;
         }
       },
 
-      async loadAll() {
+      async loadAll(){
         this.loading = true;
         this.lastError = null;
         this.statusText = "loading...";
-
-        try {
+        try{
           const qDays = await sb
             .from("days")
             .select("id,day_no,date,title,note,sort_order,created_at,updated_at")
-            .order("day_no", { ascending: true });
+            .order("day_no", { ascending:true });
+
           if (qDays.error) throw qDays.error;
           this.days = qDays.data || [];
           if (!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
@@ -768,128 +772,170 @@
           const qPlan = await sb
             .from("plan_items")
             .select("id,day_id,time_label,kind,title,note,maps_query,order_no,created_at,updated_at")
-            .order("order_no", { ascending: true });
+            .order("order_no", { ascending:true });
+
           if (qPlan.error) throw qPlan.error;
           this.planItems = qPlan.data || [];
 
           const qFlights = await sb
             .from("flights")
             .select("id,seg_no,flight_no,carrier,depart_airport,arrive_airport,depart_time,arrive_time,note,created_at,updated_at")
-            .order("seg_no", { ascending: true });
+            .order("seg_no", { ascending:true });
+
           if (qFlights.error) throw qFlights.error;
           this.flights = qFlights.data || [];
-
-          const qShop = await sb
-            .from("shopping_items")
-            .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
-            .order("order_no", { ascending: true });
-          if (qShop.error) throw qShop.error;
-          this.shopping = qShop.data || [];
 
           const qExp = await sb
             .from("expenses")
             .select("id,day_id,happened_on,category,merchant,amount,currency,paid_by,note,created_at,updated_at")
-            .order("happened_on", { ascending: true });
+            .order("happened_on", { ascending:true });
+
           if (qExp.error) throw qExp.error;
           this.expenses = qExp.data || [];
 
+          const qShop = await sb
+            .from("shopping_items")
+            .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
+            .order("order_no", { ascending:true });
+
+          if (qShop.error) throw qShop.error;
+          this.shopping = qShop.data || [];
+
           this.connected = true;
           this.statusText = "loaded";
-        } catch (e) {
+        }catch(e){
           this.connected = false;
           this.setErr(e);
-        } finally {
+        }finally{
           this.loading = false;
         }
       },
 
-      // Group items by period, show destinations first, meal after, and only one meal displayed
-      groupPeriod(bucket) {
-        const arr = this.planForDay.filter(x => bucketOf(x.time_label) === bucket);
-
-        // destination first
-        const dest = arr.filter(x => !String(x.kind || "").toLowerCase().includes("meal") && !String(x.kind || "").includes("用餐") && !String(x.kind || "").includes("食"));
-        const meals = arr.filter(x => !dest.includes(x));
-
-        // only show first meal (if multiple)
-        const mealOne = meals.length ? [meals[0]] : [];
-
-        return { dest, mealOne };
-      },
-
-      // convert day number -> day_id for plan_items/expenses
-      dayIdFromNo(dayNo) {
-        const n = Number(dayNo);
-        const d = this.days.find(x => Number(x.day_no) === n);
-        return d ? d.id : null;
-      },
-
-      // CRUD open
-      openNewPlan(kind, periodKey) {
-        const periodLabel = (periodKey === "am") ? "上午" : (periodKey === "pm") ? "下午" : "晚上";
+      // ===== CRUD helpers =====
+      openNewPlan(period, kind){
+        // user enters day number instead of day_id (we store dayNoTemp then convert on save)
+        const dayNo = this.selectedDay?.day_no ?? 1;
+        const tl = period; // "上午/下午/晚上"
         const blank = {
-          day_id: this.selectedDayId,
-          time_label: periodLabel,
-          kind: kind, // "dest" or "meal" etc.
+          dayNoTemp: dayNo,
+          time_label: tl,
+          kind: kind, // "activity" or "food" or "wear"
           title: "",
           note: "",
           maps_query: "",
-          order_no: 1
         };
-        this.editing = { table:"plan_items", mode:"insert", row: JSON.parse(JSON.stringify(blank)), uiDayNo: (this.selectedDay?.day_no ?? "") };
         this.showDelete = false;
+        this.editing = { table:"plan_items", mode:"insert", row: blank, title: (kind==="food"?"新增用餐":(kind==="wear"?"新增衣著":"新增行程")) };
       },
 
-      openNewDay() {
-        const nextNo = (this.days.reduce((m,d)=>Math.max(m, Number(d.day_no||0)),0) || 0) + 1;
-        const blank = { day_no: nextNo, date: "", title: "", note: "", sort_order: nextNo };
-        this.editing = { table:"days", mode:"insert", row: JSON.parse(JSON.stringify(blank)) };
+      openEditPlan(row){
+        const dayNo = this.days.find(d => d.id === row.day_id)?.day_no ?? 1;
+        const copy = JSON.parse(JSON.stringify(row));
+        copy.dayNoTemp = dayNo;         // show day number instead
+        delete copy.day_id;             // hide raw id in form
+        delete copy.order_no;           // remove order_no from form (per request)
         this.showDelete = false;
+        this.editing = { table:"plan_items", mode:"update", row: copy, title:"編輯行程" };
       },
 
-      openEdit(table, row) {
-        const r = JSON.parse(JSON.stringify(row));
-        const editObj = { table, mode:"update", row: r };
-        if (table === "plan_items" || table === "expenses") {
-          const d = this.days.find(x => x.id === r.day_id);
-          editObj.uiDayNo = d ? d.day_no : "";
-        }
-        this.editing = editObj;
+      openNewDay(){
+        const maxNo = this.days.reduce((m,d)=>Math.max(m, d.day_no||0), 0);
+        const blank = { day_no: maxNo+1, date:"", title:"", note:"", sort_order: maxNo+1 };
         this.showDelete = false;
+        this.editing = { table:"days", mode:"insert", row: blank, title:"新增 Day" };
       },
 
-      closeEdit() {
+      openEditDay(day){
+        const copy = JSON.parse(JSON.stringify(day));
+        this.showDelete = false;
+        this.editing = { table:"days", mode:"update", row: copy, title:"編輯 Day" };
+      },
+
+      openNewFlight(){
+        const blank = { seg_no: 1, flight_no:"", carrier:"", depart_airport:"", arrive_airport:"", depart_time:"", arrive_time:"", note:"" };
+        this.showDelete = false;
+        this.editing = { table:"flights", mode:"insert", row: blank, title:"新增航程" };
+      },
+      openEditFlight(row){
+        const copy = JSON.parse(JSON.stringify(row));
+        this.showDelete = false;
+        this.editing = { table:"flights", mode:"update", row: copy, title:"編輯航程" };
+      },
+
+      openNewExpense(){
+        const dayNo = this.selectedDay?.day_no ?? 1;
+        const blank = { dayNoTemp: dayNo, happened_on:"", category:"", merchant:"", amount:null, currency:"JPY", paid_by:"", note:"" };
+        this.showDelete = false;
+        this.editing = { table:"expenses", mode:"insert", row: blank, title:"新增記帳" };
+      },
+      openEditExpense(row){
+        const dayNo = this.days.find(d => d.id === row.day_id)?.day_no ?? 1;
+        const copy = JSON.parse(JSON.stringify(row));
+        copy.dayNoTemp = dayNo;
+        delete copy.day_id;
+        this.showDelete = false;
+        this.editing = { table:"expenses", mode:"update", row: copy, title:"編輯記帳" };
+      },
+
+      openNewShop(){
+        const blank = { name:"", location:"", price_text:"", note:"", done:false, order_no: 1 };
+        this.showDelete = false;
+        this.editing = { table:"shopping_items", mode:"insert", row: blank, title:"新增購物" };
+      },
+      openEditShop(row){
+        const copy = JSON.parse(JSON.stringify(row));
+        // done handled by checkbox in list; keep but don't emphasize in form
+        this.showDelete = false;
+        this.editing = { table:"shopping_items", mode:"update", row: copy, title:"編輯購物" };
+      },
+
+      closeEdit(){
         this.editing = null;
         this.showDelete = false;
       },
 
-      async saveEdit() {
+      async saveEdit(){
         if (!this.editing) return;
         const { table } = this.editing;
-        const payload = { ...this.editing.row };
+        const row = JSON.parse(JSON.stringify(this.editing.row || {}));
 
         this.loading = true;
         this.lastError = null;
 
-        try {
+        try{
+          const payload = { ...row };
           delete payload.created_at;
           delete payload.updated_at;
 
-          // day number -> day_id mapping (user inputs day number only)
-          if (table === "plan_items" || table === "expenses") {
-            const uiNo = this.editing.uiDayNo;
-            const mapped = this.dayIdFromNo(uiNo);
-            if (!mapped) throw new Error("搵唔到 Day number 對應嘅 day_id（請先確保 days 表有呢個 day_no）");
-            payload.day_id = mapped;
+          // Convert dayNoTemp => day_id
+          if (table === "plan_items" || table === "expenses"){
+            const dayNo = Number(payload.dayNoTemp);
+            delete payload.dayNoTemp;
+
+            const day = this.days.find(d => Number(d.day_no) === dayNo);
+            if (!day) throw new Error(`Day ${dayNo} 不存在（請先新增 Day）`);
+            payload.day_id = day.id;
           }
 
-          // normalize shopping done (but we mainly toggle via checkbox)
-          if (table === "shopping_items") payload.done = !!payload.done;
+          // table-specific cleanups
+          if (table === "plan_items"){
+            // keep time_label/kind/title/note/maps_query
+            payload.time_label = payload.time_label || "上午";
+            payload.kind = payload.kind || "activity";
 
-          // order_no: auto bottom for plan_items
-          if (table === "plan_items" && (payload.order_no == null || payload.order_no === "")) {
-            const max = this.planForDay.reduce((m,x) => Math.max(m, x.order_no || 0), 0);
-            payload.order_no = max + 1;
+            // If insert without order_no: push to bottom within same day+period
+            if (!payload.id){
+              const dayId = payload.day_id;
+              const same = (this.planItems || []).filter(x => x.day_id===dayId && periodFromTimeLabel(x.time_label)===periodFromTimeLabel(payload.time_label));
+              const max = same.reduce((m,x)=>Math.max(m, x.order_no||0), 0);
+              payload.order_no = max + 1;
+            }
+          }
+
+          if (table === "shopping_items"){
+            payload.done = !!payload.done;
+            // order_no default
+            if (!payload.order_no) payload.order_no = (this.shopping || []).reduce((m,x)=>Math.max(m,x.order_no||0),0)+1;
           }
 
           const { error } = await sb.from(table).upsert(payload);
@@ -898,698 +944,623 @@
           this.statusText = "saved";
           this.closeEdit();
           await this.loadAll();
-        } catch (e) {
+        }catch(e){
           this.setErr(e);
-        } finally {
+        }finally{
           this.loading = false;
         }
       },
 
-      async delRow(table, id) {
+      async delEditing(){
+        if (!this.editing) return;
+        const t = this.editing.table;
+        const id = this.editing.row?.id;
         if (!id) return;
         this.loading = true;
-        this.lastError = null;
-        try {
-          const { error } = await sb.from(table).delete().eq("id", id);
+        try{
+          const { error } = await sb.from(t).delete().eq("id", id);
           if (error) throw error;
           this.statusText = "deleted";
           this.closeEdit();
           await this.loadAll();
-        } catch (e) {
+        }catch(e){
           this.setErr(e);
-        } finally {
+        }finally{
           this.loading = false;
         }
       },
 
-      // Shopping checkbox toggle (no edit needed)
-      async toggleShopping(row) {
-        const payload = { id: row.id, done: !row.done };
-        try {
-          const { error } = await sb.from("shopping_items").upsert(payload);
+      async toggleShopDone(item){
+        try{
+          const newVal = !item.done;
+          const { error } = await sb.from("shopping_items").upsert({ id: item.id, done: newVal });
           if (error) throw error;
-          row.done = !row.done;
-          this.statusText = "updated";
-        } catch (e) {
+          item.done = newVal; // optimistic update
+        }catch(e){
           this.setErr(e);
         }
       },
 
-      // Google Maps direction: current location -> destination query
-      async openMap(item) {
-        const q = item.maps_query || item.title || "";
-        if (!q) return;
-
-        // origin: current location preferred
-        let origin = "Current+Location";
-        if (this.geo.ok && this.geo.lat != null && this.geo.lon != null) {
-          origin = `${this.geo.lat},${this.geo.lon}`;
-        }
-        const url = `https://www.google.com/maps/dir/?api=1&origin=${enc(origin)}&destination=${enc(q)}&travelmode=transit`;
-        window.open(url, "_blank");
+      // Links: destination -> Google Maps directions from current location
+      openMaps(item){
+        const q = item?.maps_query || item?.title || "";
+        const url = gmapDirUrl(q);
+        if (url) window.open(url, "_blank");
       },
 
-      // simple date format for flight header
-      fmtDate(d) {
-        if (!d) return "";
-        // accept "2026-01-13" or timestamp
-        const s = String(d);
-        const dt = new Date(s);
-        if (isNaN(dt.getTime())) return s;
-        return dt.toLocaleDateString("en-GB", { weekday:"short", day:"2-digit", month:"short", year:"numeric" });
+      // Debug
+      toggleDebug(){
+        this.showDebug = !this.showDebug;
       },
-
-      // parse "2026-01-08 02:00:00+08" etc
-      fmtTime(v) {
-        if (!v) return "--:--";
-        const s = String(v).replace(" ", "T");
-        const dt = new Date(s);
-        if (isNaN(dt.getTime())) return String(v).slice(11,16) || String(v);
-        const hh = String(dt.getHours()).padStart(2,"0");
-        const mm = String(dt.getMinutes()).padStart(2,"0");
-        return `${hh}:${mm}`;
+      async reload(){
+        await this.loadAll();
       },
-
-      // ====== geo + weather (Open-Meteo) ======
-      async initGeoAndWeather() {
-        try {
-          const pos = await new Promise((resolve, reject) => {
-            if (!navigator.geolocation) return reject(new Error("Geolocation not supported"));
-            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy:false, timeout:8000, maximumAge: 60_000 });
-          });
-
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          this.geo = { ok:true, lat, lon, label: `${lat.toFixed(2)}, ${lon.toFixed(2)}` };
-
-          // Open-Meteo current weather + wind
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=Asia%2FHong_Kong`;
-          const r = await fetch(url);
-          const j = await r.json();
-          const cur = j?.current || {};
-          this.weather = {
-            ok: true,
-            temp: cur.temperature_2m,
-            code: cur.weather_code,
-            wind: cur.wind_speed_10m
-          };
-        } catch (e) {
-          // no crash if denied
-          this.geo = { ok:false, lat:null, lon:null, label:"" };
-          this.weather = { ok:false, temp:null, wind:null, code:null };
-        }
-      },
-
-      // ====== misc ======
-      viewLabel(v){
-        return ({ plan:"行程", flights:"航程", expenses:"記帳", shopping:"購物" })[v] || v;
-      },
-
-      editTitle(){
-        if (!this.editing) return "";
-        const t = this.editing.table;
-        if (t === "days") return (this.editing.mode === "insert" ? "新增 Day" : "編輯 Day");
-        if (t === "plan_items") return (this.editing.mode === "insert" ? "新增 行程/用餐" : "編輯 行程/用餐");
-        if (t === "flights") return (this.editing.mode === "insert" ? "新增 航程" : "編輯 航程");
-        if (t === "shopping_items") return (this.editing.mode === "insert" ? "新增 購物" : "編輯 購物");
-        if (t === "expenses") return (this.editing.mode === "insert" ? "新增 記帳" : "編輯 記帳");
-        return "編輯";
-      }
     },
 
-    async mounted() {
-      await this.initGeoAndWeather();
+    async mounted(){
       await this.ping();
       await this.loadAll();
+      // weather is best-effort
+      this.loadWeather();
     },
 
     template: /*html*/`
       <div class="wrap">
         <!-- HEADER -->
         <div class="card header">
-          <div style="min-width:0;">
-            <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
-            <div class="titleRow">
-              <div style="min-width:0;">
-                <div class="appTitle">札幌旅行 App</div>
-                <div class="subTitle muted">行程 / 航程 / 記帳 / 購物</div>
+          <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
+
+          <div class="titleRow">
+            <div style="min-width:0;">
+              <div class="appTitle">札幌旅行 App</div>
+              <div class="subTitle">行程 / 航程 / 記帳 / 購物</div>
+            </div>
+
+            <div class="headerRight">
+              <div class="row">
+                <div class="pill small" :class="connected ? 'ok' : 'bad'">
+                  {{ connected ? 'DB OK' : 'DB NO' }}
+                </div>
+
+                <!-- Debug button replaces the old DB YES pill -->
+                <div class="repairBtn btn" @click="toggleDebug()" title="Debug">🛠️</div>
+
+                <div class="iconBtn btn" @click="reload()" title="Reload">↻</div>
+              </div>
+
+              <div class="pill" v-if="weather.ok">
+                <span style="font-size:18px;">{{ wEmoji(weather.code) }}</span>
+                <span style="font-weight:1000;">{{ Math.round(weather.temp) }}°C</span>
+                <span class="muted" style="font-weight:900;">風 {{ Math.round(weather.wind) }} km/h</span>
+              </div>
+              <div class="pill muted mono" v-if="weather.ok">
+                ({{ weather.lat }}, {{ weather.lon }})
+              </div>
+              <div class="pill muted" v-if="!weather.ok">
+                ⛅️ --°C  --
               </div>
             </div>
-          </div>
-
-          <div class="headerRight">
-            <!-- Debug button replaces old DB badge (per request) -->
-            <div style="display:flex; gap:8px; align-items:center;">
-              <div class="pill" :class="connected ? 'ok' : 'bad'">
-                {{ connected ? 'DB OK' : 'DB ERR' }}
-              </div>
-              <div class="btn icon" title="Debug" @click="debugOpen = !debugOpen">🛠️</div>
-              <div class="btn icon" title="Reload" @click="loadAll()">↻</div>
-            </div>
-
-            <div class="pill" v-if="weather.ok">
-              <span>{{ wEmoji(weather.code) }}</span>
-              <span style="font-weight:1000;">{{ Math.round(weather.temp) }}°C</span>
-              <span class="muted">風 {{ Math.round(weather.wind) }} km/h</span>
-            </div>
-
-            <div class="pill muted mono" v-if="geo.ok">({{ geo.label }})</div>
           </div>
         </div>
 
-        <!-- MAIN SECTION -->
-        <div class="card section">
-          <div class="sectionHeader">
-            <div class="sectionTitle">{{ viewLabel(view) }}</div>
-
-            <div style="display:flex; gap:10px; align-items:center;">
-              <template v-if="view==='plan'">
-                <div class="btn small" @click="openNewDay()">＋ Day</div>
-              </template>
-              <template v-else-if="view==='flights'">
-                <div class="btn small" @click="openEdit('flights', { seg_no: 1, flight_no:'', carrier:'', depart_airport:'', arrive_airport:'', depart_time:'', arrive_time:'', note:'' })">＋ 航程</div>
-              </template>
-              <template v-else-if="view==='shopping'">
-                <div class="btn small" @click="openEdit('shopping_items', { name:'', location:'', price_text:'', note:'', done:false, order_no: 1 })">＋ 購物</div>
-              </template>
-              <template v-else-if="view==='expenses'">
-                <div class="btn small" @click="openEdit('expenses', { day_id: selectedDayId, happened_on:'', category:'', merchant:'', amount:null, currency:'JPY', paid_by:'', note:'' , order_no: 1 })">＋ 記帳</div>
-              </template>
+        <!-- PLAN -->
+        <div class="card section" v-if="view==='plan'">
+          <div class="sectionHead">
+            <h2 class="sectionTitle">行程</h2>
+            <div class="chipRow">
+              <div class="chipBtn btn" @click="openNewDay()">＋ Day</div>
             </div>
           </div>
 
-          <!-- PLAN -->
-          <template v-if="view==='plan'">
-            <div class="daySlider">
-              <div class="dayCard btn"
-                v-for="d in days"
-                :key="d.id"
-                :class="{active: selectedDayId===d.id}"
-                @click="selectedDayId=d.id"
-                style="cursor:pointer;"
-              >
-                <div class="dayTop">
-                  <div class="dayChip">Day {{ d.day_no }}</div>
-                  <div class="dayDate">{{ d.date || '-' }}</div>
-                  <div class="editMini" @click.stop="openEdit('days', d)" v-html="penSvg()"></div>
+          <!-- Day slider (thin) -->
+          <div class="dayRail">
+            <div
+              class="dayCard btn"
+              v-for="d in days"
+              :key="d.id"
+              :class="{active: selectedDayId===d.id}"
+              @click="selectedDayId=d.id"
+            >
+              <div class="dayTop">
+                <div class="dayBadge">
+                  <div class="tag">Day {{ d.day_no }}</div>
+                  <div class="dayDate">{{ fmtDateZh(d.date) }}</div>
                 </div>
-                <div class="dayName">{{ d.title || d.date || '未命名' }}</div>
+                <div class="iconBtn small btn" v-html="penIcon()" @click.stop="openEditDay(d)" title="編輯 Day"></div>
+              </div>
+              <div class="dayTitle">
+                {{ d.title || d.date || ('Day ' + d.day_no) }}
               </div>
             </div>
+          </div>
 
-            <div class="planGrid" v-if="selectedDay">
-              <!-- 上午 -->
-              <div class="period">
-                <div class="periodHeader">
-                  <div class="periodTitle">上午</div>
-                  <div class="periodBtns">
-                    <div class="btn small" @click="openNewPlan('dest','am')">＋ 行程</div>
-                    <div class="btn small" @click="openNewPlan('meal','am')">＋ 用餐</div>
-                  </div>
-                </div>
-                <div class="list">
-                  <!-- DEST first -->
-                  <div class="itemCard" v-for="x in planAM.dest" :key="x.id">
-                    <div class="itemTop">
-                      <div class="badgeEmoji">{{ itemEmoji(x.kind) }}</div>
-                      <div class="itemMain">
-                        <div class="itemTitle">{{ x.title }}</div>
-                        <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
-                          <span>開地圖：{{ x.maps_query || x.title }}</span>
-                        </a>
-                      </div>
-                      <div class="itemActions">
-                        <div class="penBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
-                      </div>
-                    </div>
-                  </div>
+          <!-- Periods -->
+          <div v-if="!selectedDay" class="muted">未選 Day。</div>
 
-                  <!-- MEAL one -->
-                  <div class="itemCard" v-for="x in planAM.mealOne" :key="x.id">
-                    <div class="itemTop">
-                      <div class="badgeEmoji">🍴</div>
-                      <div class="itemMain">
-                        <div class="itemTitle">{{ x.title }}</div>
-                        <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
-                          <span>開地圖：{{ x.maps_query || x.title }}</span>
-                        </a>
-                      </div>
-                      <div class="itemActions">
-                        <div class="penBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="muted" v-if="planAM.dest.length===0 && planAM.mealOne.length===0">（未有內容）</div>
+          <div v-else>
+            <div class="period" v-for="p in periods" :key="p.name">
+              <div class="periodHead">
+                <h3 class="periodName">{{ p.name }}</h3>
+                <div class="chipRow">
+                  <div class="chipBtn btn" @click="openNewPlan(p.name,'activity')">＋ 行程</div>
+                  <div class="chipBtn btn" @click="openNewPlan(p.name,'food')">＋ 用餐</div>
                 </div>
               </div>
 
-              <!-- 下午 -->
-              <div class="period">
-                <div class="periodHeader">
-                  <div class="periodTitle">下午</div>
-                  <div class="periodBtns">
-                    <div class="btn small" @click="openNewPlan('dest','pm')">＋ 行程</div>
-                    <div class="btn small" @click="openNewPlan('meal','pm')">＋ 用餐</div>
+              <div class="list">
+                <!-- Destinations first -->
+                <div class="item" v-for="x in p.dest" :key="x.id">
+                  <div class="itemTop">
+                    <div class="itemLeft">
+                      <div style="display:flex; gap:10px; align-items:flex-start;">
+                        <div class="emoji">📍</div>
+                        <div style="min-width:0;">
+                          <div class="itemTitle">
+                            <a v-if="x.maps_query" class="btn" @click.prevent="openMaps(x)">{{ x.title }}</a>
+                            <span v-else>{{ x.title }}</span>
+                          </div>
+                          <div class="itemNote" v-if="x.note">{{ x.note }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="rightActions">
+                      <div class="iconBtn small btn" v-html="penIcon()" @click="openEditPlan(x)" title="編輯"></div>
+                    </div>
                   </div>
                 </div>
-                <div class="list">
-                  <div class="itemCard" v-for="x in planPM.dest" :key="x.id">
-                    <div class="itemTop">
-                      <div class="badgeEmoji">{{ itemEmoji(x.kind) }}</div>
-                      <div class="itemMain">
-                        <div class="itemTitle">{{ x.title }}</div>
-                        <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
-                          <span>開地圖：{{ x.maps_query || x.title }}</span>
-                        </a>
-                      </div>
-                      <div class="itemActions">
-                        <div class="penBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
+
+                <!-- Meal (only show one) -->
+                <div class="item" v-for="m in p.meal" :key="m.id">
+                  <div class="itemTop">
+                    <div class="itemLeft">
+                      <div style="display:flex; gap:10px; align-items:flex-start;">
+                        <div class="emoji">🍽️</div>
+                        <div style="min-width:0;">
+                          <div class="itemTitle">
+                            <a v-if="m.maps_query" class="btn" @click.prevent="openMaps(m)">{{ m.title }}</a>
+                            <span v-else>{{ m.title }}</span>
+                          </div>
+                          <div class="itemNote" v-if="m.note">{{ m.note }}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div class="itemCard" v-for="x in planPM.mealOne" :key="x.id">
-                    <div class="itemTop">
-                      <div class="badgeEmoji">🍴</div>
-                      <div class="itemMain">
-                        <div class="itemTitle">{{ x.title }}</div>
-                        <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
-                          <span>開地圖：{{ x.maps_query || x.title }}</span>
-                        </a>
-                      </div>
-                      <div class="itemActions">
-                        <div class="penBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
-                      </div>
+                    <div class="rightActions">
+                      <div class="iconBtn small btn" v-html="penIcon()" seen @click="openEditPlan(m)" title="編輯"></div>
                     </div>
-                  </div>
-
-                  <div class="muted" v-if="planPM.dest.length===0 && planPM.mealOne.length===0">（未有內容）</div>
-                </div>
-              </div>
-
-              <!-- 晚上 -->
-              <div class="period">
-                <div class="periodHeader">
-                  <div class="periodTitle">晚上</div>
-                  <div class="periodBtns">
-                    <div class="btn small" @click="openNewPlan('dest','night')">＋ 行程</div>
-                    <div class="btn small" @click="openNewPlan('meal','night')">＋ 用餐</div>
                   </div>
                 </div>
-                <div class="list">
-                  <div class="itemCard" v-for="x in planNight.dest" :key="x.id">
-                    <div class="itemTop">
-                      <div class="badgeEmoji">{{ itemEmoji(x.kind) }}</div>
-                      <div class="itemMain">
-                        <div class="itemTitle">{{ x.title }}</div>
-                        <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
-                          <span>開地圖：{{ x.maps_query || x.title }}</span>
-                        </a>
-                      </div>
-                      <div class="itemActions">
-                        <div class="penBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div class="itemCard" v-for="x in planNight.mealOne" :key="x.id">
-                    <div class="itemTop">
-                      <div class="badgeEmoji">🍴</div>
-                      <div class="itemMain">
-                        <div class="itemTitle">{{ x.title }}</div>
-                        <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
-                          <span>開地圖：{{ x.maps_query || x.title }}</span>
-                        </a>
-                      </div>
-                      <div class="itemActions">
-                        <div class="penBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="muted" v-if="planNight.dest.length===0 && planNight.mealOne.length===0">（未有內容）</div>
+                <div v-if="p.dest.length===0 && p.meal.length===0" class="muted item">
+                  呢個時段未有內容。
                 </div>
               </div>
             </div>
 
-            <div class="muted" style="padding: 12px 14px 14px;" v-else>
-              未選 Day。
-            </div>
-          </template>
-
-          <!-- FLIGHTS -->
-          <template v-else-if="view==='flights'">
-            <div class="flightList">
-              <div class="flightCard" v-for="f in flights" :key="f.id">
-                <div class="flightMeta">
-                  <div>{{ fmtDate(f.depart_time) }}</div>
-                  <div style="opacity:.85;">{{ (f.carrier||'') + (f.flight_no||'') }}</div>
-                  <div class="penBtn" style="width:34px;height:34px;" @click="openEdit('flights', f)" v-html="penSvg()"></div>
-                </div>
-
-                <div class="flightRoute">
-                  <div class="flightSide">
-                    <div class="flightCode">{{ f.depart_airport || '---' }}</div>
-                    <div class="flightTime">{{ fmtTime(f.depart_time) }}</div>
-                    <div class="flightTerminal">{{ f.note || ' ' }}</div>
-                  </div>
-
-                  <div class="flightMid">
-                    <div class="flightDur">✈️</div>
-                    <div class="flightLine"><span class="plane">✈️</span></div>
-                  </div>
-
-                  <div class="flightSide" style="text-align:right;">
-                    <div class="flightCode">{{ f.arrive_airport || '---' }}</div>
-                    <div class="flightTime">{{ fmtTime(f.arrive_time) }}</div>
-                    <div class="flightTerminal">&nbsp;</div>
-                  </div>
+            <!-- Wear section separate -->
+            <div class="period" v-if="wearList.length">
+              <div class="periodHead">
+                <h3 class="periodName">衣著</h3>
+                <div class="chipRow">
+                  <div class="chipBtn btn" @click="openNewPlan('上午','wear')">＋ 衣著</div>
                 </div>
               </div>
 
-              <div class="muted" v-if="flights.length===0">（未有航程）</div>
-            </div>
-          </template>
-
-          <!-- EXPENSES -->
-          <template v-else-if="view==='expenses'">
-            <div class="expList">
-              <div class="expRow" v-for="e in expenses" :key="e.id">
-                <div class="expLeft">
-                  <div class="expTitle">{{ e.merchant || '（未命名）' }}</div>
-                  <div class="expMeta">{{ e.happened_on || '' }} · {{ e.category || '' }} · {{ e.paid_by || '' }}</div>
-                  <div class="expMeta" v-if="e.note">{{ e.note }}</div>
-                </div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <div class="expAmt">{{ e.amount }} {{ e.currency }}</div>
-                  <div class="penBtn" @click="openEdit('expenses', e)" v-html="penSvg()"></div>
+              <div class="list">
+                <div class="item" v-for="w in wearList" :key="w.id">
+                  <div class="itemTop">
+                    <div class="itemLeft">
+                      <div style="display:flex; gap:10px; align-items:flex-start;">
+                        <div class="emoji">👕</div>
+                        <div style="min-width:0;">
+                          <div class="itemTitle">{{ w.title }}</div>
+                          <div class="itemNote" v-if="w.note">{{ w.note }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="rightActions">
+                      <div class="iconBtn small btn" v-html="penIcon()" @click="openEditPlan(w)" title="編輯"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div class="muted" v-if="expenses.length===0">（未有記帳）</div>
             </div>
-          </template>
 
-          <!-- SHOPPING -->
-          <template v-else-if="view==='shopping'">
-            <div class="shopList">
-              <div class="shopRow" :class="{done: s.done}" v-for="s in shopping" :key="s.id">
-                <input class="check" type="checkbox" :checked="!!s.done" @change="toggleShopping(s)" />
-                <div class="shopMain">
-                  <div class="shopName">{{ s.name || '（未命名）' }}</div>
-                  <div class="shopMeta" v-if="s.location">{{ s.location }}</div>
-                  <div class="shopMeta" v-if="s.price_text">{{ s.price_text }}</div>
-                  <div class="shopMeta" v-if="s.note">{{ s.note }}</div>
-                </div>
-                <div class="penBtn" @click="openEdit('shopping_items', s)" v-html="penSvg()"></div>
-              </div>
-
-              <div class="muted" v-if="shopping.length===0">（未有購物清單）</div>
-            </div>
-          </template>
+          </div>
         </div>
+
+        <!-- FLIGHTS -->
+        <div class="card section" v-else-if="view==='flights'">
+          <div class="sectionHead">
+            <h2 class="sectionTitle">航程</h2>
+            <div class="chipRow">
+              <div class="chipBtn btn" @click="openNewFlight()">＋ 航程</div>
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="flightCard" v-for="f in flights" :key="f.id">
+              <div class="flightTop">
+                <div class="meta">
+                  {{ (f.depart_time || '').slice(0,10) || '—' }} ｜ {{ (f.carrier || '') + (f.flight_no || '') || segLabel(f.seg_no) }}
+                </div>
+                <div class="iconBtn small btn" v-html="penIcon()" @click="openEditFlight(f)" title="編輯"></div>
+              </div>
+
+              <div class="flightBody">
+                <div>
+                  <div class="ap">{{ (f.depart_airport || '---').toUpperCase() }}</div>
+                  <div class="tm">{{ (f.depart_time || '').slice(11,16) || '--:--' }}</div>
+                  <div class="sub">{{ f.depart_airport ? 'Terminal / Gate：' + (f.note ? '' : '') : (f.note || '') }}</div>
+                </div>
+
+                <div class="midLine">
+                  <div class="plane">✈️</div>
+                  <div class="bar"></div>
+                </div>
+
+                <div style="text-align:right;">
+                  <div class="ap">{{ (f.arrive_airport || '---').toUpperCase() }}</div>
+                  <div class="tm">{{ (f.arrive_time || '').slice(11,16) || '--:--' }}</div>
+                  <div class="sub">{{ f.arrive_airport ? '到達' : '' }}</div>
+                </div>
+              </div>
+
+              <div class="muted" style="margin-top:10px; white-space:pre-wrap;" v-if="f.note">{{ f.note }}</div>
+            </div>
+
+            <div v-if="flights.length===0" class="muted item">未有航程。</div>
+          </div>
+        </div>
+
+        <!-- EXPENSES -->
+        <div class="card section" v-else-if="view==='expenses'">
+          <div class="sectionHead">
+            <h2 class="sectionTitle">記帳</h2>
+            <div class="chipRow">
+              <div class="chipBtn btn" @click="openNewExpense()">＋ 記帳</div>
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="item" v-for="e in expenses" :key="e.id">
+              <div class="expRow">
+                <div style="min-width:0;">
+                  <div class="itemTitle">{{ e.merchant || '—' }}</div>
+                  <div class="muted" style="margin-top:6px; font-weight:900;">
+                    {{ e.happened_on || '—' }}　·　{{ e.category || '—' }}　·　{{ e.paid_by || '' }}
+                  </div>
+                  <div class="itemNote" v-if="e.note">{{ e.note }}</div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                  <div class="money">{{ e.amount ?? '' }} {{ e.currency || '' }}</div>
+                  <div class="iconBtn small btn" v-html="penIcon()" @click="openEditExpense(e)" title="編輯"></div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="expenses.length===0" class="muted item">未有記帳。</div>
+          </div>
+        </div>
+
+        <!-- SHOPPING -->
+        <div class="card section" v-else-if="view==='shopping'">
+          <div class="sectionHead">
+            <h2 class="sectionTitle">購物</h2>
+            <div class="chipRow">
+              <div class="chipBtn btn" @click="openNewShop()">＋ 購物</div>
+            </div>
+          </div>
+
+          <div class="list">
+            <div class="item" v-for="s in shoppingSorted" :key="s.id">
+              <div class="shopRow">
+                <div class="chk">
+                  <input type="checkbox" :checked="!!s.done" @change="toggleShopDone(s)" />
+                  <div style="min-width:0;">
+                    <div class="itemTitle" :class="{strike: s.done}">{{ s.name || '—' }}</div>
+                    <div class="muted" style="margin-top:6px;" v-if="s.location" :class="{strike: s.done}">{{ s.location }}</div>
+                    <div class="muted" style="margin-top:6px;" v-if="s.price_text" :class="{strike: s.done}">{{ s.price_text }}</div>
+                    <div class="itemNote" v-if="s.note" :class="{strike: s.done}">{{ s.note }}</div>
+                  </div>
+                </div>
+                <div class="iconBtn small btn" v-html="penIcon()" @click="openEditShop(s)" title="編輯"></div>
+              </div>
+            </div>
+
+            <div v-if="shopping.length===0" class="muted item">未有購物清單。</div>
+          </div>
+        </div>
+
+        <!-- DEBUG MODAL -->
+        <div class="overlay" v-if="showDebug" @click.self="toggleDebug()">
+          <div class="modal">
+            <div class="modalHead">
+              <h3 class="modalTitle">Debug</h3>
+              <div class="chipRow">
+                <div class="pill small" :class="connected ? 'ok' : 'bad'">{{ connected ? 'DB OK' : 'DB NO' }}</div>
+                <div class="iconBtn btn" @click="toggleDebug()" title="Close">✕</div>
+              </div>
+            </div>
+
+            <div class="item" style="background: rgba(255,255,255,.03);">
+              <div class="muted">Vue</div>
+              <div class="pill small">{{ Vue?.version || 'unknown' }}</div>
+              <div class="muted" style="margin-top:10px;">Status</div>
+              <div class="mono muted">{{ statusText }}</div>
+            </div>
+
+            <div class="item dangerBtn" v-if="lastError" style="border-color: rgba(255,180,180,.35);">
+              <div class="muted">Last error</div>
+              <div style="white-space:pre-wrap;">{{ lastError.message || lastError }}</div>
+            </div>
+
+            <div class="modalActions">
+              <div class="chipBtn btn" @click="reload()">Reload</div>
+              <div class="chipBtn btn" @click="showDelete = !showDelete">{{ showDelete ? '隱藏刪除' : '顯示刪除' }}</div>
+              <div class="chipBtn btn dangerBtn" v-if="showDelete && editing && editing.row && editing.row.id" @click="delEditing()">刪除（目前編輯）</div>
+            </div>
+
+            <div class="muted" style="margin-top:10px;">
+              （Debug 只係收埋資料；唔影響 UI。）
+            </div>
+          </div>
+        </div>
+
+        <!-- EDIT MODAL (center of page) -->
+        <div class="overlay" v-if="editing" @click.self="closeEdit()">
+          <div class="modal">
+            <div class="modalHead">
+              <h3 class="modalTitle">{{ editing.title || '編輯' }}</h3>
+              <div class="chipRow">
+                <div class="chipBtn btn" @click="closeEdit()">關閉</div>
+              </div>
+            </div>
+
+            <!-- PLAN ITEMS -->
+            <template v-if="editing.table==='plan_items'">
+              <div class="grid2">
+                <div>
+                  <label>Day（輸入 day number）</label>
+                  <input v-model="editing.row.dayNoTemp" inputmode="numeric" placeholder="例如 1" />
+                </div>
+                <div>
+                  <label>時段</label>
+                  <select v-model="editing.row.time_label">
+                    <option value="上午">上午</option>
+                    <option value="下午">下午</option>
+                    <option value="晚上">晚上</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid2">
+                <div>
+                  <label>類型</label>
+                  <select v-model="editing.row.kind">
+                    <option value="activity">行程</option>
+                    <option value="food">用餐</option>
+                    <option value="wear">衣著</option>
+                    <option value="hotel">酒店</option>
+                    <option value="transport">交通</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Google Map 搜尋字（可留空）</label>
+                  <input v-model="editing.row.maps_query" placeholder="例如 札幌 PARCO / 北海道神宮" />
+                </div>
+              </div>
+
+              <div class="grid1">
+                <div>
+                  <label>標題</label>
+                  <input v-model="editing.row.title" />
+                </div>
+                <div>
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </div>
+            </template>
+
+            <!-- DAYS -->
+            <template v-else-if="editing.table==='days'">
+              <div class="grid2">
+                <div>
+                  <label>Day number</label>
+                  <input v-model.number="editing.row.day_no" type="number" />
+                </div>
+                <div>
+                  <label>排序</label>
+                  <input v-model.number="editing.row.sort_order" type="number" />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>日期（YYYY-MM-DD）</label>
+                  <input v-model="editing.row.date" placeholder="2026-01-08" />
+                </div>
+                <div>
+                  <label>標題（可留空）</label>
+                  <input v-model="editing.row.title" />
+                </div>
+              </div>
+              <div class="grid1">
+                <div>
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </div>
+            </template>
+
+            <!-- FLIGHTS -->
+            <template v-else-if="editing.table==='flights'">
+              <div class="grid2">
+                <div>
+                  <label>段數（seg_no）</label>
+                  <input v-model.number="editing.row.seg_no" type="number" />
+                </div>
+                <div>
+                  <label>航空公司（carrier）</label>
+                  <input v-model="editing.row.carrier" placeholder="CX / UO ..." />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>航班號（flight_no）</label>
+                  <input v-model="editing.row.flight_no" placeholder="581" />
+                </div>
+                <div>
+                  <label>備註（可留空）</label>
+                  <input v-model="editing.row.note" placeholder="T1 -> Narita ..." />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>出發機場（IATA）</label>
+                  <input v-model="editing.row.depart_airport" placeholder="HKG" />
+                </div>
+                <div>
+                  <label>到達機場（IATA）</label>
+                  <input v-model="editing.row.arrive_airport" placeholder="NRT" />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>出發時間（YYYY-MM-DD HH:MM）</label>
+                  <input v-model="editing.row.depart_time" placeholder="2026-01-08 02:00" />
+                </div>
+                <div>
+                  <label>到達時間（YYYY-MM-DD HH:MM）</label>
+                  <input v-model="editing.row.arrive_time" placeholder="2026-01-08 07:05" />
+                </div>
+              </div>
+            </template>
+
+            <!-- EXPENSES -->
+            <template v-else-if="editing.table==='expenses'">
+              <div class="grid2">
+                <div>
+                  <label>Day（輸入 day number）</label>
+                  <input v-model="editing.row.dayNoTemp" inputmode="numeric" placeholder="例如 2" />
+                </div>
+                <div>
+                  <label>日期（YYYY-MM-DD）</label>
+                  <input v-model="editing.row.happened_on" placeholder="2026-01-09" />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>類別</label>
+                  <input v-model="editing.row.category" placeholder="食 / 交通 / ..." />
+                </div>
+                <div>
+                  <label>店名 / 對象</label>
+                  <input v-model="editing.row.merchant" />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>金額</label>
+                  <input v-model.number="editing.row.amount" type="number" step="0.01" />
+                </div>
+                <div>
+                  <label>貨幣</label>
+                  <input v-model="editing.row.currency" placeholder="JPY" />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>付款人</label>
+                  <input v-model="editing.row.paid_by" placeholder="Kin / Aline ..." />
+                </div>
+                <div></div>
+              </div>
+              <div class="grid1">
+                <div>
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </div>
+            </template>
+
+            <!-- SHOPPING -->
+            <template v-else-if="editing.table==='shopping_items'">
+              <div class="grid2">
+                <div>
+                  <label>名稱</label>
+                  <input v-model="editing.row.name" />
+                </div>
+                <div>
+                  <label>地點（可留空）</label>
+                  <input v-model="editing.row.location" />
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label>價錢（文字）</label>
+                  <input v-model="editing.row.price_text" placeholder="¥1,500 / 免稅..." />
+                </div>
+                <div>
+                  <label>排序（可留空）</label>
+                  <input v-model.number="editing.row.order_no" type="number" />
+                </div>
+              </div>
+              <div class="grid1">
+                <div>
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </div>
+              <div class="muted" style="margin-top:8px;">
+                * done 用清單上的 ✅ 勾選（唔喺呢度改）
+              </div>
+            </template>
+
+            <div class="modalActions">
+              <div class="chipBtn btn" @click="saveEdit()">{{ loading ? '儲存中...' : '儲存' }}</div>
+              <div class="chipBtn btn" @click="closeEdit()">取消</div>
+              <div class="chipBtn btn dangerBtn" v-if="showDelete && editing && editing.row && editing.row.id" @click="delEditing()">刪除</div>
+              <div class="chipBtn btn" @click="showDelete = !showDelete">{{ showDelete ? '隱藏刪除' : '顯示刪除' }}</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- bottom toolbar -->
+      <!-- Bottom toolbar -->
       <div class="bottomBar">
-        <div class="barInner">
-          <div class="navBtn" :class="{active:view==='plan'}" @click="view='plan'">
-            <span class="navIcon">🗺️</span>行程
+        <div class="dock">
+          <div class="dockBtn btn" :class="{active:view==='plan'}" @click="view='plan'">
+            <div class="dockIcon">🗺️</div>
+            <div class="dockText">行程</div>
           </div>
-          <div class="navBtn" :class="{active:view==='flights'}" @click="view='flights'">
-            <span class="navIcon">✈️</span>航程
+          <div class="dockBtn btn" :class="{active:view==='flights'}" @click="view='flights'">
+            <div class="dockIcon">✈️</div>
+            <div class="dockText">航程</div>
           </div>
-          <div class="navBtn" :class="{active:view==='expenses'}" @click="view='expenses'">
-            <span class="navIcon">💴</span>記帳
+          <div class="dockBtn btn" :class="{active:view==='expenses'}" @click="view='expenses'">
+            <div class="dockIcon">💴</div>
+            <div class="dockText">記帳</div>
           </div>
-          <div class="navBtn" :class="{active:view==='shopping'}" @click="view='shopping'">
-            <span class="navIcon">🛍️</span>購物
-          </div>
-        </div>
-      </div>
-
-      <!-- Debug small floating -->
-      <div class="debugFab" @click="debugOpen = !debugOpen" title="Debug">
-        <span>🛠️</span>
-      </div>
-
-      <div class="debugPanel" v-if="debugOpen">
-        <div class="debugRow">
-          <div class="debugTitle">Debug</div>
-          <div class="btn small" @click="debugOpen=false">關閉</div>
-        </div>
-
-        <div class="debugBox">
-          <div class="mono muted">Vue: {{ Vue?.version || 'unknown' }}</div>
-          <div class="mono muted">DB: {{ connected ? 'OK' : 'ERR' }}</div>
-          <div class="mono muted">status: {{ statusText }}</div>
-          <div class="mono muted" v-if="lastError" style="margin-top:10px; white-space:pre-wrap;">
-            error: {{ lastError.message || lastError }}
+          <div class="dockBtn btn" :class="{active:view==='shopping'}" @click="view='shopping'">
+            <div class="dockIcon">🛍️</div>
+            <div class="dockText">購物</div>
           </div>
         </div>
       </div>
+    `,
 
-      <!-- EDIT MODAL -->
-      <div class="overlay" v-if="editing" @click.self="closeEdit()">
-        <div class="modal">
-          <div class="modalTop">
-            <div class="modalTitle">{{ editTitle() }}</div>
-            <div class="spacer"></div>
-            <div class="btn small" @click="showDelete = !showDelete">{{ showDelete ? '隱藏刪除' : '顯示刪除' }}</div>
-            <div class="btn small" @click="closeEdit()">關閉</div>
-          </div>
-
-          <!-- Days -->
-          <div v-if="editing.table==='days'">
-            <div class="grid2">
-              <div>
-                <label>第幾日 (Day)</label>
-                <input v-model.number="editing.row.day_no" type="number" />
-              </div>
-              <div>
-                <label>日期</label>
-                <input v-model="editing.row.date" placeholder="YYYY-MM-DD" />
-              </div>
-            </div>
-            <div class="grid1" style="margin-top:12px;">
-              <div>
-                <label>標題</label>
-                <input v-model="editing.row.title" placeholder="例如：Day 2 1/9 星期五" />
-              </div>
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <!-- Plan items -->
-          <div v-else-if="editing.table==='plan_items'">
-            <div class="grid2">
-              <div>
-                <label>Day（輸入 day number）</label>
-                <input v-model.number="editing.uiDayNo" type="number" placeholder="例如 1" />
-              </div>
-              <div>
-                <label>時段</label>
-                <select v-model="editing.row.time_label">
-                  <option value="上午">上午</option>
-                  <option value="下午">下午</option>
-                  <option value="晚上">晚上</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>類型</label>
-                <select v-model="editing.row.kind">
-                  <option value="dest">行程（📍）</option>
-                  <option value="meal">用餐（🍴）</option>
-                  <option value="wear">衣著（👕）</option>
-                  <option value="hotel">酒店（🏨）</option>
-                  <option value="transport">交通（🚇）</option>
-                </select>
-              </div>
-              <div>
-                <label>Google Map 搜尋字（可留空）</label>
-                <input v-model="editing.row.maps_query" placeholder="例如：札幌 PARCO / 北海道神宮" />
-              </div>
-            </div>
-
-            <div class="grid1" style="margin-top:12px;">
-              <div>
-                <label>標題</label>
-                <input v-model="editing.row.title" />
-              </div>
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-              <div class="hint muted">
-                * 刪除按鈕會喺你按「顯示刪除」先出現。
-              </div>
-            </div>
-          </div>
-
-          <!-- Flights -->
-          <div v-else-if="editing.table==='flights'">
-            <div class="grid2">
-              <div>
-                <label>段數 (SEG)</label>
-                <input v-model.number="editing.row.seg_no" type="number" />
-              </div>
-              <div>
-                <label>航空公司</label>
-                <input v-model="editing.row.carrier" placeholder="CX / UO / ..." />
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>航班號</label>
-                <input v-model="editing.row.flight_no" placeholder="581" />
-              </div>
-              <div></div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>出發機場</label>
-                <input v-model="editing.row.depart_airport" placeholder="HKG / NRT / CTS" />
-              </div>
-              <div>
-                <label>到達機場</label>
-                <input v-model="editing.row.arrive_airport" placeholder="CTS / HKG / ..." />
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>出發時間</label>
-                <input v-model="editing.row.depart_time" placeholder="2026-01-08 02:00:00+08" />
-              </div>
-              <div>
-                <label>到達時間</label>
-                <input v-model="editing.row.arrive_time" placeholder="2026-01-08 07:05:00+09" />
-              </div>
-            </div>
-
-            <div class="grid1" style="margin-top:12px;">
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <!-- Shopping -->
-          <div v-else-if="editing.table==='shopping_items'">
-            <div class="grid2">
-              <div>
-                <label>名稱</label>
-                <input v-model="editing.row.name" />
-              </div>
-              <div>
-                <label>地點</label>
-                <input v-model="editing.row.location" />
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>價錢（文字）</label>
-                <input v-model="editing.row.price_text" />
-              </div>
-              <div>
-                <label>已買？</label>
-                <select v-model="editing.row.done">
-                  <option :value="false">未買</option>
-                  <option :value="true">已買</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid1" style="margin-top:12px;">
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-              <div class="hint muted">* done 用清單上的 ✅ 勾選（暗啲+刪線）都得。</div>
-            </div>
-          </div>
-
-          <!-- Expenses -->
-          <div v-else-if="editing.table==='expenses'">
-            <div class="grid2">
-              <div>
-                <label>Day（輸入 day number）</label>
-                <input v-model.number="editing.uiDayNo" type="number" placeholder="例如 2" />
-              </div>
-              <div>
-                <label>日期</label>
-                <input v-model="editing.row.happened_on" placeholder="YYYY-MM-DD" />
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>類別</label>
-                <input v-model="editing.row.category" placeholder="交通 / 食 / ..." />
-              </div>
-              <div>
-                <label>商戶</label>
-                <input v-model="editing.row.merchant" />
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>金額</label>
-                <input v-model.number="editing.row.amount" type="number" step="0.01" />
-              </div>
-              <div>
-                <label>貨幣</label>
-                <input v-model="editing.row.currency" placeholder="JPY" />
-              </div>
-            </div>
-
-            <div class="grid2" style="margin-top:12px;">
-              <div>
-                <label>付款人</label>
-                <input v-model="editing.row.paid_by" placeholder="Kin / Aline" />
-              </div>
-              <div></div>
-            </div>
-
-            <div class="grid1" style="margin-top:12px;">
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div v-else class="muted">unknown editor</div>
-
-          <div class="modalBtns">
-            <div class="btn" @click="saveEdit()">{{ loading ? '儲存中...' : '儲存' }}</div>
-            <div class="btn ghost" @click="closeEdit()">取消</div>
-            <div class="btn danger" v-if="showDelete && editing.mode==='update' && editing.row.id" @click="delRow(editing.table, editing.row.id)">
-              刪除
-            </div>
-          </div>
-        </div>
-      </div>
-    
-  `}).mount("#app");
+    // expose helpers to template
+    methods: {
+      // merged methods block (Vue merges but keep explicit for readability)
+      ...this?.methods,
+      fmtDateZh,
+      wEmoji,
+      itemEmoji,
+      segLabel,
+      gmapDirUrl,
+    }
+  }).mount("#app");
 })();
 </script>
 </body>
