@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- Your CSS (optional). If missing, fallback styles below still work. -->
   <link rel="stylesheet" href="./assets/app.css" />
-
-  <!-- Vue (global build) -->
   <script src="./assets/vue.global.prod.js"></script>
-
-  <!-- Supabase JS v2 (UMD global: window.supabase) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -20,7 +15,6 @@
       --panel: rgba(255,255,255,.06);
       --panel2: rgba(255,255,255,.045);
       --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(255,255,255,.14);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.70);
       --ok: rgba(191,255,209,.95);
@@ -28,18 +22,17 @@
       --shadow: 0 18px 60px rgba(0,0,0,.45);
       --r: 22px;
     }
-
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
       color:var(--text);
       background: var(--bg);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
       overflow-x:hidden;
     }
 
-    /* BG image */
+    /* BG image + fallback */
     body::before{
       content:"";
       position:fixed; inset:0;
@@ -49,27 +42,25 @@
         url("./assets/bg.jpg");
       background-size: cover;
       background-position: center;
-      filter: saturate(1.05) contrast(1.02);
       opacity:.55;
       z-index:-2;
     }
     body::after{
       content:"";
       position:fixed; inset:0;
-      background: linear-gradient(180deg, rgba(5,10,20,.65), rgba(5,10,20,.85));
+      background: linear-gradient(180deg, rgba(5,10,20,.65), rgba(5,10,20,.86));
       z-index:-1;
     }
 
-    a{ color:inherit; text-decoration:none; }
     .muted{ color:var(--muted); }
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    a{ color:inherit; text-decoration:none; }
 
     .shell{
       max-width: 980px;
       margin: 0 auto;
-      padding: 12px 12px 92px;
+      padding: 12px 12px 94px;
     }
-
     .card{
       background: var(--panel);
       border: 1px solid var(--stroke);
@@ -78,11 +69,9 @@
       backdrop-filter: blur(10px);
     }
 
-    .header{
-      padding: 14px;
-      border-radius: 26px;
-    }
-    .headTop{
+    /* Header (simplified) */
+    .header{ padding: 12px 12px; border-radius: 26px; }
+    .headRow{
       display:flex;
       gap:10px;
       align-items:flex-start;
@@ -108,22 +97,13 @@
       font-weight:650;
     }
 
-    .headRight{
+    .rightCol{
       flex:0 0 auto;
       display:flex;
       flex-direction:column;
       gap:8px;
       align-items:flex-end;
-      min-width: 0;
     }
-    .headRightRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      align-items:center;
-    }
-
     .pill{
       display:inline-flex;
       gap:8px;
@@ -146,74 +126,27 @@
       color: var(--text);
       border-radius: 999px;
       padding: 10px 14px;
-      font-weight: 800;
+      font-weight: 900;
       display:inline-flex;
       align-items:center;
       gap:8px;
     }
-    .btn.small{
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 850;
-    }
-    .btn:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-    }
-    .btnGhost{
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-    }
+    .btn.small{ padding: 8px 10px; font-size: 12px; }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; }
 
-    /* Tabs (top) */
-    .tabs{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      align-items:center;
-    }
-    .tab{
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
-      font-weight: 850;
-      cursor:pointer;
-    }
-    .tab.active{
-      background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.18);
-    }
-    .spacer{ flex:1; }
-
-    /* Panel */
-    .panel{
-      margin-top: 12px;
-      overflow:hidden;
-    }
+    /* Panels */
+    .panel{ margin-top: 12px; overflow:hidden; }
     .panelHead{
       display:flex;
       align-items:center;
       gap:10px;
       padding: 12px 12px;
       border-bottom: 1px solid rgba(255,255,255,.08);
-      flex-wrap: nowrap;
     }
-    .panelTitle{
-      font-size: 18px;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-    .panelActions{
-      margin-left:auto;
-      display:flex;
-      gap:10px;
-      flex-wrap: nowrap;
-      align-items:center;
-    }
+    .panelTitle{ font-size: 18px; font-weight: 950; }
+    .panelActions{ margin-left:auto; display:flex; gap:10px; align-items:center; }
 
-    /* Day slider */
+    /* Day slider: thinner */
     .daySlider{
       display:flex;
       gap:10px;
@@ -224,19 +157,18 @@
     }
     .dayCard{
       flex: 0 0 auto;
-      min-width: 220px;
-      max-width: 220px;
-      scroll-snap-align:start;
-      padding: 10px 10px;
+      width: 210px; /* thinner look */
+      padding: 10px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
+      scroll-snap-align:start;
     }
     .dayCard.active{
       border-color: rgba(191,255,209,.35);
       background: rgba(191,255,209,.06);
     }
-    .dayCardTop{
+    .dayTop{
       display:flex;
       gap:10px;
       align-items:flex-start;
@@ -248,22 +180,14 @@
       background: rgba(255,255,255,.04);
       font-weight: 900;
       font-size: 12px;
-      line-height: 1.1;
       min-width: 64px;
       text-align:center;
     }
-    .dayMeta{
-      flex:1;
-      min-width:0;
-    }
-    .dayDate{
-      font-weight: 900;
-      opacity:.82;
-      white-space:nowrap;
-    }
+    .dayMeta{ flex:1; min-width:0; }
+    .dayDate{ font-weight: 900; opacity:.82; white-space:nowrap; }
     .dayTitle{
       font-weight: 950;
-      font-size: 18px;
+      font-size: 16px;
       margin-top: 6px;
       line-height: 1.1;
       display: -webkit-box;
@@ -271,9 +195,11 @@
       -webkit-line-clamp: 2;
       overflow: hidden;
     }
+
+    /* Small icon button (pen) */
     .iconBtn{
-      width: 36px;
-      height: 36px;
+      width: 30px;
+      height: 30px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
@@ -282,19 +208,10 @@
       cursor:pointer;
       flex:0 0 auto;
     }
-    .iconBtn.small{ width: 32px; height: 32px; border-radius: 12px; }
-    .iconSvg{
-      width: 18px; height: 18px;
-      opacity:.92;
-    }
+    .iconSvg{ width: 16px; height: 16px; opacity:.95; }
 
-    /* Sections (上午/下午/晚上/衣著) */
-    .sections{
-      padding: 10px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    /* Sections */
+    .sections{ padding: 10px; display:flex; flex-direction:column; gap:10px; }
     .section{
       border-radius: 20px;
       border: 1px solid rgba(255,255,255,.10);
@@ -302,29 +219,14 @@
       overflow:hidden;
     }
     .sectionHead{
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
       padding: 12px 12px;
       border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .sectionTitle{
-      font-size: 20px;
-      font-weight: 950;
-    }
-    .sectionActions{
-      margin-left:auto;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+    .sectionTitle{ font-size: 20px; font-weight: 950; }
+    .sectionActions{ margin-left:auto; display:flex; gap:10px; align-items:center; }
 
-    .items{
-      padding: 10px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .items{ padding: 10px; display:flex; flex-direction:column; gap:10px; }
     .itemCard{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -335,13 +237,10 @@
       align-items:flex-start;
     }
     .itemEmoji{
-      width: 26px;
-      height: 26px;
-      display:grid;
-      place-items:center;
+      width: 26px; height: 26px;
+      display:grid; place-items:center;
       font-size: 18px;
       margin-top: 2px;
-      opacity:.95;
       flex:0 0 auto;
     }
     .itemMain{ flex:1; min-width:0; }
@@ -349,17 +248,13 @@
       font-weight: 950;
       font-size: 20px;
       line-height: 1.15;
+      word-break: break-word;
     }
     .itemNote{
       margin-top: 8px;
       color: rgba(255,255,255,.74);
       white-space: pre-wrap;
       line-height: 1.35;
-    }
-    .itemActions{
-      display:flex;
-      gap:8px;
-      flex:0 0 auto;
     }
 
     /* Flights */
@@ -369,7 +264,6 @@
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
       padding: 14px;
-      position:relative;
     }
     .flightTop{
       display:flex;
@@ -378,14 +272,11 @@
       justify-content:space-between;
       flex-wrap:wrap;
     }
-    .flightMeta{
-      font-weight: 900;
-      opacity:.85;
-    }
+    .flightMeta{ font-weight: 900; opacity:.85; }
     .flightRoute{
       margin-top: 10px;
       font-weight: 950;
-      font-size: 26px;
+      font-size: 24px;
       line-height: 1.1;
     }
     .flightGrid{
@@ -395,27 +286,15 @@
       gap:10px;
       align-items:center;
     }
-    .flightAirport{
-      font-weight: 950;
-      font-size: 22px;
-    }
-    .flightTime{
-      font-weight: 950;
-      font-size: 34px;
-      line-height:1;
-      margin-top: 6px;
-    }
-    .flightTerminal{
-      margin-top: 4px;
-      opacity:.75;
-      font-weight: 750;
-    }
+    .flightAirport{ font-weight: 950; font-size: 20px; }
+    .flightTime{ font-weight: 950; font-size: 32px; line-height:1; margin-top: 6px; }
+    .flightTerminal{ margin-top: 4px; opacity:.75; font-weight: 750; }
     .flightLine{
       height: 4px;
       border-radius: 999px;
       background: rgba(255,255,255,.16);
       position:relative;
-      margin: 0 8px;
+      width: 140px;
     }
     .flightPlane{
       position:absolute;
@@ -438,11 +317,7 @@
       align-items:flex-start;
     }
     .expenseMain{ flex:1; min-width:0; }
-    .expenseTitle{
-      font-weight: 950;
-      font-size: 18px;
-      line-height: 1.15;
-    }
+    .expenseTitle{ font-weight: 950; font-size: 18px; line-height: 1.15; }
     .expenseSub{ margin-top:6px; opacity:.78; font-weight:800; }
 
     /* Shopping */
@@ -456,20 +331,10 @@
       gap:10px;
       align-items:center;
     }
-    .shopRow.done{
-      opacity: .70;
-      background: rgba(255,255,255,.03);
-    }
+    .shopRow.done{ opacity: .70; }
     .shopText{ flex:1; min-width:0; }
-    .shopName{
-      font-weight: 950;
-      font-size: 18px;
-      line-height:1.15;
-    }
-    .shopName.done{
-      text-decoration: line-through;
-      opacity:.9;
-    }
+    .shopName{ font-weight: 950; font-size: 18px; line-height:1.15; }
+    .shopName.done{ text-decoration: line-through; opacity:.9; }
     .shopMeta{
       margin-top: 4px;
       opacity:.75;
@@ -479,12 +344,9 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    input[type="checkbox"]{
-      width: 20px; height: 20px;
-      accent-color: #9ef0c1;
-    }
+    input[type="checkbox"]{ width: 20px; height: 20px; accent-color: #9ef0c1; }
 
-    /* Modal editor */
+    /* Modal editor (center) */
     .modalMask{
       position:fixed;
       inset:0;
@@ -508,7 +370,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    .formGrid1{ grid-template-columns: 1fr; }
     label{
       display:block;
       font-size: 12px;
@@ -566,11 +427,11 @@
     .navIcon{ font-size: 18px; }
     .navLabel{ font-size: 12px; opacity:.9; white-space:nowrap; }
 
-    /* Debug button */
+    /* Debug: smaller */
     .debugFab{
       position: fixed;
       right: 14px;
-      bottom: 94px;
+      bottom: 86px; /* above bottomBar */
       z-index: 30;
       display:flex;
       flex-direction:column;
@@ -579,7 +440,7 @@
     }
     .debugBtn{
       border-radius: 999px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       font-weight: 950;
@@ -587,9 +448,10 @@
       display:flex;
       align-items:center;
       gap:8px;
+      font-size: 12px;
     }
     .debugPanel{
-      width: min(360px, calc(100vw - 28px));
+      width: min(320px, calc(100vw - 28px));
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(10,18,34,.85);
@@ -604,16 +466,11 @@
     }
     .debugRow:last-child{ border-bottom:none; }
 
-    /* Mobile tweaks to feel wider */
     @media (max-width: 520px){
-      .shell{ padding-left: 10px; padding-right: 10px; padding-bottom: 96px; }
+      .shell{ padding-left: 10px; padding-right: 10px; padding-bottom: 98px; }
       .titleBig{ font-size: 38px; }
-      .dayCard{ min-width: 210px; max-width: 210px; padding: 10px; }
-      .panelHead{ padding: 10px; }
-      .sections{ padding: 10px; }
-      .header{ padding: 12px; }
-      .tabs{ gap:8px; }
-      .tab{ padding: 9px 12px; }
+      .dayCard{ width: 205px; }
+      .flightLine{ width: 120px; }
     }
   </style>
 </head>
@@ -625,105 +482,24 @@
   (() => {
     const { createApp } = Vue;
 
-    // =========================
-    // CONFIG
-    // =========================
     const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF"; // publishable key
+    const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF";
 
     const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
     if (!sb) console.error("Supabase init failed: window.supabase missing?");
 
-    const safe = (v) => (v == null ? "" : String(v));
-
-    const penSvg = `
-      <svg class="iconSvg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 20h9"/>
-        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-      </svg>
-    `;
-
-    const pinSvg = `
-      <svg class="iconSvg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 21s7-4.35 7-11a7 7 0 0 0-14 0c0 6.65 7 11 7 11z"/>
-        <circle cx="12" cy="10" r="2.5"/>
-      </svg>
-    `;
-
-    function encodeQ(s){ return encodeURIComponent(s || ""); }
-
-    function parsePeriod(timeLabel){
-      const t = safe(timeLabel);
-      if (t.includes("上午")) return "上午";
-      if (t.includes("下午")) return "下午";
-      if (t.includes("晚上") || t.includes("夜")) return "晚上";
-      // fallback: keep in 上午
-      return "上午";
-    }
-
-    function timeLabelHuman(t){
-      // keep your existing labels if present
-      const s = safe(t).trim();
-      if (!s) return "";
-      return s;
-    }
-
-    function kindEmoji(kind){
-      const k = safe(kind);
-      if (k === "food") return "🍽️";
-      if (k === "wear") return "👕";
-      return "📍";
-    }
-
-    function flightGuessCodes(f){
-      // depart_airport/arrive_airport may already be codes like HKG/CTS
-      const dep = safe(f.depart_airport).toUpperCase();
-      const arr = safe(f.arrive_airport).toUpperCase();
-      return { dep: dep || "—", arr: arr || "—" };
-    }
-
-    function pickRouteTitle(f){
-      const dep = safe(f.depart_airport);
-      const arr = safe(f.arrive_airport);
-      return `${dep || "—"} → ${arr || "—"}`;
-    }
-
-    function formatDateLabel(d){
-      if (!d) return "";
-      // Accept YYYY-MM-DD
-      const dt = new Date(d + "T00:00:00");
-      if (Number.isNaN(dt.getTime())) return d;
-      const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-      return `${days[dt.getDay()]} ${dt.getDate()} ${dt.toLocaleString("en-GB",{month:"short"})} ${dt.getFullYear()}`;
-    }
-
-    function formatHHMM(ts){
-      if (!ts) return "";
-      // ts could be "2026-01-08 02:00:00+08" or ISO; try Date parse first
-      const s = String(ts).replace(" ", "T");
-      const dt = new Date(s);
-      if (!Number.isNaN(dt.getTime())){
-        return dt.toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit", hour12:false });
-      }
-      // fallback: grab HH:MM from string
-      const m = String(ts).match(/(\d{2}):(\d{2})/);
-      return m ? `${m[1]}:${m[2]}` : String(ts).slice(0,5);
-    }
-
     createApp({
       data(){
         return {
-          view: "plan", // plan|flights|expenses|shopping
+          view: "plan",
           connected: false,
           loading: false,
           statusText: "ready",
           lastError: null,
 
-          // geo + weather
           geo: { lat: null, lon: null, ok: false },
           wx: { emoji:"⛅", temp:"--°C", wind:"--", loc:"" },
 
-          // data from DB
           days: [],
           selectedDayId: null,
           planItems: [],
@@ -731,12 +507,19 @@
           shopping: [],
           expenses: [],
 
-          // UI
           debugOpen: false,
 
-          // editor
-          editing: null, // {table, mode, row, day_no_input}
-          showDelete: false, // only show delete inside edit
+          editing: null,
+          showDelete: false,
+
+          // ✅ put SVG strings INSIDE Vue so v-html works
+          penSvg: `
+            <svg class="iconSvg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+            </svg>
+          `,
         };
       },
 
@@ -745,52 +528,77 @@
           return this.days.find(d => d.id === this.selectedDayId) || null;
         },
 
-        // plan items for selected day
         planForDay(){
           if (!this.selectedDayId) return [];
           return (this.planItems || []).filter(x => x.day_id === this.selectedDayId);
         },
 
-        // grouped by period, with "destination first, meal last (only one)"
         periods(){
           const items = this.planForDay.slice().sort((a,b)=> (a.order_no ?? 0) - (b.order_no ?? 0));
           const bucket = { "上午": [], "下午": [], "晚上": [] };
           const wear = [];
 
           for (const x of items){
-            const k = safe(x.kind);
-            if (k === "wear"){
-              wear.push(x);
-              continue;
-            }
-            const p = parsePeriod(x.time_label);
+            const k = this.safe(x.kind);
+            if (k === "wear"){ wear.push(x); continue; }
+            const p = this.parsePeriod(x.time_label);
             bucket[p].push(x);
           }
 
-          // for each period: destinations first, then one meal (first food)
           const out = {};
           for (const p of ["上午","下午","晚上"]){
             const arr = bucket[p] || [];
-            const dest = arr.filter(x => safe(x.kind) !== "food");
-            const meal = arr.filter(x => safe(x.kind) === "food");
-            out[p] = {
-              dest,
-              meal: meal.length ? [meal[0]] : []
-            };
+            const dest = arr.filter(x => this.safe(x.kind) !== "food");
+            const meal = arr.filter(x => this.safe(x.kind) === "food");
+            out[p] = { dest, meal: meal.length ? [meal[0]] : [] };
           }
-
           return { ...out, "衣著": { dest: wear, meal: [] } };
         },
 
         shoppingSorted(){
           const arr = (this.shopping || []).slice().sort((a,b)=> (a.order_no ?? 0) - (b.order_no ?? 0));
-          const todo = arr.filter(x => !x.done);
-          const done = arr.filter(x => !!x.done);
-          return [...todo, ...done];
+          return [...arr.filter(x=>!x.done), ...arr.filter(x=>!!x.done)];
         },
       },
 
       methods:{
+        // ✅ helpers must be here (otherwise flights page can blank)
+        safe(v){ return (v == null ? "" : String(v)); },
+        encodeQ(s){ return encodeURIComponent(s || ""); },
+
+        parsePeriod(timeLabel){
+          const t = this.safe(timeLabel);
+          if (t.includes("上午")) return "上午";
+          if (t.includes("下午")) return "下午";
+          if (t.includes("晚上") || t.includes("夜")) return "晚上";
+          return "上午";
+        },
+
+        formatDateLabel(d){
+          if (!d) return "";
+          const dt = new Date(d + "T00:00:00");
+          if (Number.isNaN(dt.getTime())) return d;
+          const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+          return `${days[dt.getDay()]} ${dt.getDate()} ${dt.toLocaleString("en-GB",{month:"short"})} ${dt.getFullYear()}`;
+        },
+
+        formatHHMM(ts){
+          if (!ts) return "";
+          const s = String(ts).replace(" ", "T");
+          const dt = new Date(s);
+          if (!Number.isNaN(dt.getTime())){
+            return dt.toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit", hour12:false });
+          }
+          const m = String(ts).match(/(\d{2}):(\d{2})/);
+          return m ? `${m[1]}:${m[2]}` : String(ts).slice(0,5);
+        },
+
+        flightGuessCodes(f){
+          const dep = this.safe(f.depart_airport).toUpperCase();
+          const arr = this.safe(f.arrive_airport).toUpperCase();
+          return { dep: dep || "—", arr: arr || "—" };
+        },
+
         setErr(e){
           const msg = (e && (e.message || e.error_description)) ? (e.message || e.error_description) : String(e);
           this.lastError = { message: msg, raw: e };
@@ -815,37 +623,32 @@
           this.lastError = null;
           this.statusText = "loading...";
           try{
-            const qDays = await sb
-              .from("days")
+            const qDays = await sb.from("days")
               .select("id,day_no,date,title,note,sort_order,created_at,updated_at")
               .order("day_no", { ascending:true });
             if (qDays.error) throw qDays.error;
             this.days = qDays.data || [];
             if (!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
 
-            const qPlan = await sb
-              .from("plan_items")
+            const qPlan = await sb.from("plan_items")
               .select("id,day_id,time_label,kind,title,note,maps_query,order_no,created_at,updated_at")
               .order("order_no", { ascending:true });
             if (qPlan.error) throw qPlan.error;
             this.planItems = qPlan.data || [];
 
-            const qFlights = await sb
-              .from("flights")
+            const qFlights = await sb.from("flights")
               .select("id,seg_no,flight_no,carrier,depart_airport,arrive_airport,depart_time,arrive_time,note,created_at,updated_at")
               .order("seg_no", { ascending:true });
             if (qFlights.error) throw qFlights.error;
             this.flights = qFlights.data || [];
 
-            const qShop = await sb
-              .from("shopping_items")
+            const qShop = await sb.from("shopping_items")
               .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
               .order("order_no", { ascending:true });
             if (qShop.error) throw qShop.error;
             this.shopping = qShop.data || [];
 
-            const qExp = await sb
-              .from("expenses")
+            const qExp = await sb.from("expenses")
               .select("id,day_id,happened_on,category,merchant,amount,currency,paid_by,note,created_at,updated_at")
               .order("happened_on", { ascending:true });
             if (qExp.error) throw qExp.error;
@@ -861,7 +664,7 @@
           }
         },
 
-        // --- Geo + Weather (no key) ---
+        // Weather (no key)
         async initGeo(){
           try{
             if (!navigator.geolocation) return;
@@ -880,14 +683,12 @@
           try{
             if (!this.geo.ok) return;
 
-            // Reverse geocode (Open-Meteo)
             const rgUrl = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${this.geo.lat}&longitude=${this.geo.lon}&language=en&count=1`;
             const rg = await fetch(rgUrl);
             const rgj = await rg.json();
             const place = rgj?.results?.[0];
             const loc = place ? [place.name, place.admin1].filter(Boolean).join(", ") : "";
 
-            // Forecast (Open-Meteo)
             const url = `https://api.open-meteo.com/v1/forecast?latitude=${this.geo.lat}&longitude=${this.geo.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=Asia%2FHong_Kong`;
             const r = await fetch(url);
             const j = await r.json();
@@ -897,16 +698,14 @@
             const ws = cur.wind_speed_10m;
 
             const mapWx = (code)=>{
-              // super simple mapping
               if (code == null) return "⛅";
               const c = Number(code);
-              if ([0].includes(c)) return "☀️";
+              if (c===0) return "☀️";
               if ([1,2,3].includes(c)) return "⛅";
               if ([45,48].includes(c)) return "🌫️";
               if ([51,53,55,56,57].includes(c)) return "🌦️";
-              if ([61,63,65,66,67].includes(c)) return "🌧️";
+              if ([61,63,65,66,67,80,81,82].includes(c)) return "🌧️";
               if ([71,73,75,77].includes(c)) return "🌨️";
-              if ([80,81,82].includes(c)) return "🌧️";
               if ([95,96,99].includes(c)) return "⛈️";
               return "⛅";
             };
@@ -918,48 +717,36 @@
               loc: loc || ""
             };
           }catch(e){
-            // ignore weather failure silently
             console.warn("weather failed", e);
           }
         },
 
-        // --- Map link: current location -> destination ---
         destLink(item){
-          const q = safe(item.maps_query) || safe(item.title);
+          const q = this.safe(item.maps_query) || this.safe(item.title);
           if (!q) return null;
           if (this.geo.ok){
-            return `https://www.google.com/maps/dir/?api=1&origin=${this.geo.lat},${this.geo.lon}&destination=${encodeQ(q)}&travelmode=transit`;
+            return `https://www.google.com/maps/dir/?api=1&origin=${this.geo.lat},${this.geo.lon}&destination=${this.encodeQ(q)}&travelmode=transit`;
           }
-          // if no geo, let google decide origin = current location
-          return `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${encodeQ(q)}&travelmode=transit`;
+          return `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${this.encodeQ(q)}&travelmode=transit`;
         },
 
-        // --- CRUD helpers ---
-        openNewPlan(period, kind){
-          // kind: "activity" or "food" or "wear"
-          if (!this.selectedDay) return;
-          const row = {
-            day_id: this.selectedDayId,
-            time_label: period === "衣著" ? "衣著" : period,
-            kind: kind,
-            title: "",
-            note: "",
-            maps_query: "",
-            order_no: null
-          };
-          this.showDelete = false;
-          this.editing = {
-            table: "plan_items",
-            mode: "insert",
-            row: JSON.parse(JSON.stringify(row)),
-            day_no_input: this.selectedDay.day_no
-          };
+        selectDay(id){ this.selectedDayId = id; },
+
+        itemTitleLine(x){
+          const tl = this.safe(x.time_label).trim();
+          const t = this.safe(x.title);
+          if (tl && !["上午","下午","晚上","衣著"].includes(tl)) return `${tl}  ${t}`;
+          return t;
         },
 
+        // CRUD (keep same behavior)
         openEdit(table, row){
           this.showDelete = false;
           const cloned = JSON.parse(JSON.stringify(row));
-          const day = (table === "plan_items" || table === "expenses") ? this.days.find(d => d.id === cloned.day_id) : null;
+          const day = (table === "plan_items" || table === "expenses")
+            ? this.days.find(d => d.id === cloned.day_id)
+            : null;
+
           this.editing = {
             table,
             mode: "update",
@@ -1009,10 +796,22 @@
           };
         },
 
-        closeEdit(){
-          this.editing = null;
+        openNewPlan(period, kind){
+          if (!this.selectedDay) return;
+          const row = {
+            day_id: this.selectedDayId,
+            time_label: period === "衣著" ? "衣著" : period,
+            kind: kind,
+            title: "",
+            note: "",
+            maps_query: "",
+            order_no: null
+          };
           this.showDelete = false;
+          this.editing = { table:"plan_items", mode:"insert", row: JSON.parse(JSON.stringify(row)), day_no_input: this.selectedDay.day_no };
         },
+
+        closeEdit(){ this.editing = null; this.showDelete = false; },
 
         resolveDayIdFromDayNo(dayNo){
           const n = Number(dayNo);
@@ -1028,19 +827,15 @@
           try{
             const t = this.editing.table;
             const payload = { ...this.editing.row };
-
             delete payload.created_at;
             delete payload.updated_at;
 
-            // DayNo -> DayId for plan_items / expenses
             if (t === "plan_items" || t === "expenses"){
-              const dayNo = this.editing.day_no_input;
-              const resolved = this.resolveDayIdFromDayNo(dayNo);
+              const resolved = this.resolveDayIdFromDayNo(this.editing.day_no_input);
               if (!resolved) throw new Error("搵唔到呢個 Day number（請先確保 Days 表有呢個 day_no）");
               payload.day_id = resolved;
             }
 
-            // auto order_no at bottom if missing
             if (t === "plan_items" && (payload.order_no == null || payload.order_no === "")){
               const max = this.planForDay.reduce((m,x)=>Math.max(m, x.order_no||0), 0);
               payload.order_no = max + 1;
@@ -1049,7 +844,6 @@
               const max = (this.shopping || []).reduce((m,x)=>Math.max(m, x.order_no||0), 0);
               payload.order_no = max + 1;
             }
-
             if (t === "shopping_items") payload.done = !!payload.done;
 
             const { error } = await sb.from(t).upsert(payload);
@@ -1090,27 +884,10 @@
             const { error } = await sb.from("shopping_items").upsert({ id: item.id, done: newVal });
             if (error) throw error;
             item.done = newVal;
-            // keep list sorted with done at bottom
             this.shopping = this.shopping.slice();
           }catch(e){
             this.setErr(e);
           }
-        },
-
-        // UI
-        selectDay(id){
-          this.selectedDayId = id;
-        },
-
-        prettyPeriod(p){
-          return p; // already trad chinese
-        },
-
-        itemTitleLine(x){
-          // show time_label if exists, else just title
-          const tl = timeLabelHuman(x.time_label);
-          const t = safe(x.title);
-          return (tl && !["上午","下午","晚上","衣著"].includes(tl)) ? `${tl}  ${t}` : t;
         },
       },
 
@@ -1118,7 +895,6 @@
         await this.ping();
         await this.loadAll();
         this.initGeo();
-        // refresh weather sometimes
         setInterval(()=>this.fetchWeather(), 10*60*1000);
       },
 
@@ -1126,39 +902,26 @@
         <div class="shell">
           <!-- HEADER -->
           <div class="card header">
-            <div class="headTop">
+            <div class="headRow">
               <div class="brand">
                 <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
                 <div class="titleBig">札幌旅行 App</div>
                 <div class="subtitle">行程 / 航程 / 記帳 / 購物</div>
-
-                <!-- top tabs (optional, bottom toolbar is main) -->
-                <div class="tabs">
-                  <div class="tab" :class="{active:view==='plan'}" @click="view='plan'">行程</div>
-                  <div class="tab" :class="{active:view==='flights'}" @click="view='flights'">航程</div>
-                  <div class="tab" :class="{active:view==='expenses'}" @click="view='expenses'">記帳</div>
-                  <div class="tab" :class="{active:view==='shopping'}" @click="view='shopping'">購物</div>
-                  <div class="spacer"></div>
-                </div>
               </div>
 
-              <div class="headRight">
-                <div class="headRightRow">
-                  <div class="pill" :class="connected ? 'ok' : 'bad'">
-                    <span style="font-weight:950;">DB</span>
-                    <span>{{ connected ? 'YES' : 'NO' }}</span>
-                  </div>
-
-                  <div class="pill">
-                    <span style="font-weight:950;">{{ wx.emoji }}</span>
-                    <span style="font-weight:950;">{{ wx.temp }}</span>
-                    <span class="muted">{{ wx.wind }}</span>
-                  </div>
-
-                  <button class="btn small" @click="loadAll()" :disabled="loading">↻</button>
+              <div class="rightCol">
+                <div class="pill" :class="connected ? 'ok' : 'bad'">
+                  <span style="font-weight:950;">DB</span>
+                  <span>{{ connected ? 'YES' : 'NO' }}</span>
                 </div>
 
-                <div class="pill muted" v-if="wx.loc">{{ wx.loc }}</div>
+                <div class="pill">
+                  <span style="font-weight:950;">{{ wx.emoji }}</span>
+                  <span style="font-weight:950;">{{ wx.temp }}</span>
+                  <span class="muted">{{ wx.wind }}</span>
+                </div>
+
+                <button class="btn small" @click="loadAll()" :disabled="loading">↻ Reload</button>
               </div>
             </div>
           </div>
@@ -1168,43 +931,34 @@
             <div class="panelHead">
               <div class="panelTitle">行程</div>
               <div class="panelActions">
-                <button class="btn small btnGhost" @click="openNewDay()">＋ Day</button>
+                <button class="btn small" @click="openNewDay()">＋ Day</button>
               </div>
             </div>
 
-            <!-- Day slider -->
             <div class="daySlider">
-              <div
-                class="dayCard"
-                :class="{active: selectedDayId===d.id}"
-                v-for="d in days"
-                :key="d.id"
-                @click="selectDay(d.id)"
-              >
-                <div class="dayCardTop">
+              <div class="dayCard" :class="{active:selectedDayId===d.id}" v-for="d in days" :key="d.id" @click="selectDay(d.id)">
+                <div class="dayTop">
                   <div class="dayBadge">Day {{ d.day_no }}</div>
                   <div class="dayMeta">
                     <div class="dayDate">{{ d.date || '-' }}</div>
                     <div class="dayTitle">{{ d.title || '未命名' }}</div>
                   </div>
-                  <div class="iconBtn small" title="Edit Day" @click.stop="openEdit('days', d)" v-html="penSvg"></div>
+                  <div class="iconBtn" title="Edit Day" @click.stop="openEdit('days', d)" v-html="penSvg"></div>
                 </div>
               </div>
             </div>
 
             <div class="sections" v-if="selectedDay">
-              <!-- Periods: 上午/下午/晚上 -->
               <div class="section" v-for="p in ['上午','下午','晚上']" :key="p">
                 <div class="sectionHead">
-                  <div class="sectionTitle">{{ prettyPeriod(p) }}</div>
+                  <div class="sectionTitle">{{ p }}</div>
                   <div class="sectionActions">
-                    <button class="btn small btnGhost" @click="openNewPlan(p,'activity')">＋ 行程</button>
-                    <button class="btn small btnGhost" @click="openNewPlan(p,'food')">＋ 用餐</button>
+                    <button class="btn small" @click="openNewPlan(p,'activity')">＋ 行程</button>
+                    <button class="btn small" @click="openNewPlan(p,'food')">＋ 用餐</button>
                   </div>
                 </div>
 
                 <div class="items">
-                  <!-- destinations first -->
                   <div class="itemCard" v-for="x in periods[p].dest" :key="x.id">
                     <div class="itemEmoji">📍</div>
                     <div class="itemMain">
@@ -1216,12 +970,9 @@
                       </div>
                       <div class="itemNote" v-if="x.note">{{ x.note }}</div>
                     </div>
-                    <div class="itemActions">
-                      <div class="iconBtn small" title="Edit" @click="openEdit('plan_items', x)" v-html="penSvg"></div>
-                    </div>
+                    <div class="iconBtn" title="Edit" @click="openEdit('plan_items', x)" v-html="penSvg"></div>
                   </div>
 
-                  <!-- only one meal -->
                   <div class="itemCard" v-for="x in periods[p].meal" :key="x.id">
                     <div class="itemEmoji">🍽️</div>
                     <div class="itemMain">
@@ -1233,9 +984,7 @@
                       </div>
                       <div class="itemNote" v-if="x.note">{{ x.note }}</div>
                     </div>
-                    <div class="itemActions">
-                      <div class="iconBtn small" title="Edit" @click="openEdit('plan_items', x)" v-html="penSvg"></div>
-                    </div>
+                    <div class="iconBtn" title="Edit" @click="openEdit('plan_items', x)" v-html="penSvg"></div>
                   </div>
 
                   <div class="muted" v-if="periods[p].dest.length===0 && periods[p].meal.length===0" style="padding:6px 2px;">
@@ -1244,12 +993,11 @@
                 </div>
               </div>
 
-              <!-- 衣著 (separate, not in time periods) -->
               <div class="section">
                 <div class="sectionHead">
                   <div class="sectionTitle">衣著</div>
                   <div class="sectionActions">
-                    <button class="btn small btnGhost" @click="openNewPlan('衣著','wear')">＋ 衣著</button>
+                    <button class="btn small" @click="openNewPlan('衣著','wear')">＋ 衣著</button>
                   </div>
                 </div>
                 <div class="items">
@@ -1259,11 +1007,8 @@
                       <div class="itemTitle">{{ itemTitleLine(x) }}</div>
                       <div class="itemNote" v-if="x.note">{{ x.note }}</div>
                     </div>
-                    <div class="itemActions">
-                      <div class="iconBtn small" title="Edit" @click="openEdit('plan_items', x)" v-html="penSvg"></div>
-                    </div>
+                    <div class="iconBtn" title="Edit" @click="openEdit('plan_items', x)" v-html="penSvg"></div>
                   </div>
-
                   <div class="muted" v-if="periods['衣著'].dest.length===0" style="padding:6px 2px;">
                     （暫未有內容）
                   </div>
@@ -1281,17 +1026,19 @@
             <div class="panelHead">
               <div class="panelTitle">航程</div>
               <div class="panelActions">
-                <button class="btn small btnGhost" @click="openNewFlight()">＋ 航程</button>
+                <button class="btn small" @click="openNewFlight()">＋ 航程</button>
               </div>
             </div>
 
             <div class="flightList">
               <div class="flightCard" v-for="f in flights" :key="f.id">
                 <div class="flightTop">
-                  <div class="flightMeta">{{ formatDateLabel((selectedDay && selectedDay.date) || '') }} <span class="muted">|</span> {{ (f.carrier||'') + (f.flight_no||'') }}</div>
-                  <div class="itemActions">
-                    <div class="iconBtn small" title="Edit" @click="openEdit('flights', f)" v-html="penSvg"></div>
+                  <div class="flightMeta">
+                    {{ formatDateLabel(selectedDay?.date || '') }}
+                    <span class="muted"> | </span>
+                    {{ (safe(f.carrier)||'') + (safe(f.flight_no)||'') }}
                   </div>
+                  <div class="iconBtn" title="Edit" @click="openEdit('flights', f)" v-html="penSvg"></div>
                 </div>
 
                 <div class="flightRoute">{{ safe(f.depart_airport) }} to {{ safe(f.arrive_airport) }}</div>
@@ -1300,11 +1047,11 @@
                   <div>
                     <div class="flightAirport">{{ flightGuessCodes(f).dep }}</div>
                     <div class="flightTime">{{ formatHHMM(f.depart_time) || '--:--' }}</div>
-                    <div class="flightTerminal">{{ safe(f.depart_airport) || '' }}</div>
+                    <div class="flightTerminal">{{ safe(f.depart_airport) }}</div>
                   </div>
 
                   <div style="display:flex; align-items:center; justify-content:center;">
-                    <div class="flightLine" style="width:160px;">
+                    <div class="flightLine">
                       <div class="flightPlane">✈️</div>
                     </div>
                   </div>
@@ -1312,7 +1059,7 @@
                   <div style="text-align:right;">
                     <div class="flightAirport">{{ flightGuessCodes(f).arr }}</div>
                     <div class="flightTime">{{ formatHHMM(f.arrive_time) || '--:--' }}</div>
-                    <div class="flightTerminal">{{ safe(f.arrive_airport) || '' }}</div>
+                    <div class="flightTerminal">{{ safe(f.arrive_airport) }}</div>
                   </div>
                 </div>
 
@@ -1330,7 +1077,7 @@
             <div class="panelHead">
               <div class="panelTitle">記帳</div>
               <div class="panelActions">
-                <button class="btn small btnGhost" @click="openNewExpense()">＋ 記帳</button>
+                <button class="btn small" @click="openNewExpense()">＋ 記帳</button>
               </div>
             </div>
 
@@ -1346,9 +1093,7 @@
                   </div>
                   <div class="muted" v-if="e.note" style="margin-top:8px; white-space:pre-wrap;">{{ e.note }}</div>
                 </div>
-                <div class="itemActions">
-                  <div class="iconBtn small" title="Edit" @click="openEdit('expenses', e)" v-html="penSvg"></div>
-                </div>
+                <div class="iconBtn" title="Edit" @click="openEdit('expenses', e)" v-html="penSvg"></div>
               </div>
 
               <div class="muted" v-if="expenses.length===0" style="padding:14px;">
@@ -1362,7 +1107,7 @@
             <div class="panelHead">
               <div class="panelTitle">購物</div>
               <div class="panelActions">
-                <button class="btn small btnGhost" @click="openNewShopping()">＋ 購物</button>
+                <button class="btn small" @click="openNewShopping()">＋ 購物</button>
               </div>
             </div>
 
@@ -1377,7 +1122,7 @@
                     <span v-if="s.price_text">{{ s.price_text }}</span>
                   </div>
                 </div>
-                <div class="iconBtn small" title="Edit" @click="openEdit('shopping_items', s)" v-html="penSvg"></div>
+                <div class="iconBtn" title="Edit" @click="openEdit('shopping_items', s)" v-html="penSvg"></div>
               </div>
 
               <div class="muted" v-if="shopping.length===0" style="padding:14px;">
@@ -1387,7 +1132,7 @@
           </div>
         </div>
 
-        <!-- Debug FAB -->
+        <!-- Debug (smaller) -->
         <div class="debugFab">
           <div class="debugBtn" @click="debugOpen=!debugOpen">
             🛠️ Debug <span class="muted">{{ debugOpen ? '▲' : '▼' }}</span>
@@ -1404,7 +1149,7 @@
             </div>
             <div class="debugRow" v-if="lastError">
               <div class="muted">Error</div>
-              <div class="mono" style="max-width:220px; text-align:right; white-space:pre-wrap;">{{ lastError.message }}</div>
+              <div class="mono" style="max-width:200px; text-align:right; white-space:pre-wrap;">{{ lastError.message }}</div>
             </div>
             <div class="debugRow">
               <div class="muted">Status</div>
@@ -1440,14 +1185,13 @@
               <div class="pill">{{ editing.mode==='insert' ? '新增' : '編輯' }}</div>
               <div style="font-weight:950; font-size:18px;">{{ editing.table }}</div>
               <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
-                <button class="btn small btnGhost" @click="showDelete=!showDelete" v-if="editing.mode==='update'">
+                <button class="btn small" @click="showDelete=!showDelete" v-if="editing.mode==='update'">
                   {{ showDelete ? '收起刪除' : '顯示刪除' }}
                 </button>
                 <button class="btn small" @click="closeEdit()">關閉</button>
               </div>
             </div>
 
-            <!-- Fields -->
             <template v-if="editing.table==='plan_items'">
               <div class="formGrid">
                 <div>
@@ -1480,12 +1224,12 @@
 
                 <div style="grid-column:1/-1;">
                   <label>標題</label>
-                  <input v-model="editing.row.title" placeholder="例如 北海道神宮 / 午餐：海鮮丼" />
+                  <input v-model="editing.row.title" />
                 </div>
 
                 <div style="grid-column:1/-1;">
                   <label>備註</label>
-                  <textarea v-model="editing.row.note" placeholder="可貼 flight detail / 地點細節 / 開放時間..."></textarea>
+                  <textarea v-model="editing.row.note"></textarea>
                 </div>
               </div>
             </template>
@@ -1502,7 +1246,7 @@
                 </div>
                 <div style="grid-column:1/-1;">
                   <label>標題</label>
-                  <input v-model="editing.row.title" placeholder="例如 Day 2 1/9 星期五" />
+                  <input v-model="editing.row.title" />
                 </div>
                 <div style="grid-column:1/-1;">
                   <label>備註</label>
@@ -1518,13 +1262,13 @@
                   <input v-model.number="editing.row.seg_no" type="number" inputmode="numeric" />
                 </div>
                 <div>
-                  <label>航班（CX581）</label>
-                  <input v-model="editing.row.flight_no" placeholder="581" />
+                  <label>航空公司（CX）</label>
+                  <input v-model="editing.row.carrier" placeholder="CX" />
                 </div>
 
                 <div>
-                  <label>航空公司（CX）</label>
-                  <input v-model="editing.row.carrier" placeholder="CX" />
+                  <label>航班（581）</label>
+                  <input v-model="editing.row.flight_no" placeholder="581" />
                 </div>
                 <div></div>
 
@@ -1566,7 +1310,7 @@
 
                 <div>
                   <label>分類</label>
-                  <input v-model="editing.row.category" placeholder="交通 / 食 / 手信..." />
+                  <input v-model="editing.row.category" />
                 </div>
                 <div>
                   <label>商戶</label>
@@ -1584,7 +1328,7 @@
 
                 <div>
                   <label>付款人</label>
-                  <input v-model="editing.row.paid_by" placeholder="Kin / Aline" />
+                  <input v-model="editing.row.paid_by" />
                 </div>
                 <div></div>
 
@@ -1599,15 +1343,15 @@
               <div class="formGrid">
                 <div style="grid-column:1/-1;">
                   <label>物品</label>
-                  <input v-model="editing.row.name" placeholder="例如：雪靴 / 喉糖 / 手信" />
+                  <input v-model="editing.row.name" />
                 </div>
                 <div>
                   <label>地點</label>
-                  <input v-model="editing.row.location" placeholder="狸小路 / 大丸..." />
+                  <input v-model="editing.row.location" />
                 </div>
                 <div>
                   <label>價錢（文字）</label>
-                  <input v-model="editing.row.price_text" placeholder="¥xxx" />
+                  <input v-model="editing.row.price_text" />
                 </div>
                 <div style="grid-column:1/-1;">
                   <label>備註</label>
@@ -1618,7 +1362,7 @@
 
             <div style="display:flex; gap:10px; margin-top:14px; align-items:center;">
               <button class="btn" @click="saveEdit()" :disabled="loading">{{ loading ? '儲存中...' : '儲存' }}</button>
-              <button class="btn btnGhost" @click="closeEdit()">取消</button>
+              <button class="btn" @click="closeEdit()">取消</button>
 
               <button
                 class="btn"
