@@ -1805,12 +1805,7 @@ coords: {{ wx.lat ? (wx.lat.toFixed(4)+","+wx.lon.toFixed(4)) : "--" }}
         </div>
       </div>
     
-    `,
-    // expose helpers in template
-    methods: {
-      // merge methods (Vue option merge) by returning already defined methods above? No.
-      // We'll rely on Vue's standard option merge: methods already defined above.
-    }
+    `
   })
   .mixin({
     // allow using PenIcon in template via data() or global? simplest: attach to $root
