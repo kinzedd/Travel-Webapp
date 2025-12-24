@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- your CSS (optional, can be empty) -->
-  <link rel="stylesheet" href="./assets/app.css" />
-
   <!-- Vue (global build) -->
   <script src="./assets/vue.global.prod.js"></script>
 
@@ -19,1769 +16,1653 @@
       --bg:#0b1220;
       --card: rgba(255,255,255,.07);
       --card2: rgba(255,255,255,.05);
-      --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(255,255,255,.14);
+      --line: rgba(255,255,255,.10);
+      --line2: rgba(255,255,255,.14);
       --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.70);
-      --ok: rgba(191,255,209,.95);
-      --danger: rgba(255,180,180,.95);
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
-      --radius: 22px;
-      --radius2: 18px;
+      --muted: rgba(255,255,255,.68);
+      --ok: #bfffd1;
+      --danger: #ffb4b4;
+      --shadow: 0 18px 40px rgba(0,0,0,.45);
+      --r: 22px;
     }
+
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", Arial;
       color:var(--text);
       background: var(--bg);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       overflow-x:hidden;
     }
 
-    /* bg.jpg is OUTSIDE assets folder */
+    /* bg.jpg at repo root (not /assets) */
     body::before{
       content:"";
       position:fixed; inset:0;
       background:
-        radial-gradient(1200px 800px at 18% 8%, rgba(54,130,255,.18), transparent 60%),
-        radial-gradient(900px 700px at 80% 0%, rgba(0,255,210,.10), transparent 55%),
-        radial-gradient(900px 800px at 20% 100%, rgba(255,255,255,.10), transparent 60%),
-        url("./bg.jpg");
-      background-size: cover;
-      background-position: center;
-      opacity:.55;
+        radial-gradient(1200px 600px at 30% 10%, rgba(61,130,255,.18), transparent 55%),
+        radial-gradient(1000px 700px at 70% 40%, rgba(0,255,190,.08), transparent 60%),
+        url("./bg.jpg") center/cover no-repeat;
+      filter:saturate(1.05) contrast(1.05);
+      opacity:.92;
       z-index:-2;
     }
     body::after{
       content:"";
       position:fixed; inset:0;
-      background: linear-gradient(180deg, rgba(11,18,32,.70), rgba(11,18,32,.92));
+      background: linear-gradient(to bottom, rgba(11,18,32,.72), rgba(11,18,32,.85));
       z-index:-1;
     }
 
     a{ color:inherit; text-decoration:none; }
-    .muted{ color:var(--muted); }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; font-size:12px; }
-    .btn{ cursor:pointer; user-select:none; -webkit-tap-highlight-color: transparent; }
-    .btn:active{ transform: translateY(1px); }
 
-    /* Wider mobile layout */
     .wrap{
-      max-width: 760px;
+      max-width: 520px;
       margin: 0 auto;
-      padding: 14px 14px 118px;
+      padding: 14px 12px 110px; /* bottom bar space */
     }
 
     .card{
       background: var(--card);
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
     }
-    .cardInner{
-      background: var(--card2);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius2);
-    }
 
-    /* Header */
-    .header{ padding:14px; }
+    .header{
+      padding: 14px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
     .kicker{
-      letter-spacing:.26em; font-size:12px;
-      color: rgba(255,255,255,.62);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      letter-spacing:.28em;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 62vw;
     }
-    .titleRow{ display:flex; align-items:flex-start; gap:12px; margin-top:8px; }
-    .appTitle{ font-weight:900; font-size:44px; line-height:.95; }
-    .subTitle{ margin-top:10px; font-weight:700; color: rgba(255,255,255,.72); font-size:18px; }
-
+    .appTitle{
+      font-weight:900;
+      font-size:44px;
+      line-height: .95;
+      margin-top:6px;
+    }
+    .subTitle{
+      color:var(--muted);
+      font-weight:600;
+      margin-top:6px;
+      letter-spacing:.06em;
+    }
     .headerRight{
-      margin-left:auto;
       display:flex;
       flex-direction:column;
       gap:10px;
       align-items:flex-end;
-      min-width: 180px;
+      min-width: 110px;
     }
+
     .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:.42rem .72rem; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line2);
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+      font-weight:700;
+      color: rgba(255,255,255,.86);
       white-space:nowrap;
     }
     .pill.ok{ border-color: rgba(191,255,209,.35); color: var(--ok); }
     .pill.bad{ border-color: rgba(255,180,180,.35); color: var(--danger); }
-    .miniBtn{
-      width:42px; height:42px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex; align-items:center; justify-content:center;
-      font-size:18px;
-    }
-    .chipBtn{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:.55rem .85rem; border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line2);
       background: rgba(255,255,255,.06);
-      font-weight:900;
-    }
-
-    /* Sections */
-    .section{ margin-top:12px; padding:12px; }
-    .sectionHead{
-      display:flex; align-items:center; gap:10px;
-      padding: 6px 2px 10px;
-    }
-    .sectionTitle{ font-weight:900; font-size:22px; }
-    .sectionHead .right{ margin-left:auto; display:flex; gap:10px; }
-
-    /* Day slider (thin + aligned) */
-    .daysSlider{
-      display:flex; gap:10px; overflow-x:auto;
-      padding:10px 2px 6px;
-      scroll-snap-type:x mandatory;
-    }
-    .dayCard{
-      scroll-snap-align:start;
-      min-width: 210px; max-width:210px;
-      padding: 10px 12px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-    }
-    .dayCard.active{
-      border-color: rgba(191,255,209,.35);
-      background: rgba(191,255,209,.06);
-    }
-    .dayTop{ display:flex; align-items:center; gap:10px; }
-    .dayBadge{
-      padding:.25rem .6rem; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      font-weight:900;
-      flex:0 0 auto;
-    }
-    .dayDate{
-      margin-left:auto;
-      font-weight:900;
-      color: rgba(255,255,255,.76);
-      flex:1 1 auto;
-      text-align:right;
-    }
-    .penBtn{
-      width:30px; height:30px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex; align-items:center; justify-content:center;
-      flex:0 0 auto;
-    }
-    .penBtn svg{ width:15px; height:15px; }
-
-    /* Day summary card (align visually with period cards) */
-    .daySummary{
-      margin-top:12px;
-      padding:12px;
-    }
-    .daySummaryTop{
-      display:flex; align-items:center; gap:10px;
-    }
-    .daySummaryTitle{
-      font-weight:950;
-      font-size:18px;
-      line-height:1.15;
-      flex:1 1 auto;
-      min-width:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .daySummaryDate{ color: rgba(255,255,255,.72); font-weight:900; }
-
-    /* Period */
-    .periodCard{ margin-top:12px; padding:12px; }
-    .periodHead{
-      display:flex; align-items:center; gap:10px;
-      padding:2px 2px 10px;
-    }
-    .periodName{ font-weight:950; font-size:20px; }
-    .periodHead .right{ margin-left:auto; display:flex; gap:10px; }
-
-    .list{ display:flex; flex-direction:column; gap:10px; }
-    .itemCard{
-      padding:12px; border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-    }
-    .itemTop{ display:flex; align-items:flex-start; gap:10px; }
-    .itemIcon{
-      width:28px; height:28px; border-radius:10px;
-      background: rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.10);
-      display:flex; align-items:center; justify-content:center;
-      flex:0 0 auto; font-size:16px;
-    }
-    .itemMain{ flex:1 1 auto; min-width:0; }
-    .itemTitle{
-      font-weight:950;
-      font-size:18px;
-      line-height:1.15;
-      word-break:break-word;
-    }
-    .itemNote{
-      margin-top:8px;
-      color: rgba(255,255,255,.72);
-      white-space:pre-wrap;
-      line-height:1.35;
-    }
-    .mapsLink{
-      margin-top:8px;
-      display:inline-flex; gap:8px; align-items:center;
-      padding:.35rem .6rem; border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.16);
-      font-weight:900; font-size:13px;
-    }
-
-    /* Flights: light card style like sample */
-    .flightCard{
-      background: rgba(255,255,255,.92);
-      color: rgba(0,0,0,.86);
-      border-radius: 18px;
-      padding: 14px;
-      border: 1px solid rgba(255,255,255,.55);
-      box-shadow: 0 18px 50px rgba(0,0,0,.35);
-    }
-    .flightTopRow{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-      color: rgba(0,0,0,.55);
+      cursor:pointer;
+      user-select:none;
       font-weight:800;
     }
-    .flightRoute{
-      margin-top:8px;
-      font-size: 28px;
-      font-weight: 950;
-      color: rgba(0,0,0,.80);
+    .btn:active{ transform: translateY(1px); }
+    .btn.small{ padding:8px 12px; font-weight:800; }
+    .btn.ghost{ background: rgba(0,0,0,.10); }
+
+    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .muted{ color:var(--muted); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    /* Top actions */
+    .topActions{
+      margin-top: 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
-    .flightMid{
+
+    /* Day slider */
+    .section{
+      margin-top: 12px;
+      padding: 12px;
+    }
+    .sectionTitleRow{
       display:flex;
       align-items:center;
-      gap:12px;
-      margin-top:10px;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
     }
-    .flightCol{
-      flex:1 1 0;
-      min-width:0;
+    .sectionTitle{
+      font-weight:900;
+      font-size:22px;
+      letter-spacing:.05em;
     }
-    .flightIata{
-      font-weight:950;
-      font-size: 30px;
-      color: rgba(0,0,0,.70);
+
+    .dayRail{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom: 6px;
+      scroll-snap-type: x mandatory;
     }
-    .flightTime{
-      font-weight:950;
-      font-size: 44px;
-      line-height:1.0;
-      margin-top:2px;
-      color: rgba(0,0,0,.82);
+    .dayRail::-webkit-scrollbar{ height: 6px; }
+    .dayRail::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.16); border-radius:999px; }
+
+    .dayCard{
+      flex: 0 0 auto;
+      width: 235px;            /* keep thin + stable */
+      padding: 10px 12px;      /* thin */
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      scroll-snap-align: start;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      position:relative;
+      min-height: 86px;
     }
-    .flightTerm{
-      margin-top:6px;
-      color: rgba(0,0,0,.55);
-      font-weight:800;
+    .dayCard.active{
+      border-color: rgba(191,255,209,.40);
+      background: rgba(191,255,209,.06);
     }
-    .flightLine{
-      flex: 1.2 1 0;
+    .dayTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .dayTag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.12);
+      font-weight:900;
+      min-width: 68px;
+      justify-content:center;
+    }
+    .dayDate{
+      font-weight:900;
+      font-size: 20px;
+      letter-spacing:.04em;
+      color: rgba(255,255,255,.82);
+    }
+    .dayName{
+      font-weight:900;
+      font-size: 22px;
+      line-height:1.12;
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+    }
+
+    .iconBtn{
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.12);
       display:flex;
       align-items:center;
       justify-content:center;
-      min-width: 120px;
-      color: rgba(0,0,0,.45);
-      position:relative;
+      cursor:pointer;
+      flex:0 0 auto;
     }
-    .flightLine::before{
-      content:"";
-      height:6px;
-      width:100%;
+    .iconBtn:active{ transform: translateY(1px); }
+    .penSvg{ width:16px; height:16px; opacity:.92; }
+
+    /* Period blocks */
+    .periodCard{
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+    }
+    .periodHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .periodTitle{
+      font-weight:950;
+      font-size: 22px;
+      letter-spacing:.08em;
+    }
+    .periodBtns{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    /* Items */
+    .itemCard{
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      margin-top: 10px;
+      position:relative;
+      overflow:hidden;
+    }
+    .itemTop{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .itemEmoji{
+      font-size: 18px;
+      line-height: 1;
+      margin-top: 2px;
+      width: 22px;
+      text-align:center;
+      flex:0 0 auto;
+    }
+    .itemMain{
+      flex:1;
+      min-width:0;
+    }
+    .itemTitle{
+      font-weight:950;
+      font-size: 22px;
+      line-height:1.15;
+      word-break: break-word;
+    }
+    .itemNote{
+      margin-top: 8px;
+      color: rgba(255,255,255,.72);
+      white-space: pre-wrap;
+      line-height:1.35;
+    }
+    .itemMeta{
+      margin-top: 8px;
+      color: rgba(255,255,255,.62);
+      font-size: 12px;
+    }
+
+    .linkHint{
+      margin-top:8px;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:6px 10px;
       border-radius:999px;
-      background: rgba(0,0,0,.12);
-      display:block;
+      border:1px dashed rgba(255,255,255,.18);
+      color: rgba(255,255,255,.78);
+      font-weight:800;
+      font-size: 12px;
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    /* Flights */
+    .flightWrap{ display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+    .flightCard{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 22px;
+      padding: 14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .flightTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      color: rgba(255,255,255,.78);
+      font-weight:900;
+    }
+    .flightRoute{
+      margin-top: 8px;
+      font-size: 26px;
+      font-weight: 950;
+      letter-spacing:.03em;
+    }
+    .flightRow{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1fr 34px 1fr;
+      align-items:center;
+      gap:10px;
+    }
+    .airport{
+      font-weight: 950;
+      font-size: 26px;
+    }
+    .time{
+      font-weight: 950;
+      font-size: 40px;
+      letter-spacing:.02em;
+    }
+    .terminal{
+      margin-top: 4px;
+      color: rgba(255,255,255,.70);
+      font-weight:800;
+    }
+    .planeLine{
+      position:relative;
+      height: 4px;
+      background: rgba(255,255,255,.18);
+      border-radius:999px;
+    }
+    .planeLine::after{
+      content:"";
+      position:absolute;
+      right: -2px;
+      top:50%;
+      transform: translateY(-50%);
+      width: 10px; height: 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.22);
     }
     .plane{
+      font-size: 22px;
       position:absolute;
-      font-size:22px;
-      transform: translateY(-14px);
+      left: 10px;
+      top:50%;
+      transform: translateY(-55%);
+      filter: drop-shadow(0 10px 12px rgba(0,0,0,.45));
     }
-    .dur{
-      position:absolute;
-      top:-18px;
-      font-weight:900;
-      color: rgba(0,0,0,.55);
+
+    /* Expenses */
+    .list{ display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+    .expRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .expTitle{
+      font-weight:950;
+      font-size: 18px;
+      line-height:1.2;
     }
 
     /* Shopping */
     .shopRow{
-      display:flex; gap:10px; align-items:flex-start;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
     }
-    .checkbox{
-      width:22px; height:22px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(0,0,0,.18);
-      display:flex; align-items:center; justify-content:center;
+    .chk{
+      width: 22px; height: 22px;
+      accent-color: #9ef6c2;
+      margin-top: 3px;
       flex:0 0 auto;
-    }
-    .checkbox.on{
-      border-color: rgba(191,255,209,.40);
-      background: rgba(191,255,209,.16);
-    }
-    .shopTitle{
-      font-weight:950; font-size:18px; line-height:1.15;
     }
     .strike{
       text-decoration: line-through;
-      opacity: .55;
-    }
-    .shopMeta{
-      margin-top:6px;
-      color: rgba(255,255,255,.72);
-      font-weight:700;
+      opacity:.55;
     }
 
-    /* Expenses */
-    .expAmt{
-      margin-left:auto;
-      font-weight:950;
-      color: rgba(255,255,255,.92);
-      white-space:nowrap;
+    /* Bottom nav */
+    .bottomBar{
+      position:fixed;
+      left:0; right:0;
+      bottom: 0;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      z-index: 50;
     }
-    .expPill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:.25rem .6rem;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.16);
-      font-weight:900;
-      font-size:12px;
-      color: rgba(255,255,255,.78);
-    }
-
-    /* Bottom toolbar */
-    .toolbar{
-      position:fixed; left:0; right:0; bottom:10px;
-      padding:0 14px; z-index:50; pointer-events:none;
-    }
-    .toolbarInner{
-      pointer-events:auto;
-      max-width:760px; margin:0 auto;
-      padding:10px; border-radius:22px;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(14px);
-      display:flex; gap:10px; justify-content:space-between;
-    }
-    .tabBtn{
-      flex:1 1 0;
-      border-radius:18px;
-      padding:10px 8px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      text-align:center;
-      font-weight:900;
-      min-width:0;
-    }
-    .tabBtn.active{
-      border-color: rgba(191,255,209,.35);
-      background: rgba(191,255,209,.10);
-    }
-    .tabBtn .ico{ font-size:18px; display:block; }
-    .tabBtn .lbl{ font-size:12px; opacity:.9; margin-top:4px; }
-
-    /* Debug (small button top-right replacing DB) */
-    .debugModalWrap{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.45);
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding: 68px 14px 14px;
-      z-index:200;
-    }
-    .debugModal{
-      width: min(720px, 98vw);
-      border-radius: 18px;
+    .bottomInner{
+      max-width: 520px;
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+      padding: 10px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
-      padding: 12px;
+      backdrop-filter: blur(12px);
     }
-    .debugRow{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    .navBtn{
+      padding: 10px 8px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      min-height: 62px;
     }
+    .navBtn.active{
+      background: rgba(191,255,209,.10);
+      border-color: rgba(191,255,209,.38);
+    }
+    .navEmoji{ font-size: 20px; }
+    .navText{ font-size: 13px; opacity:.9; }
 
-    /* Edit modal (center, symmetric) */
-    .modalWrap{
-      position:fixed; inset:0;
+    /* Modal */
+    .modalMask{
+      position:fixed;
+      inset:0;
       background: rgba(0,0,0,.55);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:14px;
-      z-index:300;
+      padding: 14px;
+      z-index: 80;
     }
     .modal{
-      width: min(760px, 98vw);
-      max-height: 90vh;
+      width: min(520px, 96vw);
+      max-height: 86vh;
       overflow:auto;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(18,24,40,.78);
       backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
       padding: 14px;
     }
     .modalHead{
-      display:flex; align-items:center; gap:10px;
-      position:sticky; top:0;
-      background: rgba(0,0,0,.25);
-      backdrop-filter: blur(14px);
-      border-radius: 14px;
-      padding:10px;
-      border:1px solid rgba(255,255,255,.10);
-      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
     }
     .modalTitle{
       font-weight:950;
-      font-size:18px;
-      flex:1 1 auto;
-      min-width:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      font-size: 20px;
+      letter-spacing:.06em;
     }
-    .modalActions{ display:flex; gap:10px; }
-    .dangerBtn{
-      border-color: rgba(255,180,180,.35) !important;
-      color: rgba(255,180,180,.95);
-    }
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    .grid1{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-      margin-top:12px;
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top: 10px;
     }
     label{
-      display:block;
-      font-size:12px;
-      color: rgba(255,255,255,.70);
+      color: rgba(255,255,255,.76);
       font-weight:900;
-      margin-bottom:6px;
+      font-size: 13px;
       letter-spacing:.04em;
     }
     input, textarea, select{
       width:100%;
-      background: rgba(0,0,0,.25);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.14);
+      padding: 12px 12px;
       border-radius: 14px;
-      padding: .7rem .8rem;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
       outline:none;
-      font-size:16px;
+      font-size: 16px;
     }
-    textarea{ min-height: 92px; resize: vertical; }
+    textarea{ min-height: 110px; resize: vertical; }
+    .modalBtns{
+      display:flex;
+      gap:10px;
+      margin-top: 14px;
+      flex-wrap:wrap;
+    }
+    .dangerBtn{
+      border-color: rgba(255,180,180,.35);
+      color: var(--danger);
+    }
 
-    /* remove ugly long labels on small screens */
-    @media (max-width: 520px){
+    /* Debug drawer */
+    .debugFab{
+      position:fixed;
+      right: 12px;
+      top: 12px;
+      z-index: 70;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .tinyFab{
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+    .debugDrawer{
+      position:fixed;
+      right: 12px;
+      top: 62px;
+      width: min(360px, calc(100vw - 24px));
+      max-height: 70vh;
+      overflow:auto;
+      z-index: 70;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(12,16,28,.82);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+    .debugRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.05);
+      margin-top: 8px;
+      font-weight:900;
+    }
+
+    /* Keep layout not too narrow on mobile */
+    @media (max-width: 360px){
       .appTitle{ font-size: 40px; }
-      .headerRight{ min-width: 150px; }
-      .dayCard{ min-width: 200px; max-width:200px; }
-      .flightRoute{ font-size: 24px; }
-      .flightTime{ font-size: 40px; }
-      .grid2{ grid-template-columns: 1fr; }
+      .dayCard{ width: 220px; }
+      .time{ font-size: 36px; }
     }
   </style>
 </head>
 
 <body>
-<div id="app"></div>
+  <div id="app"></div>
 
-<script>
-(() => {
-  if (!window.Vue) throw new Error("Vue not loaded: check ./assets/vue.global.prod.js path");
-  if (!window.supabase) throw new Error("Supabase not loaded: CDN blocked?");
+  <script>
+  (() => {
+    const { createApp } = Vue;
 
-  const { createApp } = window.Vue;
+    // ============
+    // Supabase config
+    // ============
+    const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF";
 
-  // ============
-  // CONFIG
-  // ============
-  const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
+    if (!sb) console.error("Supabase init failed: window.supabase missing?");
 
-  const safeStr = (v) => (v == null ? "" : String(v));
+    const safeStr = (v) => (v == null ? "" : String(v));
 
-  const mapsDirUrl = (query) => {
-    const q = (query || "").trim();
-    if (!q) return "";
-    return `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${encodeURIComponent(q)}`;
-  };
-
-  const toPeriodKey = (timeLabel) => {
-    const s = (timeLabel || "").trim();
-    if (!s) return "am";
-    if (["上午","早上","凌晨"].includes(s)) return "am";
-    if (["下午","中午"].includes(s)) return "pm";
-    if (["晚上","夜晚"].includes(s)) return "night";
-    if (s.includes("上") || s.includes("早") || s.includes("凌")) return "am";
-    if (s.includes("下") || s.includes("中")) return "pm";
-    if (s.includes("晚") || s.includes("夜")) return "night";
-    return "am";
-  };
-
-  const isMeal = (row) => {
-    const k = (row?.kind || "").toLowerCase();
-    return k === "food" || k === "meal" || k === "用餐";
-  };
-  const isWear = (row) => {
-    const k = (row?.kind || "").toLowerCase();
-    return k === "wear" || k === "衣著";
-  };
-
-  const parseTs = (v) => {
-    // accept "2026-01-13 16:00" / ISO / empty
-    if (!v) return null;
-    const s = String(v).trim();
-    const iso = s.includes("T") ? s : s.replace(" ", "T");
-    const d = new Date(iso);
-    if (Number.isNaN(+d)) return null;
-    return d;
-  };
-
-  const fmtHM = (d) => {
-    try{
-      return new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Tokyo",
-        hour12:false,
-        hour:"2-digit", minute:"2-digit"
-      }).format(d);
-    } catch(e){
-      return String(d).slice(16,21);
-    }
-  };
-
-  const fmtDate = (d) => {
-    try{
-      return new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Tokyo",
-        weekday:"short",
-        day:"2-digit",
-        month:"short",
-        year:"numeric"
-      }).format(d);
-    } catch(e){
-      return d.toDateString();
-    }
-  };
-
-  const wEmoji = (code) => {
-    if (code == null) return "☁️";
-    if ([0].includes(code)) return "☀️";
-    if ([1,2,3].includes(code)) return "⛅️";
-    if ([45,48].includes(code)) return "🌫️";
-    if ([51,53,55,61,63,65,80,81,82].includes(code)) return "🌧️";
-    if ([71,73,75,85,86].includes(code)) return "❄️";
-    if ([95,96,99].includes(code)) return "⛈️";
-    return "☁️";
-  };
-
-  createApp({
-    data(){
-      return {
-        view: "plan", // plan | flights | expenses | shopping
-        statusText: "ready",
-        lastError: null,
-        connected: false,
-        loading: false,
-
-        // data
-        days: [],
-        selectedDayId: null,
-        planItems: [],
-        flights: [],
-        shopping: [],
-        expenses: [],
-
-        // weather
-        weather: { ok:false, temp:null, wind:null, code:null, lat:null, lon:null },
-
-        // debug
-        showDebug: false,
-
-        // editor
-        editing: null,   // { table, mode, row, title }
-        showDelete: false,
-
-        kindOptions: [
-          { value:"activity", label:"行程" },
-          { value:"food", label:"用餐" },
-          { value:"wear", label:"衣著" },
-          { value:"transport", label:"交通" },
-          { value:"hotel", label:"酒店" },
-        ],
-        periodOptions: [
-          { value:"上午", label:"上午" },
-          { value:"下午", label:"下午" },
-          { value:"晚上", label:"晚上" },
-          { value:"", label:"（自動）" },
-        ],
-      };
-    },
-
-    computed:{
-      selectedDay(){
-        return this.days.find(d => d.id === this.selectedDayId) || null;
-      },
-      selectedDayNo(){
-        return this.selectedDay?.day_no ?? null;
-      },
-      selectedPlanItems(){
-        if (!this.selectedDayId) return [];
-        return (this.planItems || []).filter(x => x.day_id === this.selectedDayId);
-      },
-      wearItems(){
-        return this.selectedPlanItems
-          .filter(x => isWear(x))
-          .sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
-      },
-      periodGroups(){
-        const base = this.selectedPlanItems.filter(x => !isWear(x));
-        const groups = { am:[], pm:[], night:[] };
-
-        for (const it of base){
-          const pk = toPeriodKey(it.time_label);
-          (groups[pk] ||= []).push(it);
-        }
-
-        const out = {};
-        for (const k of ["am","pm","night"]){
-          const items = (groups[k] || []).slice().sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
-          const dest = items.filter(x => !isMeal(x));
-          const meal = items.filter(x => isMeal(x));
-          out[k] = { dest, meal: meal.length ? [meal[0]] : [] };
-        }
-        return out;
-      },
-
-      flightsSorted(){
-        return (this.flights || []).slice().sort((a,b) => (a.seg_no ?? 0) - (b.seg_no ?? 0));
-      },
-
-      shoppingSorted(){
-        return (this.shopping || []).slice().sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
-      },
-
-      expensesSorted(){
-        // keep by happened_on then created_at
-        return (this.expenses || []).slice().sort((a,b) => {
-          const da = safeStr(a.happened_on);
-          const db = safeStr(b.happened_on);
-          if (da < db) return -1;
-          if (da > db) return 1;
-          return 0;
-        });
+    // ===== Weather (Open-Meteo) =====
+    async function fetchWeather(lat, lon){
+      try{
+        // current weather + windspeed
+        const url =
+          "https://api.open-meteo.com/v1/forecast"
+          + "?latitude=" + encodeURIComponent(lat)
+          + "&longitude=" + encodeURIComponent(lon)
+          + "&current=temperature_2m,wind_speed_10m,weather_code"
+          + "&timezone=Asia%2FHong_Kong";
+        const r = await fetch(url);
+        const j = await r.json();
+        const c = j?.current || null;
+        return {
+          ok: !!c,
+          lat, lon,
+          temp: c?.temperature_2m,
+          wind: c?.wind_speed_10m,
+          code: c?.weather_code
+        };
+      }catch(e){
+        return { ok:false, lat, lon, err: e?.message || String(e) };
       }
-    },
+    }
 
-    methods:{
-      penSvg(){
-        return `
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M13.5 6.5l4 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            <path d="M4 20l4.5-1 10-10a2 2 0 0 0 0-2.8l-.7-.7a2 2 0 0 0-2.8 0l-10 10L4 20Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        `;
+    function wEmoji(code){
+      // simple mapping
+      if (code == null) return "⛅️";
+      const c = Number(code);
+      if ([0].includes(c)) return "☀️";
+      if ([1,2,3].includes(c)) return "⛅️";
+      if ([45,48].includes(c)) return "🌫️";
+      if ([51,53,55,56,57].includes(c)) return "🌦️";
+      if ([61,63,65,66,67].includes(c)) return "🌧️";
+      if ([71,73,75,77,85,86].includes(c)) return "🌨️";
+      if ([80,81,82].includes(c)) return "🌧️";
+      if ([95,96,99].includes(c)) return "⛈️";
+      return "⛅️";
+    }
+
+    function toHHMM(isoOrText){
+      if(!isoOrText) return "";
+      // if it looks like "2026-01-08 02:00:00+08" or ISO
+      const s = String(isoOrText);
+      const m = s.match(/(\d{2}):(\d{2})/);
+      return m ? (m[1] + ":" + m[2]) : s;
+    }
+
+    function toYMD(isoOrText){
+      if(!isoOrText) return "";
+      const s = String(isoOrText);
+      const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+      return m ? (m[1]+"-"+m[2]+"-"+m[3]) : s;
+    }
+
+    function mapLink(q){
+      const dest = encodeURIComponent(q || "");
+      // origin=current location
+      return "https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=" + dest;
+    }
+
+    function inferPeriod(timeLabel){
+      const t = String(timeLabel || "").toLowerCase();
+      // allow common tags
+      if (t.includes("上午") || t.includes("早") || t.includes("morning") || t.includes("淩晨")) return "am";
+      if (t.includes("下午") || t.includes("午") || t.includes("pm") || t.includes("中午")) return "pm";
+      if (t.includes("晚上") || t.includes("夜") || t.includes("night")) return "night";
+      // default
+      return "am";
+    }
+
+    function kindType(kind){
+      // your schema: plan_items.kind text
+      const k = String(kind || "").toLowerCase();
+      if (k === "food" || k.includes("meal")) return "meal";
+      if (k === "wear" || k.includes("cloth")) return "wear";
+      return "dest";
+    }
+
+    function itemEmoji(item){
+      const t = kindType(item?.kind);
+      if (t === "meal") return "🍽️";
+      if (t === "wear") return "👕";
+      return "📍"; // destination
+    }
+
+    // ============
+    // App
+    // ============
+    createApp({
+      data(){
+        return {
+          view: "plan", // plan | flights | expenses | shopping
+
+          connected: false,
+          statusText: "ready",
+          lastError: null,
+          loading: false,
+
+          // weather
+          weather: { ok:false, temp:null, wind:null, code:null, lat:null, lon:null },
+
+          // data from DB
+          days: [],
+          selectedDayId: null,
+          planItems: [],
+          flights: [],
+          expenses: [],
+          shopping: [],
+
+          // edit
+          editing: null,   // { table, mode, row, uiTitle }
+          showDelete: false,
+
+          // debug
+          debugOpen: false,
+        };
       },
 
-      setErr(e){
-        this.lastError = e;
-        this.statusText = "ERR: " + safeStr(e?.message || e);
-        console.error(e);
-      },
+      computed:{
+        selectedDay(){
+          return this.days.find(d => d.id === this.selectedDayId) || null;
+        },
 
-      async ping(){
-        try{
-          const { error, status } = await sb
-            .from("days")
-            .select("id,day_no")
-            .order("day_no", { ascending:true })
-            .limit(1);
+        // plan items for selected day, sorted
+        planForDay(){
+          if(!this.selectedDayId) return [];
+          return (this.planItems || [])
+            .filter(x => x.day_id === this.selectedDayId)
+            .sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
+        },
 
-          if (error) throw error;
-          this.connected = true;
-          this.statusText = `OK (${status})`;
-        } catch(e){
-          this.connected = false;
-          this.setErr(e);
+        // group by period, and apply rules:
+        // - destination can be many
+        // - meal only keep ONE per period (lowest order_no)
+        planGroups(){
+          const rows = this.planForDay;
+          const by = { am:[], pm:[], night:[], wear:[] };
+
+          for(const x of rows){
+            const t = kindType(x.kind);
+            if(t === "wear"){
+              by.wear.push(x);
+            }else{
+              const p = inferPeriod(x.time_label);
+              by[p].push(x);
+            }
+          }
+
+          // ensure meal single per period
+          for(const key of ["am","pm","night"]){
+            const arr = by[key];
+            const meals = arr.filter(x => kindType(x.kind)==="meal");
+            if(meals.length > 1){
+              meals.sort((a,b)=> (a.order_no??0)-(b.order_no??0));
+              const keep = meals[0]?.id;
+              by[key] = arr.filter(x => kindType(x.kind)!=="meal" || x.id === keep);
+            }
+            // destinations first then meal
+            by[key].sort((a,b)=>{
+              const ta = kindType(a.kind)==="dest" ? 0 : (kindType(a.kind)==="meal" ? 1 : 2);
+              const tb = kindType(b.kind)==="dest" ? 0 : (kindType(b.kind)==="meal" ? 1 : 2);
+              if(ta !== tb) return ta - tb;
+              return (a.order_no??0)-(b.order_no??0);
+            });
+          }
+
+          // wear keep order
+          by.wear.sort((a,b)=> (a.order_no??0)-(b.order_no??0));
+          return by;
         }
       },
 
-      async loadAll(){
-        this.loading = true;
-        this.lastError = null;
-        this.statusText = "loading...";
-        try{
-          const qDays = await sb
-            .from("days")
-            .select("id,day_no,date,title,note,sort_order,created_at,updated_at")
-            .order("day_no", { ascending:true });
-          if (qDays.error) throw qDays.error;
-          this.days = qDays.data || [];
-          if (!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
+      methods:{
+        setErr(e){
+          this.lastError = (e && (e.message || e.error_description)) ? e : { message: String(e) };
+          this.statusText = "ERR: " + safeStr(this.lastError.message || this.lastError);
+          console.error(e);
+        },
 
-          const qPlan = await sb
-            .from("plan_items")
-            .select("id,day_id,time_label,kind,title,note,maps_query,order_no,created_at,updated_at")
-            .order("order_no", { ascending:true });
-          if (qPlan.error) throw qPlan.error;
-          this.planItems = qPlan.data || [];
-
-          const qFlights = await sb
-            .from("flights")
-            .select("id,seg_no,flight_no,carrier,depart_airport,arrive_airport,depart_time,arrive_time,note,created_at,updated_at")
-            .order("seg_no", { ascending:true });
-          if (qFlights.error) throw qFlights.error;
-          this.flights = qFlights.data || [];
-
-          const qShop = await sb
-            .from("shopping_items")
-            .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
-            .order("order_no", { ascending:true });
-          if (qShop.error) throw qShop.error;
-          this.shopping = qShop.data || [];
-
-          const qExp = await sb
-            .from("expenses")
-            .select("id,day_id,happened_on,category,merchant,amount,currency,paid_by,note,created_at,updated_at")
-            .order("happened_on", { ascending:true });
-          if (qExp.error) throw qExp.error;
-          this.expenses = qExp.data || [];
-
-          this.connected = true;
-          this.statusText = "loaded";
-        } catch(e){
-          this.connected = false;
-          this.setErr(e);
-        } finally {
-          this.loading = false;
-        }
-      },
-
-      async loadWeather(){
-        try{
-          const fallback = { lat:22.28, lon:114.19 };
-
-          const getPos = () => new Promise((resolve) => {
-            if (!navigator.geolocation) return resolve(null);
-            navigator.geolocation.getCurrentPosition(
-              (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude }),
-              () => resolve(null),
-              { enableHighAccuracy:false, timeout: 3500, maximumAge: 5*60*1000 }
-            );
-          });
-
-          const pos = (await getPos()) || fallback;
-          this.weather.lat = +pos.lat.toFixed(2);
-          this.weather.lon = +pos.lon.toFixed(2);
-
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(pos.lat)}&longitude=${encodeURIComponent(pos.lon)}&current_weather=true&timezone=Asia%2FHong_Kong`;
-          const r = await fetch(url, { cache:"no-store" });
-          if (!r.ok) throw new Error("weather fetch failed");
-          const j = await r.json();
-          const cw = j.current_weather || null;
-
-          this.weather.ok = !!cw;
-          this.weather.temp = cw ? cw.temperature : null;
-          this.weather.wind = cw ? cw.windspeed : null;
-          this.weather.code = cw ? cw.weathercode : null;
-        } catch(e){
-          this.weather.ok = false;
-        }
-      },
-
-      setView(v){
-        this.view = v;
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      },
-
-      mapQueryFor(row){
-        return (row?.maps_query || row?.title || "").trim();
-      },
-      mapHrefFor(row){
-        return mapsDirUrl(this.mapQueryFor(row));
-      },
-
-      // ===== Editor open =====
-      openEditDay(day){
-        this.showDelete = false;
-        this.editing = {
-          table: "days",
-          mode: "update",
-          title: "編輯：Day",
-          row: {
-            id: day.id,
-            day_no: day.day_no,
-            date: day.date || "",
-            title: day.title || "",
-            note: day.note || ""
+        // -------- DB loading --------
+        async ping(){
+          try{
+            const { error, status } = await sb
+              .from("days")
+              .select("id,day_no")
+              .limit(1);
+            if(error) throw error;
+            this.connected = true;
+            this.statusText = "DB OK (" + status + ")";
+          }catch(e){
+            this.connected = false;
+            this.setErr(e);
           }
-        };
-      },
+        },
 
-      openEditPlanItem(it){
-        this.showDelete = false;
-        this.editing = {
-          table: "plan_items",
-          mode: "update",
-          title: "編輯：行程 / 用餐 / 衣著",
-          row: {
-            id: it.id,
-            day_no_input: this.dayNoFromDayId(it.day_id) ?? (this.selectedDayNo ?? 1),
-            time_label: it.time_label || "",
-            kind: it.kind || "activity",
-            title: it.title || "",
-            note: it.note || "",
-            maps_query: it.maps_query || ""
+        async loadAll(){
+          this.loading = true;
+          this.lastError = null;
+          this.statusText = "loading...";
+          try{
+            const qDays = await sb
+              .from("days")
+              .select("id,day_no,date,title,note,sort_order,created_at,updated_at")
+              .order("day_no", { ascending:true });
+            if(qDays.error) throw qDays.error;
+            this.days = qDays.data || [];
+            if(!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
+
+            const qPlan = await sb
+              .from("plan_items")
+              .select("id,day_id,time_label,kind,title,note,maps_query,order_no,created_at,updated_at")
+              .order("order_no", { ascending:true });
+            if(qPlan.error) throw qPlan.error;
+            this.planItems = qPlan.data || [];
+
+            const qFlights = await sb
+              .from("flights")
+              .select("id,seg_no,flight_no,carrier,depart_airport,arrive_airport,depart_time,arrive_time,note,created_at,updated_at")
+              .order("seg_no", { ascending:true });
+            if(qFlights.error) throw qFlights.error;
+            this.flights = qFlights.data || [];
+
+            const qExp = await sb
+              .from("expenses")
+              .select("id,day_id,happened_on,category,merchant,amount,currency,paid_by,note,created_at,updated_at")
+              .order("happened_on", { ascending:true });
+            if(qExp.error) throw qExp.error;
+            this.expenses = qExp.data || [];
+
+            const qShop = await sb
+              .from("shopping_items")
+              .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
+              .order("order_no", { ascending:true });
+            if(qShop.error) throw qShop.error;
+            this.shopping = qShop.data || [];
+
+            this.connected = true;
+            this.statusText = "loaded";
+          }catch(e){
+            this.connected = false;
+            this.setErr(e);
+          }finally{
+            this.loading = false;
           }
-        };
-      },
+        },
 
-      openEditFlight(f){
-        this.showDelete = false;
-        this.editing = {
-          table: "flights",
-          mode: "update",
-          title: "編輯：航程",
-          row: {
-            id: f.id,
-            seg_no: f.seg_no ?? 1,
-            carrier: f.carrier || "",
-            flight_no: f.flight_no || "",
-            depart_airport: f.depart_airport || "",
-            arrive_airport: f.arrive_airport || "",
-            depart_time: f.depart_time || "",
-            arrive_time: f.arrive_time || "",
-            note: f.note || ""
+        // -------- Editing --------
+        openNew(table, extra){
+          this.showDelete = false;
+
+          const blank = {
+            days: { day_no: 1, date: "", title: "", note: "", sort_order: 1 },
+            plan_items: { day_no_input: this.selectedDay?.day_no || 1, time_label: "上午", kind:"activity", title:"", note:"", maps_query:"" },
+            flights: { seg_no: 1, flight_no:"", carrier:"", depart_airport:"", arrive_airport:"", depart_time:"", arrive_time:"", note:"" },
+            expenses: { day_no_input: this.selectedDay?.day_no || 1, happened_on:"", category:"", merchant:"", amount:null, currency:"JPY", paid_by:"", note:"" },
+            shopping_items: { name:"", location:"", price_text:"", note:"", done:false }
+          }[table] || {};
+
+          const row = Object.assign({}, blank, extra || {});
+          this.editing = { table, mode:"insert", row, uiTitle: this.uiTitleFor(table, "insert") };
+        },
+
+        openEdit(table, row){
+          this.showDelete = false;
+
+          // copy row but replace day_id with day_no_input for UX (plan_items/expenses)
+          const r = JSON.parse(JSON.stringify(row || {}));
+          if(table === "plan_items" || table === "expenses"){
+            const d = this.days.find(x => x.id === r.day_id);
+            r.day_no_input = d ? d.day_no : "";
           }
-        };
-      },
+          this.editing = { table, mode:"update", row: r, uiTitle: this.uiTitleFor(table, "update") };
+        },
 
-      openEditExpense(e){
-        this.showDelete = false;
-        this.editing = {
-          table: "expenses",
-          mode: "update",
-          title: "編輯：記帳",
-          row: {
-            id: e.id,
-            day_no_input: this.dayNoFromDayId(e.day_id) ?? (this.selectedDayNo ?? 1),
-            happened_on: e.happened_on || "",
-            category: e.category || "",
-            merchant: e.merchant || "",
-            amount: e.amount ?? null,
-            currency: e.currency || "JPY",
-            paid_by: e.paid_by || "",
-            note: e.note || ""
+        uiTitleFor(table, mode){
+          const m = mode === "insert" ? "新增" : "編輯";
+          if(table === "days") return m + " Day";
+          if(table === "plan_items") return m + " 行程";
+          if(table === "flights") return m + " 航程";
+          if(table === "expenses") return m + " 記帳";
+          if(table === "shopping_items") return m + " 購物";
+          return m;
+        },
+
+        closeEdit(){
+          this.editing = null;
+          this.showDelete = false;
+        },
+
+        toggleDelete(){
+          this.showDelete = !this.showDelete;
+        },
+
+        async saveEdit(){
+          if(!this.editing) return;
+          const { table } = this.editing;
+
+          this.loading = true;
+          this.lastError = null;
+
+          try{
+            const payload = Object.assign({}, this.editing.row);
+
+            // remove server timestamps
+            delete payload.created_at;
+            delete payload.updated_at;
+
+            // Convert day_no_input -> day_id for plan_items / expenses
+            if(table === "plan_items" || table === "expenses"){
+              const dayNo = Number(payload.day_no_input);
+              const dayRow = this.days.find(d => Number(d.day_no) === dayNo);
+              if(!dayRow) throw new Error("搵唔到 Day " + payload.day_no_input + "（請先新增該 Day）");
+              payload.day_id = dayRow.id;
+              delete payload.day_no_input;
+            }
+
+            // Auto order_no for plan_items (hide from UI)
+            if(table === "plan_items"){
+              // keep existing order_no on update
+              if(!payload.id){
+                const max = this.planForDay.reduce((m,x)=> Math.max(m, x.order_no || 0), 0);
+                payload.order_no = max + 1;
+              }
+            }
+
+            // For shopping insert: set order_no to bottom
+            if(table === "shopping_items"){
+              if(!payload.id){
+                const max = (this.shopping || []).reduce((m,x)=> Math.max(m, x.order_no || 0), 0);
+                payload.order_no = max + 1;
+              }
+              payload.done = !!payload.done;
+            }
+
+            const { error } = await sb.from(table).upsert(payload);
+            if(error) throw error;
+
+            this.statusText = "saved";
+            this.closeEdit();
+            await this.loadAll();
+          }catch(e){
+            this.setErr(e);
+          }finally{
+            this.loading = false;
           }
-        };
-      },
+        },
 
-      openEditShopping(s){
-        this.showDelete = false;
-        this.editing = {
-          table: "shopping_items",
-          mode: "update",
-          title: "編輯：購物",
-          row: {
-            id: s.id,
-            name: s.name || "",
-            location: s.location || "",
-            price_text: s.price_text || "",
-            note: s.note || ""
+        async delEditing(){
+          if(!this.editing) return;
+          const { table } = this.editing;
+          const id = this.editing.row?.id;
+          if(!id) return;
+
+          this.loading = true;
+          this.lastError = null;
+          try{
+            const { error } = await sb.from(table).delete().eq("id", id);
+            if(error) throw error;
+            this.statusText = "deleted";
+            this.closeEdit();
+            await this.loadAll();
+          }catch(e){
+            this.setErr(e);
+          }finally{
+            this.loading = false;
           }
-        };
-      },
+        },
 
-      openNewPlan(kind, timeLabel){
-        // kind: activity | food | wear
-        this.showDelete = false;
-        this.editing = {
-          table: "plan_items",
-          mode: "insert",
-          title: "新增：行程 / 用餐 / 衣著",
-          row: {
-            day_no_input: this.selectedDayNo ?? 1,
-            time_label: timeLabel || "上午",
-            kind: kind || "activity",
-            title: "",
-            note: "",
-            maps_query: ""
+        // Day click
+        selectDay(id){
+          this.selectedDayId = id;
+        },
+
+        // Add buttons in period
+        addDest(period){
+          this.openNew("plan_items", { time_label: this.periodLabel(period), kind:"activity" });
+        },
+        addMeal(period){
+          this.openNew("plan_items", { time_label: this.periodLabel(period), kind:"food" });
+        },
+
+        periodLabel(p){
+          if(p==="am") return "上午";
+          if(p==="pm") return "下午";
+          if(p==="night") return "晚上";
+          return "上午";
+        },
+
+        // Open maps
+        openMaps(item){
+          const q = item?.maps_query || item?.title || "";
+          if(!q) return;
+          window.open(mapLink(q), "_blank");
+        },
+
+        // Shopping toggle done directly
+        async toggleShopDone(row){
+          try{
+            const newVal = !row.done;
+            const { error } = await sb.from("shopping_items").update({ done: newVal }).eq("id", row.id);
+            if(error) throw error;
+            row.done = newVal;
+          }catch(e){
+            this.setErr(e);
           }
-        };
-      },
+        },
 
-      openNewDay(){
-        this.showDelete = false;
-        const nextNo = (this.days.reduce((m,d)=>Math.max(m, d.day_no||0), 0) + 1) || 1;
-        this.editing = {
-          table: "days",
-          mode: "insert",
-          title: "新增：Day",
-          row: {
-            day_no: nextNo,
-            date: "",
-            title: "",
-            note: ""
+        // Weather init
+        initWeather(){
+          if(!navigator.geolocation){
+            // fallback HK
+            this.weather = { ok:false, lat:22.28, lon:114.19, temp:null, wind:null, code:null };
+            this.refreshWeather();
+            return;
           }
-        };
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const lat = pos.coords.latitude;
+              const lon = pos.coords.longitude;
+              this.weather = { ok:false, lat, lon, temp:null, wind:null, code:null };
+              this.refreshWeather();
+            },
+            () => {
+              // fallback HK
+              this.weather = { ok:false, lat:22.28, lon:114.19, temp:null, wind:null, code:null };
+              this.refreshWeather();
+            },
+            { enableHighAccuracy:false, timeout:5000, maximumAge: 60000 }
+          );
+        },
+
+        async refreshWeather(){
+          if(this.weather?.lat == null || this.weather?.lon == null) return;
+          const w = await fetchWeather(this.weather.lat, this.weather.lon);
+          this.weather = Object.assign({}, this.weather, w);
+        },
+
+        // Simple format for flight card
+        flightTitle(f){
+          const ymd = toYMD(f.depart_time) || toYMD(f.arrive_time) || "";
+          const fn = (safeStr(f.carrier) + safeStr(f.flight_no)).trim();
+          return (ymd ? (ymd + "  |  ") : "") + (fn || "Flight");
+        },
+
+        // Debug toggle
+        toggleDebug(){
+          this.debugOpen = !this.debugOpen;
+        },
+
+        // icons
+        penSvg(){
+          return `
+            <svg class="penSvg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+          `;
+        },
       },
 
-      openNewFlight(){
-        this.showDelete = false;
-        const nextSeg = (this.flights.reduce((m,f)=>Math.max(m, f.seg_no||0), 0) + 1) || 1;
-        this.editing = {
-          table: "flights",
-          mode: "insert",
-          title: "新增：航程",
-          row: {
-            seg_no: nextSeg,
-            carrier: "",
-            flight_no: "",
-            depart_airport: "",
-            arrive_airport: "",
-            depart_time: "",
-            arrive_time: "",
-            note: ""
-          }
-        };
+      async mounted(){
+        // basic checks
+        await this.ping();
+        await this.loadAll();
+        this.initWeather();
       },
 
-      openNewExpense(){
-        this.showDelete = false;
-        this.editing = {
-          table: "expenses",
-          mode: "insert",
-          title: "新增：記帳",
-          row: {
-            day_no_input: this.selectedDayNo ?? 1,
-            happened_on: "",
-            category: "",
-            merchant: "",
-            amount: null,
-            currency: "JPY",
-            paid_by: "",
-            note: ""
-          }
-        };
-      },
+      template: /*html*/`
+        <div class="debugFab">
+          <div class="tinyFab" title="Debug" @click="toggleDebug()">🛠️</div>
+        </div>
 
-      openNewShopping(){
-        this.showDelete = false;
-        this.editing = {
-          table: "shopping_items",
-          mode: "insert",
-          title: "新增：購物",
-          row: {
-            name: "",
-            location: "",
-            price_text: "",
-            note: ""
-          }
-        };
-      },
+        <div class="debugDrawer" v-if="debugOpen">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div style="font-weight:950; letter-spacing:.08em;">DEBUG</div>
+            <div class="btn small ghost" @click="toggleDebug()">收埋</div>
+          </div>
 
-      closeEdit(){
-        this.editing = null;
-        this.showDelete = false;
-      },
+          <div class="debugRow">
+            <div>Vue</div>
+            <div class="mono">{{ Vue?.version || 'unknown' }}</div>
+          </div>
 
-      toggleDelete(){
-        this.showDelete = !this.showDelete;
-      },
+          <div class="debugRow">
+            <div>DB</div>
+            <div :class="connected ? 'mono' : 'mono'" style="font-weight:950;">
+              {{ connected ? 'OK' : 'NO' }}
+            </div>
+          </div>
 
-      dayNoFromDayId(dayId){
-        const d = this.days.find(x => x.id === dayId);
-        return d ? d.day_no : null;
-      },
+          <div class="debugRow">
+            <div>Status</div>
+            <div class="mono">{{ statusText }}</div>
+          </div>
 
-      dayIdFromDayNo(dayNo){
-        const n = Number(dayNo);
-        if (!Number.isFinite(n)) return null;
-        const d = this.days.find(x => Number(x.day_no) === n);
-        return d ? d.id : null;
-      },
+          <div class="debugRow">
+            <div>Weather</div>
+            <div class="mono">
+              {{ weather.ok ? (Math.round(weather.temp) + '°C / 風 ' + Math.round(weather.wind) + 'km/h') : '--' }}
+            </div>
+          </div>
 
-      // ===== Save / Delete =====
-      async saveEdit(){
-        if (!this.editing) return;
-        const { table, mode, row } = this.editing;
+          <div class="debugRow" v-if="lastError" style="border-color: rgba(255,180,180,.25);">
+            <div style="color: var(--danger);">ERR</div>
+            <div class="mono" style="text-align:right; max-width: 240px; white-space:pre-wrap;">
+              {{ lastError.message || lastError }}
+            </div>
+          </div>
+        </div>
 
-        this.loading = true;
-        this.lastError = null;
-        try{
-          let payload = { ...row };
-
-          // Remove any UI-only fields
-          delete payload.created_at;
-          delete payload.updated_at;
-
-          // Convert day number input -> day_id
-          if (table === "plan_items" || table === "expenses"){
-            const dayId = this.dayIdFromDayNo(payload.day_no_input);
-            if (!dayId) throw new Error("找唔到呢個 Day number（請先確保 days 表有該 day_no）");
-            payload.day_id = dayId;
-            delete payload.day_no_input;
-          }
-
-          // Do NOT show/use order_no in UI; auto-append at bottom if insert
-          if (table === "plan_items" && mode === "insert"){
-            const forDay = (this.planItems || []).filter(x => x.day_id === payload.day_id);
-            const max = forDay.reduce((m,x)=>Math.max(m, x.order_no||0), 0);
-            payload.order_no = max + 1;
-          }
-
-          if (table === "shopping_items" && mode === "insert"){
-            const max = (this.shopping || []).reduce((m,x)=>Math.max(m, x.order_no||0), 0);
-            payload.order_no = max + 1;
-            payload.done = false;
-          }
-
-          // For "days", ensure sort_order follows day_no (optional)
-          if (table === "days"){
-            payload.sort_order = payload.day_no;
-          }
-
-          // Upsert
-          const { error } = await sb.from(table).upsert(payload);
-          if (error) throw error;
-
-          this.statusText = "saved";
-          this.closeEdit();
-          await this.loadAll();
-        } catch(e){
-          this.setErr(e);
-        } finally {
-          this.loading = false;
-        }
-      },
-
-      async deleteEdit(){
-        if (!this.editing?.row?.id) return;
-        const { table, row } = this.editing;
-
-        this.loading = true;
-        this.lastError = null;
-        try{
-          const { error } = await sb.from(table).delete().eq("id", row.id);
-          if (error) throw error;
-
-          this.statusText = "deleted";
-          this.closeEdit();
-          await this.loadAll();
-        } catch(e){
-          this.setErr(e);
-        } finally {
-          this.loading = false;
-        }
-      },
-
-      // Shopping checkbox toggle (no edit needed)
-      async toggleShoppingDone(s){
-        try{
-          const next = !s.done;
-          const { error } = await sb.from("shopping_items").update({ done: next }).eq("id", s.id);
-          if (error) throw error;
-          s.done = next;
-        } catch(e){
-          this.setErr(e);
-        }
-      },
-
-      // ===== Flight card helpers =====
-      flightModel(f){
-        // fallback route label
-        const dep = (f.depart_airport || "").toUpperCase() || "CTS";
-        const arr = (f.arrive_airport || "").toUpperCase() || "HKG";
-        const dd = parseTs(f.depart_time);
-        const ad = parseTs(f.arrive_time);
-
-        const depTime = dd ? fmtHM(dd) : "--:--";
-        const arrTime = ad ? fmtHM(ad) : "--:--";
-        const date = dd ? fmtDate(dd) : (f.depart_time ? safeStr(f.depart_time).slice(0,10) : "--");
-        const fn = `${(f.carrier||"").toUpperCase()}${safeStr(f.flight_no)}`.trim() || "FLIGHT";
-
-        // duration
-        let dur = "--";
-        if (dd && ad){
-          const mins = Math.max(0, Math.round((ad - dd)/60000));
-          const h = Math.floor(mins/60);
-          const m = mins%60;
-          dur = `${h}h ${m}m`;
-        }
-
-        return { dep, arr, depTime, arrTime, date, fn, dur };
-      },
-    },
-
-    async mounted(){
-      await this.ping();
-      await this.loadAll();
-      await this.loadWeather();
-    },
-
-    template: /*html*/`
-      <div class="wrap">
-        <!-- HEADER -->
-        <div class="card header">
-          <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
-
-          <div class="titleRow">
+        <div class="wrap">
+          <!-- HEADER -->
+          <div class="card header">
             <div style="min-width:0;">
+              <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
               <div class="appTitle">札幌旅行 App</div>
               <div class="subTitle">行程 / 航程 / 記帳 / 購物</div>
+
+              <div class="topActions">
+                <div class="btn small" :class="view==='plan' ? '': 'ghost'" @click="view='plan'">行程</div>
+                <div class="btn small" :class="view==='flights' ? '': 'ghost'" @click="view='flights'">航程</div>
+                <div class="btn small" :class="view==='expenses' ? '': 'ghost'" @click="view='expenses'">記帳</div>
+                <div class="btn small" :class="view==='shopping' ? '': 'ghost'" @click="view='shopping'">購物</div>
+              </div>
             </div>
 
             <div class="headerRight">
-              <!-- Debug button replaces "DB YES" -->
-              <div style="display:flex; gap:10px; align-items:center;">
-                <div class="miniBtn btn" title="Debug" @click="showDebug=true">🛠️</div>
-                <div class="pill" :class="connected ? 'ok' : 'bad'">
-                  {{ connected ? 'DB OK' : 'DB ERR' }}
-                </div>
+              <div class="pill" :class="connected ? 'ok' : 'bad'">
+                {{ connected ? 'DB OK' : 'DB NO' }}
               </div>
 
-              <div class="pill">
-                <span>{{ wEmoji(weather.code) }}</span>
-                <span style="font-weight:900;">
+              <div class="pill" v-if="weather && (weather.lat!=null)">
+                <span style="font-size:18px;">{{ wEmoji(weather.code) }}</span>
+                <span style="font-weight:950;">
                   {{ weather.ok ? (Math.round(weather.temp) + '°C') : '--°C' }}
                 </span>
-                <span class="muted" style="font-size:12px;">
+                <span class="muted">
                   {{ weather.ok ? ('風 ' + Math.round(weather.wind) + ' km/h') : '--' }}
                 </span>
               </div>
 
-              <div class="pill muted mono">
-                ({{ weather.lat ?? '--' }}, {{ weather.lon ?? '--' }})
-              </div>
-
-              <div class="chipBtn btn" @click="ping(); loadAll(); loadWeather()">↻ Reload</div>
+              <div class="btn small" @click="loadAll()">↻ Reload</div>
             </div>
           </div>
 
-          <div class="muted mono" style="margin-top:10px;">
-            {{ statusText }}
-          </div>
-          <div v-if="lastError" class="muted mono" style="margin-top:6px; color: rgba(255,180,180,.95); white-space:pre-wrap;">
-            {{ lastError.message || lastError }}
-          </div>
-        </div>
-
-        <!-- PLAN -->
-        <div v-if="view==='plan'" class="card section">
-          <div class="sectionHead">
-            <div class="sectionTitle">行程</div>
-            <div class="right">
-              <div class="chipBtn btn" @click="openNewDay()">＋ Day</div>
-            </div>
-          </div>
-
-          <div class="daysSlider">
-            <div
-              class="dayCard btn"
-              v-for="d in days"
-              :key="d.id"
-              :class="{active: selectedDayId===d.id}"
-              @click="selectedDayId=d.id"
-            >
-              <div class="dayTop">
-                <div class="dayBadge">Day {{ d.day_no }}</div>
-                <div class="dayDate">{{ d.date || '' }}</div>
-                <div class="penBtn btn" v-html="penSvg()" @click.stop="openEditDay(d)"></div>
-              </div>
-              <!-- no day title on slider (per request) -->
-            </div>
-          </div>
-
-          <div v-if="selectedDay" class="cardInner daySummary">
-            <div class="daySummaryTop">
-              <div class="dayBadge">Day {{ selectedDay.day_no }}</div>
-              <div class="daySummaryTitle">
-                {{ selectedDay.title || ('Day ' + selectedDay.day_no) }}
-              </div>
-              <div class="daySummaryDate">{{ selectedDay.date || '' }}</div>
-              <div class="penBtn btn" v-html="penSvg()" @click.stop="openEditDay(selectedDay)"></div>
-            </div>
-          </div>
-
-          <!-- 上午 -->
-          <div v-if="selectedDay" class="cardInner periodCard">
-            <div class="periodHead">
-              <div class="periodName">上午</div>
-              <div class="right">
-                <div class="chipBtn btn" @click="openNewPlan('activity','上午')">＋ 行程</div>
-                <div class="chipBtn btn" @click="openNewPlan('food','上午')">＋ 用餐</div>
+          <!-- PLAN -->
+          <div class="card section" v-if="view==='plan'">
+            <div class="sectionTitleRow">
+              <div class="sectionTitle">行程</div>
+              <div style="display:flex; gap:10px;">
+                <div class="btn small" @click="openNew('days')">＋ Day</div>
               </div>
             </div>
 
-            <div class="list">
-              <div v-for="x in periodGroups.am.dest" :key="x.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">📍</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ x.title }}</div>
-                    <div class="itemNote" v-if="x.note">{{ x.note }}</div>
-                    <a class="mapsLink" v-if="mapQueryFor(x)" :href="mapHrefFor(x)" target="_blank" rel="noopener">
-                      📌 Google Maps
-                    </a>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(x)"></div>
+            <!-- Day slider -->
+            <div class="dayRail">
+              <div class="dayCard"
+                v-for="d in days"
+                :key="d.id"
+                :class="{active: selectedDayId===d.id}"
+                @click="selectDay(d.id)"
+              >
+                <div class="dayTop">
+                  <div class="dayTag">Day {{ d.day_no }}</div>
+                  <div class="dayDate">{{ d.date || '-' }}</div>
+                  <div class="iconBtn" @click.stop="openEdit('days', d)" v-html="penSvg()"></div>
                 </div>
+                <div class="dayName">{{ d.title || '未命名' }}</div>
               </div>
 
-              <div v-for="m in periodGroups.am.meal" :key="m.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">🍽️</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ m.title }}</div>
-                    <div class="itemNote" v-if="m.note">{{ m.note }}</div>
-                    <a class="mapsLink" v-if="mapQueryFor(m)" :href="mapHrefFor(m)" target="_blank" rel="noopener">
-                      📌 Google Maps
-                    </a>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(m)"></div>
-                </div>
-              </div>
-
-              <div v-if="periodGroups.am.dest.length===0 && periodGroups.am.meal.length===0" class="itemCard muted">
-                （未有內容）
-              </div>
-            </div>
-          </div>
-
-          <!-- 下午 -->
-          <div v-if="selectedDay" class="cardInner periodCard">
-            <div class="periodHead">
-              <div class="periodName">下午</div>
-              <div class="right">
-                <div class="chipBtn btn" @click="openNewPlan('activity','下午')">＋ 行程</div>
-                <div class="chipBtn btn" @click="openNewPlan('food','下午')">＋ 用餐</div>
+              <div v-if="days.length===0" class="dayCard">
+                <div class="dayName">未有 Day</div>
+                <div class="muted">右上角「＋ Day」新增</div>
               </div>
             </div>
 
-            <div class="list">
-              <div v-for="x in periodGroups.pm.dest" :key="x.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">📍</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ x.title }}</div>
-                    <div class="itemNote" v-if="x.note">{{ x.note }}</div>
-                    <a class="mapsLink" v-if="mapQueryFor(x)" :href="mapHrefFor(x)" target="_blank" rel="noopener">
-                      📌 Google Maps
-                    </a>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(x)"></div>
-                </div>
-              </div>
-
-              <div v-for="m in periodGroups.pm.meal" :key="m.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">🍽️</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ m.title }}</div>
-                    <div class="itemNote" v-if="m.note">{{ m.note }}</div>
-                    <a class="mapsLink" v-if="mapQueryFor(m)" :href="mapHrefFor(m)" target="_blank" rel="noopener">
-                      📌 Google Maps
-                    </a>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(m)"></div>
-                </div>
-              </div>
-
-              <div v-if="periodGroups.pm.dest.length===0 && periodGroups.pm.meal.length===0" class="itemCard muted">
-                （未有內容）
-              </div>
-            </div>
-          </div>
-
-          <!-- 晚上 -->
-          <div v-if="selectedDay" class="cardInner periodCard">
-            <div class="periodHead">
-              <div class="periodName">晚上</div>
-              <div class="right">
-                <div class="chipBtn btn" @click="openNewPlan('activity','晚上')">＋ 行程</div>
-                <div class="chipBtn btn" @click="openNewPlan('food','晚上')">＋ 用餐</div>
-              </div>
+            <!-- Period cards -->
+            <div v-if="!selectedDay" class="periodCard" style="margin-top:12px;">
+              <div class="muted">請先揀 Day。</div>
             </div>
 
-            <div class="list">
-              <div v-for="x in periodGroups.night.dest" :key="x.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">📍</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ x.title }}</div>
-                    <div class="itemNote" v-if="x.note">{{ x.note }}</div>
-                    <a class="mapsLink" v-if="mapQueryFor(x)" :href="mapHrefFor(x)" target="_blank" rel="noopener">
-                      📌 Google Maps
-                    </a>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(x)"></div>
-                </div>
-              </div>
-
-              <div v-for="m in periodGroups.night.meal" :key="m.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">🍽️</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ m.title }}</div>
-                    <div class="itemNote" v-if="m.note">{{ m.note }}</div>
-                    <a class="mapsLink" v-if="mapQueryFor(m)" :href="mapHrefFor(m)" target="_blank" rel="noopener">
-                      📌 Google Maps
-                    </a>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(m)"></div>
-                </div>
-              </div>
-
-              <div v-if="periodGroups.night.dest.length===0 && periodGroups.night.meal.length===0" class="itemCard muted">
-                （未有內容）
-              </div>
-            </div>
-          </div>
-
-          <!-- 衣著 (separate) -->
-          <div v-if="selectedDay" class="cardInner periodCard">
-            <div class="periodHead">
-              <div class="periodName">衣著</div>
-              <div class="right">
-                <div class="chipBtn btn" @click="openNewPlan('wear','')">＋ 衣著</div>
-              </div>
-            </div>
-            <div class="list">
-              <div v-for="w in wearItems" :key="w.id" class="itemCard">
-                <div class="itemTop">
-                  <div class="itemIcon">👗</div>
-                  <div class="itemMain">
-                    <div class="itemTitle">{{ w.title }}</div>
-                    <div class="itemNote" v-if="w.note">{{ w.note }}</div>
-                  </div>
-                  <div class="penBtn btn" v-html="penSvg()" @click="openEditPlanItem(w)"></div>
-                </div>
-              </div>
-              <div v-if="wearItems.length===0" class="itemCard muted">
-                （未有衣著）
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FLIGHTS -->
-        <div v-else-if="view==='flights'" class="card section">
-          <div class="sectionHead">
-            <div class="sectionTitle">航程</div>
-            <div class="right">
-              <div class="chipBtn btn" @click="openNewFlight()">＋ 航程</div>
-            </div>
-          </div>
-
-          <div class="list" style="margin-top:10px;">
-            <div v-for="f in flightsSorted" :key="f.id" class="flightCard">
-              <div class="flightTopRow">
-                <div>{{ flightModel(f).date }}</div>
-                <div>｜</div>
-                <div>{{ flightModel(f).fn }}</div>
-                <div style="margin-left:auto;">
-                  <span class="btn" style="padding:.25rem .55rem; border-radius:999px; border:1px solid rgba(0,0,0,.12); background:rgba(0,0,0,.04);"
-                        @click="openEditFlight(f)">✎</span>
-                </div>
-              </div>
-
-              <div class="flightRoute">{{ flightModel(f).dep }} to {{ flightModel(f).arr }}</div>
-
-              <div class="flightMid">
-                <div class="flightCol">
-                  <div class="flightIata">{{ flightModel(f).dep }}</div>
-                  <div class="flightTime">{{ flightModel(f).depTime }}</div>
-                  <div class="flightTerm">{{ (f.depart_airport || '').toUpperCase() || 'Depart' }}</div>
-                </div>
-
-                <div class="flightLine">
-                  <div class="dur">{{ flightModel(f).dur }}</div>
-                  <div class="plane">✈️</div>
-                </div>
-
-                <div class="flightCol" style="text-align:right;">
-                  <div class="flightIata">{{ flightModel(f).arr }}</div>
-                  <div class="flightTime">{{ flightModel(f).arrTime }}</div>
-                  <div class="flightTerm">{{ (f.arrive_airport || '').toUpperCase() || 'Arrive' }}</div>
-                </div>
-              </div>
-
-              <div v-if="f.note" style="margin-top:12px; color: rgba(0,0,0,.60); font-weight:700; white-space:pre-wrap;">
-                {{ f.note }}
-              </div>
-            </div>
-
-            <div v-if="flightsSorted.length===0" class="itemCard muted">
-              （未有航程）
-            </div>
-          </div>
-        </div>
-
-        <!-- EXPENSES -->
-        <div v-else-if="view==='expenses'" class="card section">
-          <div class="sectionHead">
-            <div class="sectionTitle">記帳</div>
-            <div class="right">
-              <div class="chipBtn btn" @click="openNewExpense()">＋ 記帳</div>
-            </div>
-          </div>
-
-          <div class="list" style="margin-top:10px;">
-            <div v-for="e in expensesSorted" :key="e.id" class="itemCard">
-              <div class="itemTop">
-                <div class="itemIcon">💴</div>
-                <div class="itemMain">
-                  <div style="display:flex; gap:10px; align-items:center;">
-                    <div class="expPill">{{ e.happened_on || '日期' }}</div>
-                    <div class="expPill">{{ e.category || '分類' }}</div>
-                    <div class="expAmt">{{ (e.amount ?? '--') }} {{ e.currency || '' }}</div>
-                  </div>
-                  <div class="itemTitle" style="margin-top:8px;">
-                    {{ e.merchant || '（未填商戶）' }}
-                  </div>
-                  <div class="itemNote" v-if="e.note">{{ e.note }}</div>
-                </div>
-                <div class="penBtn btn" v-html="penSvg()" @click="openEditExpense(e)"></div>
-              </div>
-            </div>
-
-            <div v-if="expensesSorted.length===0" class="itemCard muted">
-              （未有記帳）
-            </div>
-          </div>
-        </div>
-
-        <!-- SHOPPING -->
-        <div v-else-if="view==='shopping'" class="card section">
-          <div class="sectionHead">
-            <div class="sectionTitle">購物</div>
-            <div class="right">
-              <div class="chipBtn btn" @click="openNewShopping()">＋ 購物</div>
-            </div>
-          </div>
-
-          <div class="list" style="margin-top:10px;">
-            <div v-for="s in shoppingSorted" :key="s.id" class="itemCard">
-              <div class="shopRow">
-                <div class="checkbox btn" :class="{on: !!s.done}" @click="toggleShoppingDone(s)">
-                  <span v-if="s.done">✓</span>
-                </div>
-
-                <div style="flex:1 1 auto; min-width:0;">
-                  <div class="shopTitle" :class="{strike: !!s.done}">
-                    {{ s.name || '（未命名）' }}
-                  </div>
-                  <div class="shopMeta" v-if="s.location" :class="{strike: !!s.done}">
-                    📍 {{ s.location }}
-                  </div>
-                  <div class="shopMeta" v-if="s.price_text" :class="{strike: !!s.done}">
-                    💲 {{ s.price_text }}
-                  </div>
-                  <div class="itemNote" v-if="s.note" :class="{strike: !!s.done}">
-                    {{ s.note }}
+            <template v-else>
+              <div class="periodCard" style="margin-top:12px;">
+                <div class="periodHead">
+                  <div class="periodTitle">上午</div>
+                  <div class="periodBtns">
+                    <div class="btn small" @click="addDest('am')">＋ 行程</div>
+                    <div class="btn small" @click="addMeal('am')">＋ 用餐</div>
                   </div>
                 </div>
 
-                <div class="penBtn btn" v-html="penSvg()" @click="openEditShopping(s)"></div>
-              </div>
-            </div>
+                <div v-if="planGroups.am.length===0" class="muted">未有內容</div>
 
-            <div v-if="shoppingSorted.length===0" class="itemCard muted">
-              （未有購物清單）
-            </div>
-          </div>
-        </div>
+                <div v-for="x in planGroups.am" :key="x.id" class="itemCard">
+                  <div class="itemTop">
+                    <div class="itemEmoji">{{ itemEmoji(x) }}</div>
+                    <div class="itemMain">
+                      <div class="itemTitle">{{ x.title }}</div>
+                      <div class="itemNote" v-if="x.note">{{ x.note }}</div>
 
-      </div>
+                      <a v-if="(x.maps_query || x.title) && kindType(x.kind)==='dest'"
+                        class="linkHint"
+                        :href="mapLink(x.maps_query || x.title)"
+                        target="_blank"
+                        rel="noopener"
+                      >📍 Google Maps：{{ x.maps_query || x.title }}</a>
+                    </div>
+                    <div class="iconBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
+                  </div>
+                </div>
+              </div>
 
-      <!-- Bottom toolbar -->
-      <div class="toolbar">
-        <div class="toolbarInner">
-          <div class="tabBtn btn" :class="{active:view==='plan'}" @click="setView('plan')">
-            <span class="ico">🗺️</span><div class="lbl">行程</div>
-          </div>
-          <div class="tabBtn btn" :class="{active:view==='flights'}" @click="setView('flights')">
-            <span class="ico">✈️</span><div class="lbl">航程</div>
-          </div>
-          <div class="tabBtn btn" :class="{active:view==='expenses'}" @click="setView('expenses')">
-            <span class="ico">💴</span><div class="lbl">記帳</div>
-          </div>
-          <div class="tabBtn btn" :class="{active:view==='shopping'}" @click="setView('shopping')">
-            <span class="ico">🛍️</span><div class="lbl">購物</div>
-          </div>
-        </div>
-      </div>
+              <div class="periodCard">
+                <div class="periodHead">
+                  <div class="periodTitle">下午</div>
+                  <div class="periodBtns">
+                    <div class="btn small" @click="addDest('pm')">＋ 行程</div>
+                    <div class="btn small" @click="addMeal('pm')">＋ 用餐</div>
+                  </div>
+                </div>
 
-      <!-- Debug modal -->
-      <div v-if="showDebug" class="debugModalWrap" @click.self="showDebug=false">
-        <div class="debugModal">
-          <div class="debugRow">
-            <div class="pill">Vue {{ Vue?.version || 'unknown' }}</div>
-            <div class="pill" :class="connected ? 'ok' : 'bad'">{{ connected ? 'DB OK' : 'DB ERR' }}</div>
-            <div class="pill mono">{{ statusText }}</div>
-            <div class="chipBtn btn" style="margin-left:auto;" @click="showDebug=false">關閉</div>
-          </div>
+                <div v-if="planGroups.pm.length===0" class="muted">未有內容</div>
 
-          <div v-if="lastError" class="cardInner" style="margin-top:12px; padding:12px; border-color: rgba(255,180,180,.25);">
-            <div style="font-weight:950; color: rgba(255,180,180,.95);">Last error</div>
-            <div class="mono" style="margin-top:8px; white-space:pre-wrap;">{{ lastError.message || lastError }}</div>
-          </div>
-        </div>
-      </div>
+                <div v-for="x in planGroups.pm" :key="x.id" class="itemCard">
+                  <div class="itemTop">
+                    <div class="itemEmoji">{{ itemEmoji(x) }}</div>
+                    <div class="itemMain">
+                      <div class="itemTitle">{{ x.title }}</div>
+                      <div class="itemNote" v-if="x.note">{{ x.note }}</div>
 
-      <!-- Edit modal -->
-      <div v-if="editing" class="modalWrap" @click.self="closeEdit()">
-        <div class="modal">
-          <div class="modalHead">
-            <div class="modalTitle">{{ editing.title }}</div>
-            <div class="modalActions">
-              <div class="chipBtn btn" @click="toggleDelete()">
-                {{ showDelete ? '隱藏刪除' : '顯示刪除' }}
+                      <a v-if="(x.maps_query || x.title) && kindType(x.kind)==='dest'"
+                        class="linkHint"
+                        :href="mapLink(x.maps_query || x.title)"
+                        target="_blank"
+                        rel="noopener"
+                      >📍 Google Maps：{{ x.maps_query || x.title }}</a>
+                    </div>
+                    <div class="iconBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
+                  </div>
+                </div>
               </div>
-              <div class="chipBtn btn" @click="closeEdit()">關閉</div>
-            </div>
-          </div>
 
-          <!-- DAYS -->
-          <div v-if="editing.table==='days'">
-            <div class="grid2">
-              <div>
-                <label>Day number</label>
-                <input v-model.number="editing.row.day_no" type="number" />
-              </div>
-              <div>
-                <label>日期（YYYY-MM-DD）</label>
-                <input v-model="editing.row.date" placeholder="2026-01-08" />
-              </div>
-            </div>
+              <div class="periodCard">
+                <div class="periodHead">
+                  <div class="periodTitle">晚上</div>
+                  <div class="periodBtns">
+                    <div class="btn small" @click="addDest('night')">＋ 行程</div>
+                    <div class="btn small" @click="addMeal('night')">＋ 用餐</div>
+                  </div>
+                </div>
 
-            <div class="grid1">
-              <div>
-                <label>（可留空）</label>
-                <input v-model="editing.row.title" placeholder="例如：Day 2 1/9 星期五" />
-              </div>
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-            </div>
-          </div>
+                <div v-if="planGroups.night.length===0" class="muted">未有內容</div>
 
-          <!-- PLAN ITEMS -->
-          <div v-else-if="editing.table==='plan_items'">
-            <div class="grid2">
-              <div>
-                <label>Day（輸入 day number）</label>
-                <input v-model.number="editing.row.day_no_input" type="number" />
-              </div>
-              <div>
-                <label>時段</label>
-                <select v-model="editing.row.time_label">
-                  <option v-for="p in periodOptions" :key="p.value" :value="p.value">{{ p.label }}</option>
-                </select>
-              </div>
-            </div>
+                <div v-for="x in planGroups.night" :key="x.id" class="itemCard">
+                  <div class="itemTop">
+                    <div class="itemEmoji">{{ itemEmoji(x) }}</div>
+                    <div class="itemMain">
+                      <div class="itemTitle">{{ x.title }}</div>
+                      <div class="itemNote" v-if="x.note">{{ x.note }}</div>
 
-            <div class="grid2">
-              <div>
-                <label>類型</label>
-                <select v-model="editing.row.kind">
-                  <option v-for="k in kindOptions" :key="k.value" :value="k.value">{{ k.label }}</option>
-                </select>
+                      <a v-if="(x.maps_query || x.title) && kindType(x.kind)==='dest'"
+                        class="linkHint"
+                        :href="mapLink(x.maps_query || x.title)"
+                        target="_blank"
+                        rel="noopener"
+                      >📍 Google Maps：{{ x.maps_query || x.title }}</a>
+                    </div>
+                    <div class="iconBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label>Google Map 搜尋字（可留空）</label>
-                <input v-model="editing.row.maps_query" placeholder="例如：札幌 PARCO / 北海道神宮" />
-              </div>
-            </div>
 
-            <div class="grid1">
-              <div>
-                <label>內容</label>
-                <input v-model="editing.row.title" placeholder="例如：北海道神宮 / 午餐：根室花まる" />
+              <!-- Wear separate -->
+              <div class="periodCard">
+                <div class="periodHead">
+                  <div class="periodTitle">衣著</div>
+                  <div class="periodBtns">
+                    <div class="btn small" @click="openNew('plan_items', { time_label:'衣著', kind:'wear' })">＋ 衣著</div>
+                  </div>
+                </div>
+
+                <div v-if="planGroups.wear.length===0" class="muted">未有內容</div>
+
+                <div v-for="x in planGroups.wear" :key="x.id" class="itemCard">
+                  <div class="itemTop">
+                    <div class="itemEmoji">👕</div>
+                    <div class="itemMain">
+                      <div class="itemTitle">{{ x.title }}</div>
+                      <div class="itemNote" v-if="x.note">{{ x.note }}</div>
+                    </div>
+                    <div class="iconBtn" @click="openEdit('plan_items', x)" v-html="penSvg()"></div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-            </div>
+            </template>
           </div>
 
           <!-- FLIGHTS -->
-          <div v-else-if="editing.table==='flights'">
-            <div class="grid2">
-              <div>
-                <label>段號（seg）</label>
-                <input v-model.number="editing.row.seg_no" type="number" />
-              </div>
-              <div>
-                <label>航空公司（例如 CX）</label>
-                <input v-model="editing.row.carrier" />
-              </div>
+          <div class="card section" v-else-if="view==='flights'">
+            <div class="sectionTitleRow">
+              <div class="sectionTitle">航程</div>
+              <div class="btn small" @click="openNew('flights')">＋ 航程</div>
             </div>
 
-            <div class="grid2">
-              <div>
-                <label>航班號（例如 581）</label>
-                <input v-model="editing.row.flight_no" />
-              </div>
-              <div>
-                <label>（可留空）</label>
-                <input v-model="editing.row.note" placeholder="例如：Terminal / seat / reminder" />
-              </div>
-            </div>
+            <div class="flightWrap">
+              <div class="flightCard" v-for="f in flights" :key="f.id">
+                <div class="flightTop">
+                  <div>{{ flightTitle(f) }}</div>
+                  <div class="iconBtn" @click="openEdit('flights', f)" v-html="penSvg()"></div>
+                </div>
 
-            <div class="grid2">
-              <div>
-                <label>出發機場（IATA，例如 CTS）</label>
-                <input v-model="editing.row.depart_airport" />
-              </div>
-              <div>
-                <label>到達機場（IATA，例如 HKG）</label>
-                <input v-model="editing.row.arrive_airport" />
-              </div>
-            </div>
+                <div class="flightRoute">
+                  {{ (f.depart_airport || '---') }} to {{ (f.arrive_airport || '---') }}
+                </div>
 
-            <div class="grid2">
-              <div>
-                <label>出發時間（例如 2026-01-13 16:00）</label>
-                <input v-model="editing.row.depart_time" />
+                <div class="flightRow">
+                  <div>
+                    <div class="airport">{{ f.depart_airport || '---' }}</div>
+                    <div class="time">{{ toHHMM(f.depart_time) || '--:--' }}</div>
+                    <div class="terminal muted">Depart</div>
+                  </div>
+
+                  <div style="position:relative;">
+                    <div class="planeLine"></div>
+                    <div class="plane">✈️</div>
+                  </div>
+
+                  <div style="text-align:right;">
+                    <div class="airport">{{ f.arrive_airport || '---' }}</div>
+                    <div class="time">{{ toHHMM(f.arrive_time) || '--:--' }}</div>
+                    <div class="terminal muted">Arrive</div>
+                  </div>
+                </div>
+
+                <div class="itemNote" v-if="f.note" style="margin-top:12px;">{{ f.note }}</div>
               </div>
-              <div>
-                <label>到達時間（例如 2026-01-13 20:55）</label>
-                <input v-model="editing.row.arrive_time" />
-              </div>
+
+              <div v-if="flights.length===0" class="muted">未有航程</div>
             </div>
           </div>
 
           <!-- EXPENSES -->
-          <div v-else-if="editing.table==='expenses'">
-            <div class="grid2">
-              <div>
-                <label>Day（輸入 day number）</label>
-                <input v-model.number="editing.row.day_no_input" type="number" />
-              </div>
-              <div>
-                <label>日期（YYYY-MM-DD）</label>
-                <input v-model="editing.row.happened_on" placeholder="2026-01-09" />
-              </div>
+          <div class="card section" v-else-if="view==='expenses'">
+            <div class="sectionTitleRow">
+              <div class="sectionTitle">記帳</div>
+              <div class="btn small" @click="openNew('expenses')">＋ 記帳</div>
             </div>
 
-            <div class="grid2">
-              <div>
-                <label>分類</label>
-                <input v-model="editing.row.category" placeholder="例如：food / transport" />
+            <div class="list">
+              <div class="itemCard" v-for="e in expenses" :key="e.id">
+                <div class="itemTop">
+                  <div class="itemEmoji">🧾</div>
+                  <div class="itemMain">
+                    <div class="expRow">
+                      <div style="min-width:0;">
+                        <div class="expTitle">{{ e.merchant || '未命名' }}</div>
+                        <div class="muted" style="margin-top:4px;">
+                          {{ e.happened_on || '-' }} · {{ e.category || '分類' }}
+                        </div>
+                      </div>
+                      <div style="text-align:right; font-weight:950;">
+                        {{ e.amount }} {{ e.currency || '' }}
+                      </div>
+                    </div>
+                    <div class="itemNote" v-if="e.note">{{ e.note }}</div>
+                  </div>
+                  <div class="iconBtn" @click="openEdit('expenses', e)" v-html="penSvg()"></div>
+                </div>
               </div>
-              <div>
-                <label>商戶</label>
-                <input v-model="editing.row.merchant" placeholder="例如：Lawson / JR" />
-              </div>
-            </div>
 
-            <div class="grid2">
-              <div>
-                <label>金額</label>
-                <input v-model.number="editing.row.amount" type="number" step="0.01" />
-              </div>
-              <div>
-                <label>貨幣</label>
-                <input v-model="editing.row.currency" />
-              </div>
-            </div>
-
-            <div class="grid2">
-              <div>
-                <label>付款人</label>
-                <input v-model="editing.row.paid_by" placeholder="例如：Kin / Aline" />
-              </div>
-              <div></div>
-            </div>
-
-            <div class="grid1">
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
+              <div v-if="expenses.length===0" class="muted">未有記帳</div>
             </div>
           </div>
 
           <!-- SHOPPING -->
-          <div v-else-if="editing.table==='shopping_items'">
-            <div class="grid1">
-              <div>
-                <label>物品</label>
-                <input v-model="editing.row.name" />
-              </div>
+          <div class="card section" v-else>
+            <div class="sectionTitleRow">
+              <div class="sectionTitle">購物</div>
+              <div class="btn small" @click="openNew('shopping_items')">＋ 購物</div>
             </div>
 
-            <div class="grid2">
-              <div>
-                <label>地點</label>
-                <input v-model="editing.row.location" />
+            <div class="list">
+              <div class="itemCard" v-for="s in shopping" :key="s.id">
+                <div class="shopRow">
+                  <input class="chk" type="checkbox" :checked="!!s.done" @change="toggleShopDone(s)" />
+                  <div style="flex:1; min-width:0;">
+                    <div class="itemTitle" :class="{strike: !!s.done}" style="font-size:18px;">
+                      {{ s.name || '未命名' }}
+                    </div>
+                    <div class="muted" v-if="s.location" :class="{strike: !!s.done}" style="margin-top:4px;">
+                      {{ s.location }}
+                    </div>
+                    <div class="muted" v-if="s.price_text" :class="{strike: !!s.done}" style="margin-top:4px;">
+                      {{ s.price_text }}
+                    </div>
+                    <div class="itemNote" v-if="s.note" :class="{strike: !!s.done}">{{ s.note }}</div>
+                  </div>
+                  <div class="iconBtn" @click="openEdit('shopping_items', s)" v-html="penSvg()"></div>
+                </div>
               </div>
-              <div>
-                <label>價錢（文字）</label>
-                <input v-model="editing.row.price_text" />
-              </div>
-            </div>
 
-            <div class="grid1">
-              <div>
-                <label>備註</label>
-                <textarea v-model="editing.row.note"></textarea>
-              </div>
-            </div>
-
-            <div class="muted" style="margin-top:10px;">
-              * done 用清單上的 ✅ 勾選（唔喺呢度改）
+              <div v-if="shopping.length===0" class="muted">未有購物清單</div>
             </div>
           </div>
 
-          <div style="display:flex; gap:10px; margin-top:14px; align-items:center;">
-            <div class="chipBtn btn" @click="saveEdit()" :style="loading?'opacity:.6':''">
-              {{ loading ? '儲存中...' : '儲存' }}
-            </div>
-            <div class="chipBtn btn" @click="closeEdit()">取消</div>
+          <!-- Modal -->
+          <div v-if="editing" class="modalMask" @click.self="closeEdit()">
+            <div class="modal">
+              <div class="modalHead">
+                <div class="modalTitle">{{ editing.uiTitle }}</div>
+                <div style="display:flex; gap:10px;">
+                  <div class="btn small ghost" @click="toggleDelete()">顯示刪除</div>
+                  <div class="btn small ghost" @click="closeEdit()">關閉</div>
+                </div>
+              </div>
 
-            <div v-if="showDelete" class="chipBtn btn dangerBtn" style="margin-left:auto;" @click="deleteEdit()">
-              刪除
+              <!-- DAYS -->
+              <template v-if="editing.table==='days'">
+                <div class="grid2">
+                  <div class="field">
+                    <label>Day 編號</label>
+                    <input type="number" v-model.number="editing.row.day_no" />
+                  </div>
+                  <div class="field">
+                    <label>日期</label>
+                    <input placeholder="YYYY-MM-DD" v-model="editing.row.date" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>標題</label>
+                  <input v-model="editing.row.title" />
+                </div>
+
+                <div class="field">
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </template>
+
+              <!-- PLAN ITEMS -->
+              <template v-else-if="editing.table==='plan_items'">
+                <div class="grid2">
+                  <div class="field">
+                    <label>Day（輸入 day number）</label>
+                    <input type="number" v-model.number="editing.row.day_no_input" />
+                  </div>
+                  <div class="field">
+                    <label>時段</label>
+                    <select v-model="editing.row.time_label">
+                      <option value="上午">上午</option>
+                      <option value="下午">下午</option>
+                      <option value="晚上">晚上</option>
+                      <option value="衣著">衣著</option>
+                      <option value="淩晨">淩晨</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid2">
+                  <div class="field">
+                    <label>類型</label>
+                    <select v-model="editing.row.kind">
+                      <option value="activity">行程（Destination）</option>
+                      <option value="food">用餐（Meal）</option>
+                      <option value="wear">衣著</option>
+                      <option value="transport">交通</option>
+                      <option value="hotel">酒店</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Google Map 搜尋字（可留空）</label>
+                    <input placeholder="例如 札幌 PARCO / 北海道神宮" v-model="editing.row.maps_query" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>內容</label>
+                  <input v-model="editing.row.title" />
+                </div>
+
+                <div class="field">
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </template>
+
+              <!-- FLIGHTS -->
+              <template v-else-if="editing.table==='flights'">
+                <div class="grid2">
+                  <div class="field">
+                    <label>Segment</label>
+                    <input type="number" v-model.number="editing.row.seg_no" />
+                  </div>
+                  <div class="field">
+                    <label>航空公司 / 航班</label>
+                    <div class="grid2" style="gap:10px;">
+                      <input placeholder="CX" v-model="editing.row.carrier" />
+                      <input placeholder="581" v-model="editing.row.flight_no" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid2">
+                  <div class="field">
+                    <label>出發機場</label>
+                    <input placeholder="HKG" v-model="editing.row.depart_airport" />
+                  </div>
+                  <div class="field">
+                    <label>到達機場</label>
+                    <input placeholder="CTS" v-model="editing.row.arrive_airport" />
+                  </div>
+                </div>
+
+                <div class="grid2">
+                  <div class="field">
+                    <label>出發時間</label>
+                    <input placeholder="2026-01-08 02:00:00+08" v-model="editing.row.depart_time" />
+                  </div>
+                  <div class="field">
+                    <label>到達時間</label>
+                    <input placeholder="2026-01-08 07:05:00+09" v-model="editing.row.arrive_time" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </template>
+
+              <!-- EXPENSES -->
+              <template v-else-if="editing.table==='expenses'">
+                <div class="grid2">
+                  <div class="field">
+                    <label>Day（輸入 day number）</label>
+                    <input type="number" v-model.number="editing.row.day_no_input" />
+                  </div>
+                  <div class="field">
+                    <label>日期</label>
+                    <input placeholder="YYYY-MM-DD" v-model="editing.row.happened_on" />
+                  </div>
+                </div>
+
+                <div class="grid2">
+                  <div class="field">
+                    <label>分類</label>
+                    <input v-model="editing.row.category" />
+                  </div>
+                  <div class="field">
+                    <label>商戶</label>
+                    <input v-model="editing.row.merchant" />
+                  </div>
+                </div>
+
+                <div class="grid2">
+                  <div class="field">
+                    <label>金額</label>
+                    <input type="number" step="0.01" v-model.number="editing.row.amount" />
+                  </div>
+                  <div class="field">
+                    <label>幣種</label>
+                    <input v-model="editing.row.currency" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>付款人（可留空）</label>
+                  <input v-model="editing.row.paid_by" />
+                </div>
+
+                <div class="field">
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+              </template>
+
+              <!-- SHOPPING -->
+              <template v-else-if="editing.table==='shopping_items'">
+                <div class="field">
+                  <label>物品</label>
+                  <input v-model="editing.row.name" />
+                </div>
+                <div class="grid2">
+                  <div class="field">
+                    <label>地點（可留空）</label>
+                    <input v-model="editing.row.location" />
+                  </div>
+                  <div class="field">
+                    <label>價錢（文字）</label>
+                    <input v-model="editing.row.price_text" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label>備註</label>
+                  <textarea v-model="editing.row.note"></textarea>
+                </div>
+                <div class="muted" style="margin-top:10px;">
+                  * done 用清單上的 ✅ 直接勾選（唔需要喺呢度改）
+                </div>
+              </template>
+
+              <div class="modalBtns">
+                <div class="btn" @click="saveEdit()">{{ loading ? '儲存中...' : '儲存' }}</div>
+                <div class="btn ghost" @click="closeEdit()">取消</div>
+                <div v-if="showDelete && editing.row.id" class="btn dangerBtn" @click="delEditing()">刪除</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    
- `}).mount("#app");
-})();
-</script>
+
+        <!-- Bottom nav -->
+        <div class="bottomBar">
+          <div class="bottomInner">
+            <div class="navBtn" :class="{active:view==='plan'}" @click="view='plan'">
+              <div class="navEmoji">🗺️</div>
+              <div class="navText">行程</div>
+            </div>
+            <div class="navBtn" :class="{active:view==='flights'}" @click="view='flights'">
+              <div class="navEmoji">✈️</div>
+              <div class="navText">航程</div>
+            </div>
+            <div class="navBtn" :class="{active:view==='expenses'}" @click="view='expenses'">
+              <div class="navEmoji">💴</div>
+              <div class="navText">記帳</div>
+            </div>
+            <div class="navBtn" :class="{active:view==='shopping'}" @click="view='shopping'">
+              <div class="navEmoji">🛍️</div>
+              <div class="navText">購物</div>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    .mount("#app");
+  })();
+  </script>
 </body>
 </html>
