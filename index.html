@@ -872,7 +872,25 @@
             this.loading = false;
           }
         },
-
+        itemEmoji(kind) {
+          if (!kind) return '📍';
+          switch (kind) {
+            case 'dest':
+            case '行程':
+              return '📍';      // 地點
+            case 'meal':
+            case '用餐':
+              return '🍴';      // 餐廳
+            case 'flight':
+            case '航程':
+              return '✈️';
+            case 'shopping':
+            case '購物':
+              return '🛍️';
+            default:
+              return '📍';
+          }
+        },
         // -------- Editing --------
         openNew(table, extra){
           this.showDelete = false;
