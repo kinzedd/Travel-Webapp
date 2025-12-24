@@ -2,30 +2,33 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Sapporo Snow — Travel App</title>
 
-  <link rel="stylesheet" href="./assets/app.css" />
   <script src="./assets/vue.global.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root{
-      --bg0:#07101f;
+      --bg0:#061022;
       --card: rgba(255,255,255,.07);
       --card2: rgba(255,255,255,.05);
       --stroke: rgba(255,255,255,.12);
       --stroke2: rgba(255,255,255,.08);
       --txt: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.70);
-      --ok: rgba(191,255,209,.92);
-      --bad: rgba(255,180,180,.92);
+      --ok: rgba(191,255,209,.95);
+      --bad: rgba(255,180,180,.95);
       --shadow: 0 14px 40px rgba(0,0,0,.35);
+      --r16:16px;
+      --r18:18px;
+      --r22:22px;
       --pad: 12px;
+      --tabH: 70px; /* bottom nav height */
     }
 
-    *{box-sizing:border-box}
-    html, body { height:100%; }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
       color:var(--txt);
@@ -37,7 +40,7 @@
       overflow-x:hidden;
     }
 
-    /* bg.jpg fallback paths */
+    /* bg.jpg: try both paths */
     body::before{
       content:"";
       position:fixed; inset:0;
@@ -45,7 +48,7 @@
         url("./assets/bg.jpg"),
         url("./bg.jpg");
       background-size: cover;
-      background-position: center;
+      background-position:center;
       background-repeat:no-repeat;
       opacity:.55;
       pointer-events:none;
@@ -54,7 +57,7 @@
     body::after{
       content:"";
       position:fixed; inset:0;
-      background: linear-gradient(180deg, rgba(4,10,20,.88), rgba(4,10,20,.65) 40%, rgba(4,10,20,.92));
+      background: linear-gradient(180deg, rgba(4,10,20,.92), rgba(4,10,20,.55) 40%, rgba(4,10,20,.92));
       pointer-events:none;
       z-index:-1;
     }
@@ -63,43 +66,58 @@
     .muted{ color:var(--muted); }
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; }
 
+    /* ===== Layout ===== */
     .shell{
       max-width: 980px;
       margin: 0 auto;
-      padding: 14px 14px 96px;
+      padding: 12px 12px calc(var(--tabH) + env(safe-area-inset-bottom) + 16px);
     }
 
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      gap:12px;
-      padding:14px;
+    /* compact header */
+    .header{
       border:1px solid var(--stroke2);
       background: rgba(255,255,255,.05);
-      border-radius: 26px;
+      border-radius: 22px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
+      padding: 12px;
+    }
+
+    .headTop{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
     }
     .brand{ flex:1; min-width:0; }
     .kicker{
+      font-size:11px;
       letter-spacing:.18em;
-      font-size:12px;
-      opacity:.8;
+      opacity:.75;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .titleRow{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-top:6px; }
-    .title{ font-size:40px; font-weight:900; line-height:1; }
-    .sub{ font-size:14px; color:var(--muted); }
+    .title{
+      margin-top:6px;
+      font-size:34px;
+      font-weight:950;
+      line-height:1.02;
+    }
+    .sub{
+      margin-top:6px;
+      font-size:14px;
+      color:var(--muted);
+      font-weight:800;
+    }
 
-    .actions{
+    .headRight{
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
       align-items:flex-end;
-      min-width: 190px;
+      min-width: 150px;
     }
+
     .pill{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.06);
@@ -114,132 +132,8 @@
     .pill.ok{ border-color: rgba(191,255,209,.35); color: var(--ok); }
     .pill.bad{ border-color: rgba(255,180,180,.35); color: var(--bad); }
 
-    .btn{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      color: var(--txt);
-      border-radius: 999px;
-      padding: 10px 12px;
-      font-weight:800;
-      cursor:pointer;
-      user-select:none;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      transition: transform .08s ease, background .12s ease;
-    }
-    .btn:active{ transform: translateY(1px); }
-    .btn.small{ padding:8px 10px; font-size:13px; }
-    .btn.ghost{ background: transparent; }
-    .btn.primary{ background: rgba(191,255,209,.12); border-color: rgba(191,255,209,.25); }
-    .btn.danger{ background: rgba(255,180,180,.10); border-color: rgba(255,180,180,.25); color: rgba(255,220,220,.95); }
-    .btn:disabled{ opacity:.45; cursor:not-allowed; }
-
-    .tabs{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-    .tab{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      padding:10px 14px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-weight:900;
-      font-size:14px;
-    }
-    .tab.active{
-      background: rgba(255,255,255,.14);
-      border-color: rgba(255,255,255,.18);
-    }
-
-    .panel{
-      margin-top:14px;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.04);
-      border-radius: 26px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      overflow:hidden;
-    }
-    .panelHead{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding:12px var(--pad) 10px;
-      border-bottom:1px solid var(--stroke2);
-      background: rgba(255,255,255,.03);
-    }
-    .panelHead .right{
-      margin-left:auto;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    /* Day slider */
-    .daySlider{
-      display:flex;
-      gap:10px;
-      overflow-x:auto;
-      padding: var(--pad);
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-    }
-    .daySlider::-webkit-scrollbar{ height: 8px; }
-    .daySlider::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius:999px; }
-
-    /* ✅ thinner day cards */
-    .dayCard{
-      min-width: 200px;
-      max-width: 220px;
-      scroll-snap-align: start;
-      border:1px solid var(--stroke2);
-      background: rgba(255,255,255,.05);
-      border-radius: 18px;
-      padding: 8px 10px;              /* thinner */
-      box-shadow: 0 12px 30px rgba(0,0,0,.18);
-      cursor:pointer;
-    }
-    .dayCard.active{
-      border-color: rgba(191,255,209,.35);
-      background: rgba(191,255,209,.07);
-    }
-    .dayTop{ display:flex; gap:8px; align-items:center; }
-    .dayTag{
-      border:1px solid var(--stroke);
-      padding:5px 9px;                /* thinner */
-      border-radius:999px;
-      font-weight:900;
-      background: rgba(255,255,255,.06);
-      line-height:1.05;
-      font-size:13px;
-    }
-    .dayDate{
-      color: rgba(255,255,255,.70);
-      font-weight:800;
-      letter-spacing:.02em;
-      font-size:13px;
-    }
-    .dayTitle{
-      margin-top:6px;
-      font-size:16px;                 /* smaller */
-      font-weight:900;
-      line-height:1.15;
-      word-break:break-word;
-      display:-webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;          /* clamp to keep thin */
-      overflow:hidden;
-      min-height: 2.3em;              /* stable height */
-    }
-
     .iconBtn{
-      width:32px;
-      height:32px;
+      width:30px;height:30px;
       border-radius: 14px;
       border:1px solid var(--stroke);
       background: rgba(0,0,0,.18);
@@ -251,27 +145,128 @@
     .iconBtn:active{ transform: translateY(1px); }
     .penSvg{ width:16px; height:16px; opacity:.95; }
 
-    /* Sections aligned */
-    .section{
-      margin: 0 var(--pad) var(--pad);
+    .btn{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--txt);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-weight:950;
+      cursor:pointer;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.small{ padding:8px 10px; font-size:13px; }
+
+    /* ===== Panel ===== */
+    .panel{
+      margin-top:12px;
       border:1px solid var(--stroke2);
       background: rgba(255,255,255,.04);
       border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+    .panelHead{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-bottom:1px solid var(--stroke2);
+      background: rgba(255,255,255,.03);
+    }
+    .panelTitle{
+      font-weight:950;
+      font-size:18px;
+      margin-right:6px;
+    }
+    .panelHead .right{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    /* ===== Day slider (thinner) ===== */
+    .daySlider{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding: 12px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .daySlider::-webkit-scrollbar{ height: 6px; }
+    .daySlider::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius:999px; }
+
+    .dayCard{
+      min-width: 180px;
+      max-width: 200px;
+      scroll-snap-align: start;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 7px 9px;     /* thinner */
+      cursor:pointer;
+    }
+    .dayCard.active{
+      border-color: rgba(191,255,209,.35);
+      background: rgba(191,255,209,.07);
+    }
+    .dayTop{ display:flex; gap:8px; align-items:center; }
+    .dayTag{
+      border:1px solid var(--stroke);
+      padding:4px 8px;
+      border-radius:999px;
+      font-weight:950;
+      background: rgba(255,255,255,.06);
+      font-size:12px;
+      line-height:1.05;
+    }
+    .dayDate{
+      color: rgba(255,255,255,.70);
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.02em;
+    }
+    .dayTitle{
+      margin-top:6px;
+      font-size:14px;
+      font-weight:950;
+      line-height:1.15;
+      display:-webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;  /* thinner */
+      overflow:hidden;
+      min-height: 1.2em;
+      word-break:break-word;
+    }
+
+    /* ===== Sections ===== */
+    .section{
+      margin: 0 12px 12px;
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
       overflow:hidden;
     }
     .sectionHead{
-      padding: 12px;
+      padding: 10px 12px;
       display:flex;
       align-items:center;
       gap:10px;
       border-bottom:1px solid var(--stroke2);
       background: rgba(255,255,255,.03);
     }
-    .sectionHead h3{ margin:0; font-size:18px; font-weight:900; }
+    .sectionHead h3{ margin:0; font-size:18px; font-weight:950; }
     .sectionHead .right{ margin-left:auto; display:flex; gap:10px; }
 
     .items{
-      padding: 12px;
+      padding: 10px 12px 12px;
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -280,7 +275,7 @@
     .itemCard{
       border:1px solid var(--stroke2);
       background: rgba(255,255,255,.05);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 12px;
     }
     .itemTop{
@@ -289,19 +284,18 @@
       align-items:flex-start;
     }
     .emoji{
-      width:26px;
-      height:26px;
+      width:24px;
+      height:24px;
       display:grid;
       place-items:center;
       font-size:18px;
-      opacity:.95;
       flex:0 0 auto;
       margin-top:2px;
     }
     .itemMain{ flex:1; min-width:0; }
     .itemTitle{
-      font-weight:900;
-      font-size:18px;
+      font-weight:950;
+      font-size:17px;
       line-height:1.2;
       word-break:break-word;
     }
@@ -314,32 +308,28 @@
     }
     .itemActions{ display:flex; gap:8px; align-items:center; flex:0 0 auto; }
 
-    /* Flights - boarding pass style */
+    /* ===== Flights (compact boarding pass) ===== */
     .flightCard{
       border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 12px 30px rgba(0,0,0,.16);
+      border-radius: 16px;
+      padding: 12px;
     }
     .flightTop{
       display:flex;
       gap:10px;
       align-items:center;
-      color: rgba(255,255,255,.80);
-      font-weight:800;
-      font-size:13px;
-      letter-spacing:.02em;
+      color: rgba(255,255,255,.78);
+      font-weight:900;
+      font-size:12px;
     }
     .flightRoute{
       margin-top:8px;
-      font-size:22px;
+      font-size:18px;
       font-weight:950;
-      letter-spacing:.01em;
       display:flex;
       justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      gap:10px;
     }
     .flightMid{
       margin-top:10px;
@@ -349,19 +339,20 @@
       gap:10px;
     }
     .airport{
-      font-size:22px;
+      font-size:18px;
       font-weight:950;
       color: rgba(191,255,209,.92);
     }
     .timeBig{
-      font-size:34px;
+      font-size:26px;
       font-weight:950;
       line-height:1;
     }
     .term{
       color: rgba(255,255,255,.70);
       font-weight:800;
-      margin-top:6px;
+      margin-top:5px;
+      font-size:12px;
     }
     .planeLine{
       display:flex;
@@ -373,7 +364,7 @@
     }
     .line{
       height:6px;
-      width:120px;
+      width:82px;
       border-radius:999px;
       background: rgba(255,255,255,.14);
       position:relative;
@@ -383,85 +374,19 @@
       right:-6px;
       top:50%;
       transform: translateY(-50%);
-      width:12px;
-      height:12px;
+      width:12px;height:12px;
       border-radius:50%;
       background: rgba(255,255,255,.18);
       border:1px solid rgba(255,255,255,.25);
     }
 
-    /* Shopping */
-    .shopRow{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .chk{
-      width:20px;
-      height:20px;
-      margin-top:2px;
-      accent-color: rgba(191,255,209,.85);
-    }
+    /* ===== Shopping ===== */
+    .shopRow{ display:flex; gap:10px; align-items:flex-start; }
+    .chk{ width:20px; height:20px; margin-top:2px; accent-color: rgba(191,255,209,.85); }
     .shopMain{ flex:1; min-width:0; }
-    .strike{
-      text-decoration: line-through;
-      opacity:.55;
-    }
+    .strike{ text-decoration: line-through; opacity:.55; }
 
-    /* bottom */
-    .bottomNav{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      padding: 10px 12px 14px;
-      background: linear-gradient(180deg, rgba(4,10,20,0), rgba(4,10,20,.92) 35%, rgba(4,10,20,.96));
-      backdrop-filter: blur(10px);
-      z-index: 40;
-    }
-    .bottomBar{
-      max-width:980px;
-      margin:0 auto;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    /* debug */
-    .debugBtn{
-      position:fixed;
-      right:14px;
-      bottom: 86px;
-      z-index: 60;
-      border-radius: 999px;
-      padding:10px 12px;
-      background: rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(10px);
-      cursor:pointer;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      font-weight:900;
-      user-select:none;
-    }
-    .debugDrawer{
-      position:fixed;
-      right:14px;
-      bottom: 140px;
-      width: min(420px, calc(100vw - 28px));
-      max-height: 60vh;
-      overflow:auto;
-      z-index: 70;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.42);
-      backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
-      padding: 12px;
-    }
-    .debugRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
-
-    /* modal */
+    /* ===== Modal ===== */
     .modalMask{
       position:fixed;
       inset:0;
@@ -476,7 +401,7 @@
       width: min(680px, 96vw);
       max-height: 88vh;
       overflow:auto;
-      border-radius: 22px;
+      border-radius: 18px;
       border:1px solid rgba(255,255,255,.16);
       background: rgba(12,18,30,.78);
       backdrop-filter: blur(16px);
@@ -484,12 +409,20 @@
       padding: 14px;
     }
     .modalHead{ display:flex; gap:10px; align-items:center; }
-    .modalTitle{ font-size:18px; font-weight:900; }
+    .modalTitle{ font-size:18px; font-weight:950; }
     .modalHead .right{ margin-left:auto; display:flex; gap:10px; }
+    .pillTag{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      padding:7px 10px;
+      border-radius:999px;
+      font-weight:950;
+      font-size:13px;
+    }
     .formGrid{
       margin-top:12px;
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap:10px;
     }
     label{
@@ -497,7 +430,7 @@
       color: var(--muted);
       font-size:12px;
       margin-bottom:6px;
-      font-weight:900;
+      font-weight:950;
       letter-spacing:.03em;
     }
     input, select, textarea{
@@ -510,7 +443,7 @@
       outline:none;
     }
     textarea{ min-height: 110px; resize: vertical; }
-    .hint{ margin-top:10px; color: var(--muted); font-size:12px; }
+    .hint{ margin-top:8px; color: var(--muted); font-size:12px; }
     .modalActions{
       margin-top:12px;
       display:flex;
@@ -518,14 +451,89 @@
       justify-content:flex-end;
       flex-wrap:wrap;
     }
+    .btn.primary{ background: rgba(191,255,209,.12); border-color: rgba(191,255,209,.25); }
+    .btn.danger{ background: rgba(255,180,180,.10); border-color: rgba(255,180,180,.25); color: rgba(255,220,220,.95); }
+    .btn.ghost{ background: transparent; }
 
-    @media (max-width: 520px){
-      .title{ font-size:34px; }
-      .actions{ min-width:0; }
-      .dayCard{ min-width: 190px; max-width: 210px; }
-      .formGrid{ grid-template-columns: 1fr; }
-      .line{ width:90px; }
-      .timeBig{ font-size:30px; }
+    /* ===== Debug mini ===== */
+    .debugBtn{
+      position:fixed;
+      right:14px;
+      bottom: calc(var(--tabH) + env(safe-area-inset-bottom) + 10px);
+      z-index: 60;
+      border-radius: 999px;
+      padding:8px 10px;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      cursor:pointer;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-weight:950;
+      user-select:none;
+    }
+    .debugDrawer{
+      position:fixed;
+      right:14px;
+      bottom: calc(var(--tabH) + env(safe-area-inset-bottom) + 56px);
+      width: min(360px, calc(100vw - 28px));
+      max-height: 55vh;
+      overflow:auto;
+      z-index: 70;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.42);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+    .debugRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+
+    /* ===== Bottom tab bar ===== */
+    .tabbarWrap{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index: 50;
+      padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
+      background: linear-gradient(180deg, rgba(4,10,20,0), rgba(4,10,20,.92) 35%, rgba(4,10,20,.96));
+      backdrop-filter: blur(10px);
+    }
+    .tabbar{
+      max-width: 980px;
+      margin:0 auto;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      border-radius: 18px;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:6px;
+      padding: 8px;
+    }
+    .tabItem{
+      border:1px solid transparent;
+      border-radius: 14px;
+      padding: 10px 8px;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      font-weight:950;
+      color: rgba(255,255,255,.85);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+    }
+    .tabItem.active{
+      border-color: rgba(255,255,255,.16);
+      background: rgba(255,255,255,.10);
+    }
+    .tabIcon{ font-size:18px; }
+
+    @media (min-width: 700px){
+      .title{ font-size:40px; }
+      .formGrid{ grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -604,18 +612,16 @@
   function emojiForItem(item){
     if (isWear(item)) return "👕";
     if (isMeal(item)) return "🍽️";
-    return "📍";
+    return "📍"; // pinpoint (your request)
   }
 
   function fmtDate(d){
     if (!d) return "";
-    const s = String(d);
-    return s.slice(0,10);
+    return String(d).slice(0,10);
   }
   function fmtTime(ts){
     if (!ts) return "";
     const s = String(ts);
-    // support "2026-01-08 02:00:00+08" or ISO
     const m = s.match(/(\d{2}):(\d{2})/);
     if (m) return `${m[1]}:${m[2]}`;
     return s;
@@ -631,7 +637,7 @@
   createApp({
     data(){
       return {
-        view: "plan", // plan | flights | expenses | shopping
+        view: "plan",
         loading: false,
         connected: false,
         statusText: "ready",
@@ -644,7 +650,7 @@
         shopping: [],
         expenses: [],
 
-        wx: { ok:false, emoji:"--", temp:"--", wind:"--", loc:"" },
+        wx: { ok:false, emoji:"🌤️", temp:"--", wind:"--", loc:"" },
 
         editing: null,
         debugOpen: false,
@@ -789,13 +795,13 @@
           this.wx.ok = !!cur;
           this.wx.emoji = wxEmoji(cur?.weather_code);
           this.wx.temp = (cur?.temperature_2m != null) ? (Math.round(cur.temperature_2m) + "°C") : "--";
-          this.wx.wind = (cur?.wind_speed_10m != null) ? (Math.round(cur.wind_speed_10m) + " km/h") : "--";
+          this.wx.wind = (cur?.wind_speed_10m != null) ? ("風 " + Math.round(cur.wind_speed_10m) + " km/h") : "風 --";
           this.wx.loc = `(${lat.toFixed(2)}, ${lon.toFixed(2)})`;
         }catch(e){
           this.wx.ok = false;
           this.wx.emoji = "🌤️";
           this.wx.temp = "--";
-          this.wx.wind = "--";
+          this.wx.wind = "風 --";
           this.wx.loc = "";
         }
       },
@@ -810,7 +816,6 @@
           shopping_items: { name:"", location:"", price_text:"", note:"", done:false, order_no: 1 },
         }[table] || {};
         const row = { ...blank, ...preset };
-
         this.editing = { table, mode:"insert", row: JSON.parse(JSON.stringify(row)) };
       },
 
@@ -916,7 +921,6 @@
         return mapsDirUrl(dest);
       },
 
-      // Shopping: toggle done w/ checkbox
       async toggleShopDone(row){
         try{
           const { error } = await sb
@@ -942,42 +946,35 @@
 
     template: /*html*/`
       <div class="shell">
-        <div class="topbar">
-          <div class="brand">
-            <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
-            <div class="titleRow">
+        <div class="header">
+          <div class="headTop">
+            <div class="brand">
+              <div class="kicker">SAPPORO • SNOW • FIRST LOVE VIBE</div>
               <div class="title">札幌旅行 App</div>
               <div class="sub">行程 / 航程 / 記帳 / 購物</div>
             </div>
 
-            <div class="tabs">
-              <div class="tab" :class="{active:view==='plan'}" @click="view='plan'">行程</div>
-              <div class="tab" :class="{active:view==='flights'}" @click="view='flights'">航程</div>
-              <div class="tab" :class="{active:view==='expenses'}" @click="view='expenses'">記帳</div>
-              <div class="tab" :class="{active:view==='shopping'}" @click="view='shopping'">購物</div>
+            <div class="headRight">
+              <div class="pill" :class="connected ? 'ok' : 'bad'">
+                <span style="font-weight:950;">DB</span>
+                <span>{{ connected ? 'YES' : 'NO' }}</span>
+              </div>
+              <div class="pill">
+                <span style="font-weight:950;">{{ wx.emoji }}</span>
+                <span style="font-weight:950;">{{ wx.temp }}</span>
+                <span class="muted">{{ wx.wind }}</span>
+              </div>
+              <div class="pill muted" v-if="wx.loc">{{ wx.loc }}</div>
+              <button class="btn small" @click="loadAll()" :disabled="loading">↻ Reload</button>
             </div>
-          </div>
-
-          <div class="actions">
-            <div class="pill" :class="connected ? 'ok' : 'bad'">
-              <span>DB</span><span>{{ connected ? 'YES' : 'NO' }}</span>
-            </div>
-            <div class="pill">
-              <span style="font-weight:950;">{{ wx.emoji }}</span>
-              <span style="font-weight:950;">{{ wx.temp }}</span>
-              <span class="muted">風 {{ wx.wind }}</span>
-            </div>
-            <div class="pill muted" v-if="wx.loc">{{ wx.loc }}</div>
-            <button class="btn small" @click="loadAll()" :disabled="loading">↻ Reload</button>
           </div>
         </div>
 
         <div class="panel">
-
-          <!-- ===== PLAN ===== -->
+          <!-- PLAN -->
           <template v-if="view==='plan'">
             <div class="panelHead">
-              <div style="font-weight:950;">行程（按日）</div>
+              <div class="panelTitle">行程（按日）</div>
               <div class="muted" style="font-size:13px;">（全部直接讀 DB / 改 DB）</div>
               <div class="right">
                 <button class="btn small" @click="openNew('plan_items')" :disabled="!selectedDay">＋ Item</button>
@@ -1044,7 +1041,7 @@
                     </div>
                   </div>
 
-                  <div class="muted" v-if="planAM.dests.length===0 && !planAM.meal" style="padding:6px 2px;">（未有資料）</div>
+                  <div class="muted" v-if="planAM.dests.length===0 && !planAM.meal">（未有資料）</div>
                 </div>
               </div>
 
@@ -1089,7 +1086,7 @@
                     </div>
                   </div>
 
-                  <div class="muted" v-if="planPM.dests.length===0 && !planPM.meal" style="padding:6px 2px;">（未有資料）</div>
+                  <div class="muted" v-if="planPM.dests.length===0 && !planPM.meal">（未有資料）</div>
                 </div>
               </div>
 
@@ -1134,7 +1131,7 @@
                     </div>
                   </div>
 
-                  <div class="muted" v-if="planNight.dests.length===0 && !planNight.meal" style="padding:6px 2px;">（未有資料）</div>
+                  <div class="muted" v-if="planNight.dests.length===0 && !planNight.meal">（未有資料）</div>
                 </div>
               </div>
 
@@ -1158,24 +1155,24 @@
                       </div>
                     </div>
                   </div>
-                  <div class="muted" v-if="planWear.dests.length===0" style="padding:6px 2px;">（未有資料）</div>
+                  <div class="muted" v-if="planWear.dests.length===0">（未有資料）</div>
                 </div>
               </div>
             </template>
 
-            <div v-else class="muted" style="padding: var(--pad);">未選 Day。</div>
+            <div v-else class="muted" style="padding:12px;">未選 Day。</div>
           </template>
 
-          <!-- ===== FLIGHTS ===== -->
+          <!-- FLIGHTS -->
           <template v-else-if="view==='flights'">
             <div class="panelHead">
-              <div style="font-weight:950;">航程</div>
+              <div class="panelTitle">航程</div>
               <div class="right">
                 <button class="btn small" @click="openNew('flights')">＋ Flight</button>
               </div>
             </div>
 
-            <div style="padding: var(--pad); display:flex; flex-direction:column; gap:12px;">
+            <div style="padding:12px; display:flex; flex-direction:column; gap:10px;">
               <div class="flightCard" v-for="f in flightsSorted" :key="f.id">
                 <div class="flightTop">
                   <div>{{ fmtDate(f.depart_time) || fmtDate(f.arrive_time) || '—' }}</div>
@@ -1186,7 +1183,7 @@
 
                 <div class="flightRoute">
                   <div>{{ f.depart_airport || '—' }}</div>
-                  <div class="muted">to</div>
+                  <div class="muted">→</div>
                   <div>{{ f.arrive_airport || '—' }}</div>
                 </div>
 
@@ -1216,16 +1213,16 @@
             </div>
           </template>
 
-          <!-- ===== EXPENSES ===== -->
+          <!-- EXPENSES -->
           <template v-else-if="view==='expenses'">
             <div class="panelHead">
-              <div style="font-weight:950;">記帳</div>
+              <div class="panelTitle">記帳</div>
               <div class="right">
                 <button class="btn small" @click="openNew('expenses')">＋ Expense</button>
               </div>
             </div>
 
-            <div style="padding: var(--pad); display:flex; flex-direction:column; gap:10px;">
+            <div style="padding:12px; display:flex; flex-direction:column; gap:10px;">
               <div class="itemCard" v-for="e in expensesSorted" :key="e.id">
                 <div class="itemTop">
                   <div class="emoji">💴</div>
@@ -1249,16 +1246,16 @@
             </div>
           </template>
 
-          <!-- ===== SHOPPING ===== -->
+          <!-- SHOPPING -->
           <template v-else-if="view==='shopping'">
             <div class="panelHead">
-              <div style="font-weight:950;">購物</div>
+              <div class="panelTitle">購物</div>
               <div class="right">
                 <button class="btn small" @click="openNew('shopping_items')">＋ Item</button>
               </div>
             </div>
 
-            <div style="padding: var(--pad); display:flex; flex-direction:column; gap:10px;">
+            <div style="padding:12px; display:flex; flex-direction:column; gap:10px;">
               <div class="itemCard" v-for="s in shoppingSorted" :key="s.id">
                 <div class="shopRow">
                   <input class="chk" type="checkbox" v-model="s.done" @change="toggleShopDone(s)" />
@@ -1282,7 +1279,7 @@
 
         </div>
 
-        <!-- Debug toggle -->
+        <!-- Debug mini -->
         <div class="debugBtn" @click="debugOpen=!debugOpen">
           <span>🛠️</span><span>Debug</span><span class="muted">{{ debugOpen ? '▲' : '▼' }}</span>
         </div>
@@ -1302,7 +1299,7 @@
         <div class="modalMask" v-if="editing" @click.self="closeEdit()">
           <div class="modal">
             <div class="modalHead">
-              <div class="pill"><b>{{ editing.mode==='insert' ? '新增' : '編輯' }}</b></div>
+              <div class="pillTag"><b>{{ editing.mode==='insert' ? '新增' : '編輯' }}</b></div>
               <div class="modalTitle">
                 {{
                   editing.table==='days' ? 'Day' :
@@ -1327,11 +1324,11 @@
                 <label>日期（YYYY-MM-DD）</label>
                 <input v-model="editing.row.date" placeholder="2026-01-08" />
               </div>
-              <div style="grid-column:1/-1;">
+              <div>
                 <label>標題</label>
                 <input v-model="editing.row.title" placeholder="例如：Day 2 1/9 星期五" />
               </div>
-              <div style="grid-column:1/-1;">
+              <div>
                 <label>備註</label>
                 <textarea v-model="editing.row.note"></textarea>
               </div>
@@ -1358,17 +1355,17 @@
                 </select>
               </div>
               <div></div>
-              <div style="grid-column:1/-1;">
+              <div>
                 <label>標題</label>
                 <input v-model="editing.row.title" />
+              </div>
+              <div>
+                <label>Google Map 目的地（留空＝用標題）</label>
+                <input v-model="editing.row.maps_query" />
               </div>
               <div style="grid-column:1/-1;">
                 <label>備註</label>
                 <textarea v-model="editing.row.note"></textarea>
-              </div>
-              <div style="grid-column:1/-1;">
-                <label>Google Map 目的地（留空＝用標題）</label>
-                <input v-model="editing.row.maps_query" />
               </div>
               <div class="hint" style="grid-column:1/-1;">
                 order_no 會自動處理，你唔需要填。
@@ -1440,7 +1437,6 @@
                 <label>付款人</label>
                 <input v-model="editing.row.paid_by" placeholder="Kin / Aline" />
               </div>
-              <div></div>
               <div style="grid-column:1/-1;">
                 <label>備註</label>
                 <textarea v-model="editing.row.note"></textarea>
@@ -1449,7 +1445,7 @@
 
             <!-- SHOPPING -->
             <div v-else-if="editing.table==='shopping_items'" class="formGrid">
-              <div style="grid-column:1/-1;">
+              <div>
                 <label>物品</label>
                 <input v-model="editing.row.name" />
               </div>
@@ -1484,14 +1480,29 @@
 
       </div>
 
-      <div class="bottomNav">
-        <div class="bottomBar">
-          <div class="muted" style="font-weight:950; font-size:13px;">{{ statusText }}</div>
-          <div class="muted" style="font-weight:950; font-size:13px;">{{ connected ? 'DB OK' : 'DB ERR' }}</div>
+      <!-- Bottom Tab Bar -->
+      <div class="tabbarWrap">
+        <div class="tabbar">
+          <div class="tabItem" :class="{active:view==='plan'}" @click="view='plan'">
+            <div class="tabIcon">🗺️</div>
+            <div>行程</div>
+          </div>
+          <div class="tabItem" :class="{active:view==='flights'}" @click="view='flights'">
+            <div class="tabIcon">✈️</div>
+            <div>航程</div>
+          </div>
+          <div class="tabItem" :class="{active:view==='expenses'}" @click="view='expenses'">
+            <div class="tabIcon">💴</div>
+            <div>記帳</div>
+          </div>
+          <div class="tabItem" :class="{active:view==='shopping'}" @click="view='shopping'">
+            <div class="tabIcon">🛍️</div>
+            <div>購物</div>
+          </div>
         </div>
       </div>
     
-    `}).mount("#app");
+ `}).mount("#app");
 })();
 </script>
 </body>
