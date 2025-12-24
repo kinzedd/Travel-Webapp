@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sapporo Snow — Travel App</title>
 
-  <!-- your CSS -->
+  <!-- your CSS (optional, safe to keep) -->
   <link rel="stylesheet" href="./assets/app.css" />
 
   <!-- Vue (global build) -->
@@ -15,138 +15,334 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* keep minimal fallback style in case app.css missing */
-    body { margin:0; background:#0b1220; color:rgba(255,255,255,.92); }
-    .muted { opacity:.75; }
-    .pill { display:inline-block; padding:.35rem .65rem; border-radius:999px; border:1px solid rgba(255,255,255,.15); }
-    .btn { cursor:pointer; user-select:none; }
-    .btn:disabled { opacity:.4; cursor:not-allowed; }
-    .row { display:flex; gap:12px; }
-    .card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; }
-    .card h3 { margin:.2rem 0 .6rem; }
-    .tabs { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .tab { padding:.45rem .9rem; border-radius:999px; border:1px solid rgba(255,255,255,.12); }
-    .tab.active { background:rgba(255,255,255,.12); }
-    input, textarea, select {
-      width:100%; box-sizing:border-box;
-      background:rgba(0,0,0,.25); color:#fff;
+    :root{
+      --bg0:#070b14;
+      --bg1:#0b1220;
+      --glass: rgba(255,255,255,.06);
+      --glass2: rgba(255,255,255,.04);
+      --stroke: rgba(255,255,255,.10);
+      --stroke2: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --ok: rgba(191,255,209,.92);
+      --danger: rgba(255,180,180,.92);
+      --shadow: 0 24px 60px rgba(0,0,0,.45);
+      --r1: 26px;
+      --r2: 18px;
+      --r3: 999px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 700px at 15% 20%, rgba(71,118,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(1000px 800px at 55% 90%, rgba(120,255,223,.10), transparent 60%),
+        linear-gradient(180deg, #071028, #070b14 55%, #060913);
+      min-height:100vh;
+    }
+
+    .shell{
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 20px 18px 28px;
+    }
+
+    .glass{
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      border-radius: var(--r1);
+    }
+
+    /* HERO / HEADER (old UI style) */
+    .hero{
+      padding: 22px 22px 18px;
+      position: relative;
+      overflow:hidden;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(600px 180px at 25% 0%, rgba(255,255,255,.09), transparent 55%),
+        radial-gradient(700px 240px at 70% 0%, rgba(120,255,223,.10), transparent 55%);
+      pointer-events:none;
+    }
+
+    .heroTop{
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+    }
+    .heroLeft{ flex:1; position:relative; }
+    .heroTag{
+      letter-spacing: .24em;
+      font-size: 12px;
+      color: var(--muted);
+      opacity:.9;
+    }
+    .heroTitleRow{
+      display:flex;
+      align-items:baseline;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .heroTitle{
+      font-size: 48px;
+      font-weight: 900;
+      line-height:1.05;
+    }
+    .heroSub{
+      color: var(--muted);
+      margin-top:8px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:14px;
+      position:relative;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.48rem .95rem;
+      border-radius: var(--r3);
       border:1px solid rgba(255,255,255,.14);
-      border-radius:12px; padding:.55rem .7rem;
+      background: rgba(255,255,255,.04);
+      user-select:none;
     }
-    textarea { min-height:90px; resize:vertical; }
-    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    .grid3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
-    .right { margin-left:auto; }
-    .list { display:flex; flex-direction:column; gap:10px; }
-    .item { padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); }
-    .item .top { display:flex; gap:8px; align-items:center; }
-    .item .title { font-weight:700; }
-    .danger { color:#ffb4b4; border-color: rgba(255,180,180,.35) !important; }
-    .ok { color:#bfffd1; border-color: rgba(191,255,209,.35) !important; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; }
-
-    /* Debug floating button */
-    .debug-fab{
-      position: fixed;
-      right: 14px;
-      bottom: 14px;
-      z-index: 9999;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .debug-fab .badge{
-      font-size:12px;
-      padding:.3rem .55rem;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.25);
-    }
-    .debug-fab button{
-      border:none;
-      padding:.55rem .75rem;
-      border-radius:999px;
-      background:rgba(255,255,255,.12);
-      color:#fff;
-      font-weight:700;
+    .tabBtn{
       cursor:pointer;
-      border:1px solid rgba(255,255,255,.18);
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
     }
-    .debug-fab button:hover{
-      background:rgba(255,255,255,.18);
+    .tabBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.07); }
+    .tabBtn.active{
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.22);
     }
-
-    /* Debug drawer */
-    .debug-drawer-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.35);
-      z-index:9998;
-    }
-    .debug-drawer{
-      position:fixed;
-      right: 14px;
-      bottom: 68px;
-      width: min(420px, calc(100vw - 28px));
-      max-height: 70vh;
-      overflow:auto;
-      z-index:9999;
-      border-radius:20px;
-      background:rgba(15, 23, 42, .92);
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-      padding:14px;
-    }
-    .debug-drawer .head{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .debug-drawer .head .title{
-      font-weight:900;
-      font-size:16px;
-    }
-    .debug-drawer .head .right{
+    .right{
       margin-left:auto;
     }
-    .debug-drawer .xbtn{
-      border:none;
-      background:rgba(255,255,255,.10);
-      color:#fff;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:12px;
-      padding:.4rem .6rem;
-      cursor:pointer;
+    .chipOk{ color: var(--ok); border-color: rgba(191,255,209,.35) !important; }
+    .chipBad{ color: var(--danger); border-color: rgba(255,180,180,.35) !important; }
+
+    .clockCard{
+      min-width: 220px;
+      padding: 16px 16px 14px;
+      border-radius: 22px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      position:relative;
     }
-    .debug-drawer .xbtn:hover{
-      background:rgba(255,255,255,.16);
+    .clockLabel{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .clockTime{
+      font-size: 30px;
+      font-weight: 900;
+      margin-top:6px;
+      letter-spacing:.04em;
+    }
+    .clockMini{
+      margin-top:8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* MAIN CONTENT (old UI: big card + left/right) */
+    .main{
+      margin-top: 16px;
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+    }
+    .contentCard{
+      flex:1;
+      padding: 16px;
+      border-radius: var(--r1);
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+
+    .sectionTitleRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 12px;
+    }
+    .sectionTitle{
+      font-size: 24px;
+      font-weight: 900;
+    }
+    .sectionHint{
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .btn{
+      cursor:pointer;
+      user-select:none;
+      padding:.44rem .85rem;
+      border-radius: var(--r3);
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      transition: background .15s ease, transform .06s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{ background: rgba(255,255,255,.08); transform: translateY(-1px); }
+    .btnDanger{ color: var(--danger); border-color: rgba(255,180,180,.35); }
+    .btnOk{ color: var(--ok); border-color: rgba(191,255,209,.35); }
+
+    .gridPlan{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      .heroTop{ flex-direction:column; }
+      .clockCard{ width: 100%; }
+      .gridPlan{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      border-radius: 22px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+    }
+
+    .list{ display:flex; flex-direction:column; gap:10px; }
+    .cardItem{
+      padding: 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .cardItem.active{
+      border-color: rgba(191,255,209,.35);
+      background: rgba(191,255,209,.06);
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .muted{ color: var(--muted); }
+    .titleStrong{ font-weight: 900; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; }
+
+    input, textarea, select{
+      width:100%;
+      box-sizing:border-box;
+      background: rgba(0,0,0,.25);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 14px;
+      padding: .58rem .75rem;
+      outline:none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+
+    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 700px){ .grid2{ grid-template-columns:1fr; } }
+
+    /* DEBUG BUTTON + MODAL (hidden by default) */
+    .dbgFab{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 999;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(10,14,25,.55);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.45);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+    }
+    .dbgDot{
+      width:10px; height:10px; border-radius:99px;
+      background: rgba(255,180,180,.9);
+      box-shadow: 0 0 0 3px rgba(255,180,180,.12);
+    }
+    .dbgDot.ok{
+      background: rgba(191,255,209,.9);
+      box-shadow: 0 0 0 3px rgba(191,255,209,.12);
+    }
+    .dbgOverlay{
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,.55);
+      display:flex;
+      align-items:flex-end;
+      justify-content:flex-end;
+      padding: 18px;
+    }
+    .dbgPanel{
+      width: min(520px, 96vw);
+      max-height: 86vh;
+      overflow:auto;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(12,16,28,.78);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+      padding: 14px;
+    }
+    .dbgHeader{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .dbgTitle{ font-weight: 900; font-size: 18px; }
+    .spacer{ flex:1; }
+    .dbgItem{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
-<div id="app"></div>
+  <div id="app"></div>
 
 <script>
 (() => {
   const { createApp } = Vue;
 
   // ============
-  // 1) CONFIG (你只要改呢兩個)
+  // CONFIG
   // ============
   const SUPABASE_URL = "https://qvogojdyykgotuitjkhj.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF"; // sb_publishable_...
+  const SUPABASE_KEY = "sb_publishable_9rQ7sJQ3bZ_uhnT2hxRUKQ_MJv1icIF";
 
-  // ============
-  // 2) Supabase client
-  // ============
   const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
-  if (!sb) console.error("Supabase client init failed: window.supabase missing?");
+  if (!sb) console.error("Supabase init failed: window.supabase missing?");
 
-  // ============
-  // 3) Helpers
-  // ============
   const hkTimeStr = () => {
     try {
       return new Intl.DateTimeFormat("en-GB", {
@@ -161,12 +357,8 @@
       return d.toTimeString().slice(0,8);
     }
   };
-
   const safeStr = (v) => (v == null ? "" : String(v));
 
-  // ============
-  // 4) App
-  // ============
   createApp({
     data() {
       return {
@@ -177,9 +369,6 @@
         connected: false,
         loading: false,
 
-        // Debug UI state (NEW)
-        debugOpen: false,
-
         // data
         days: [],
         selectedDayId: null,
@@ -188,8 +377,11 @@
         shopping: [],
         expenses: [],
 
-        // edit modal state (simple inline editor)
-        editing: null,  // {table, mode, row}
+        // editor
+        editing: null, // {table, mode, row}
+
+        // debug ui
+        showDebug: false,
       };
     },
 
@@ -202,14 +394,13 @@
         return this.planItems
           .filter(x => x.day_id === this.selectedDayId)
           .sort((a,b) => (a.order_no ?? 0) - (b.order_no ?? 0));
+      },
+      dbgDotClass(){
+        return this.connected ? "dbgDot ok" : "dbgDot";
       }
     },
 
     methods: {
-      // Debug UI (NEW)
-      toggleDebug() { this.debugOpen = !this.debugOpen; },
-      closeDebug() { this.debugOpen = false; },
-
       setErr(e) {
         this.lastError = (e && (e.message || e.error_description)) ? e : { message: String(e) };
         this.statusText = "ERR: " + safeStr(this.lastError.message || this.lastError);
@@ -217,7 +408,6 @@
       },
 
       async ping() {
-        // cheapest: read days with limit 1
         try {
           const { data, error, status } = await sb
             .from("days")
@@ -242,49 +432,39 @@
         this.statusText = "loading...";
 
         try {
-          // 1) days
           const qDays = await sb
             .from("days")
             .select("id,day_no,date,title,note,sort_order,created_at,updated_at")
             .order("day_no", { ascending: true });
-
           if (qDays.error) throw qDays.error;
           this.days = qDays.data || [];
           if (!this.selectedDayId && this.days.length) this.selectedDayId = this.days[0].id;
 
-          // 2) plan_items
           const qPlan = await sb
             .from("plan_items")
             .select("id,day_id,time_label,kind,title,note,maps_query,order_no,created_at,updated_at")
             .order("order_no", { ascending: true });
-
           if (qPlan.error) throw qPlan.error;
           this.planItems = qPlan.data || [];
 
-          // 3) flights
           const qFlights = await sb
             .from("flights")
             .select("id,seg_no,flight_no,carrier,depart_airport,arrive_airport,depart_time,arrive_time,note,created_at,updated_at")
             .order("seg_no", { ascending: true });
-
           if (qFlights.error) throw qFlights.error;
           this.flights = qFlights.data || [];
 
-          // 4) shopping
           const qShop = await sb
             .from("shopping_items")
             .select("id,name,location,price_text,note,done,order_no,created_at,updated_at")
             .order("order_no", { ascending: true });
-
           if (qShop.error) throw qShop.error;
           this.shopping = qShop.data || [];
 
-          // 5) expenses
           const qExp = await sb
             .from("expenses")
             .select("id,day_id,happened_on,category,merchant,amount,currency,paid_by,note,created_at,updated_at")
             .order("happened_on", { ascending: true });
-
           if (qExp.error) throw qExp.error;
           this.expenses = qExp.data || [];
 
@@ -298,9 +478,13 @@
         }
       },
 
-      // ============
-      // CRUD: generic upsert/delete
-      // ============
+      viewLabel(v) {
+        return ({ plan:"行程", flights:"航程", expenses:"記帳", shopping:"購物" })[v] || v;
+      },
+      kindLabel(k) {
+        return ({ activity:"行程", food:"食", wear:"衣著", hotel:"酒店", transport:"交通" })[k] || k;
+      },
+
       openNew(table) {
         const blank = {
           plan_items: { day_id: this.selectedDayId, time_label: "", kind: "activity", title: "", note: "", maps_query: "", order_no: 1 },
@@ -329,20 +513,18 @@
         this.lastError = null;
 
         try {
-          const t = table;
-
           const payload = { ...row };
           delete payload.created_at;
           delete payload.updated_at;
 
-          if (t === "shopping_items") payload.done = !!payload.done;
+          if (table === "shopping_items") payload.done = !!payload.done;
 
-          if (t === "plan_items" && (payload.order_no == null || payload.order_no === "")) {
+          if (table === "plan_items" && (payload.order_no == null || payload.order_no === "")) {
             const max = this.planItemsForSelectedDay.reduce((m,x) => Math.max(m, x.order_no || 0), 0);
             payload.order_no = max + 1;
           }
 
-          const { error } = await sb.from(t).upsert(payload);
+          const { error } = await sb.from(table).upsert(payload);
           if (error) throw error;
 
           this.statusText = "saved";
@@ -372,236 +554,274 @@
         }
       },
 
-      // ============
-      // UI helpers
-      // ============
-      viewLabel(v) {
-        return ({ plan:"行程", flights:"航程", expenses:"記帳", shopping:"購物" })[v] || v;
-      },
-      kindLabel(k) {
-        return ({ activity:"行程", food:"食", wear:"衣著", hotel:"酒店", transport:"交通" })[k] || k;
+      toggleDebug(){
+        this.showDebug = !this.showDebug;
       }
     },
 
     async mounted() {
-      // clock
       setInterval(() => { this.hkClock = hkTimeStr(); }, 1000);
-
-      // basic connectivity test then load
       await this.ping();
       await this.loadAll();
     },
 
     template: /*html*/`
-      <div class="card" style="margin:14px;">
-        <div class="row" style="align-items:flex-start;">
-          <div style="flex:1;">
-            <div class="muted" style="letter-spacing:.2em; font-size:12px;">SAPPORO • SNOW • FIRST LOVE VIBE</div>
-            <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
-              <div style="font-size:44px; font-weight:900;">札幌旅行 App</div>
-              <div class="muted" style="margin-top:10px;">行程 / 航程 / 記帳 / 購物</div>
-            </div>
-
-            <div class="tabs" style="margin-top:12px;">
-              <div class="tab btn" :class="{active:view==='plan'}" @click="view='plan'">行程</div>
-              <div class="tab btn" :class="{active:view==='flights'}" @click="view='flights'">航程</div>
-              <div class="tab btn" :class="{active:view==='expenses'}" @click="view='expenses'">記帳</div>
-              <div class="tab btn" :class="{active:view==='shopping'}" @click="view='shopping'">購物</div>
-
-              <div class="right tab btn" @click="loadAll()">↻ Reload</div>
-              <div class="pill" :class="connected ? 'ok' : 'danger'">
-                DB Supabase {{ connected ? 'YES' : 'NO' }}
+      <div class="shell">
+        <!-- HERO (old UI) -->
+        <div class="hero glass">
+          <div class="heroTop">
+            <div class="heroLeft">
+              <div class="heroTag">SAPPORO • SNOW • FIRST LOVE VIBE</div>
+              <div class="heroTitleRow">
+                <div class="heroTitle">札幌旅行 App</div>
+                <div class="heroSub">行程 / 航程 / 記帳 / 購物</div>
               </div>
-              <div class="muted">{{ statusText }}</div>
-            </div>
-          </div>
 
-          <div class="card" style="min-width:220px;">
-            <div class="muted" style="font-size:12px;">HK Time</div>
-            <div style="font-size:28px; font-weight:800;">{{ hkClock }}</div>
-            <div class="muted" style="margin-top:8px;">{{ connected ? 'OK' : 'ERR' }}</div>
+              <div class="tabs">
+                <div class="pill tabBtn" :class="{active:view==='plan'}" @click="view='plan'">行程</div>
+                <div class="pill tabBtn" :class="{active:view==='flights'}" @click="view='flights'">航程</div>
+                <div class="pill tabBtn" :class="{active:view==='expenses'}" @click="view='expenses'">記帳</div>
+                <div class="pill tabBtn" :class="{active:view==='shopping'}" @click="view='shopping'">購物</div>
+
+                <div class="right pill tabBtn" @click="loadAll()">↻ Reload</div>
+
+                <div class="pill" :class="connected ? 'chipOk' : 'chipBad'">
+                  DB Supabase {{ connected ? 'YES' : 'NO' }}
+                </div>
+
+                <div class="muted">{{ statusText }}</div>
+              </div>
+            </div>
+
+            <div class="clockCard">
+              <div class="clockLabel">HK Time</div>
+              <div class="clockTime">{{ hkClock }}</div>
+              <div class="clockMini">{{ connected ? 'OK' : 'ERR' }}</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="row" style="margin:14px;">
-        <div class="card" style="flex:1;">
-          <!-- PLAN -->
-          <template v-if="view==='plan'">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0;">行程（按日）</h3>
-              <div class="muted">由 database 讀取；Edit / 新增 / 刪除 會直接改 DB</div>
-              <div class="right tab btn" @click="openNew('plan_items')">＋ Add Item</div>
-            </div>
-
-            <div class="row" style="margin-top:12px;">
-              <div style="flex:1;" class="card">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <div class="muted">Days</div>
-                  <div class="right tab btn" @click="openNew('days')">＋ Day</div>
-                </div>
-                <div class="list" style="margin-top:10px;">
-                  <div class="item btn"
-                    v-for="d in days"
-                    :key="d.id"
-                    @click="selectedDayId=d.id"
-                    :style="selectedDayId===d.id ? 'border-color:rgba(191,255,209,.35); background:rgba(191,255,209,.06);' : ''"
-                  >
-                    <div class="top">
-                      <div class="pill">Day {{ d.day_no }}</div>
-                      <div class="muted">{{ d.date || '-' }}</div>
-                      <div class="right tab btn" @click.stop="openEdit('days', d)">Edit</div>
-                      <div class="tab btn danger" @click.stop="delRow('days', d.id)">Del</div>
-                    </div>
-                    <div class="title" style="margin-top:6px;">{{ d.title || d.date || '未命名' }}</div>
-                    <div class="muted" v-if="d.note">{{ d.note }}</div>
-                  </div>
-                </div>
+        <!-- MAIN CONTENT (old UI) -->
+        <div class="main">
+          <div class="contentCard">
+            <!-- PLAN -->
+            <template v-if="view==='plan'">
+              <div class="sectionTitleRow">
+                <div class="sectionTitle">行程（按日）</div>
+                <div class="sectionHint">由 database 讀取；Edit / 新增 / 刪除 會直接改 DB</div>
+                <div class="right btn" @click="openNew('plan_items')">+ Add</div>
               </div>
 
-              <div style="flex:2;" class="card">
-                <div v-if="!selectedDay" class="muted">未選 Day。</div>
-                <template v-else>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="pill">Day {{ selectedDay.day_no }}</div>
-                    <div class="title" style="font-size:20px;">{{ selectedDay.title || selectedDay.date }}</div>
-                    <div class="right tab btn" @click="openEdit('days', selectedDay)">Edit Day</div>
+              <div class="gridPlan">
+                <!-- Days -->
+                <div class="panel">
+                  <div class="row" style="margin-bottom:10px;">
+                    <div class="muted titleStrong">Days</div>
+                    <div class="right btn" @click="openNew('days')">+ Day</div>
                   </div>
 
-                  <div class="list" style="margin-top:12px;">
-                    <div class="item" v-for="x in planItemsForSelectedDay" :key="x.id">
-                      <div class="top">
-                        <div class="pill">{{ x.time_label || '時間' }}</div>
-                        <div class="pill">{{ kindLabel(x.kind) }}</div>
-                        <div class="title">{{ x.title }}</div>
-                        <div class="right tab btn" @click="openEdit('plan_items', x)">Edit</div>
-                        <div class="tab btn danger" @click="delRow('plan_items', x.id)">Del</div>
+                  <div class="list">
+                    <div
+                      class="cardItem"
+                      :class="{active:selectedDayId===d.id}"
+                      v-for="d in days"
+                      :key="d.id"
+                      @click="selectedDayId=d.id"
+                      style="cursor:pointer;"
+                    >
+                      <div class="row">
+                        <div class="pill">Day {{ d.day_no }}</div>
+                        <div class="muted">{{ d.date || '-' }}</div>
+                        <div class="right btn" @click.stop="openEdit('days', d)">Edit</div>
+                        <div class="btn btnDanger" @click.stop="delRow('days', d.id)">Del</div>
                       </div>
-                      <div class="muted" style="margin-top:6px; white-space:pre-wrap;" v-if="x.note">{{ x.note }}</div>
-                      <div class="mono muted" v-if="x.maps_query" style="margin-top:6px;">maps: {{ x.maps_query }}</div>
+                      <div class="titleStrong" style="margin-top:8px;">
+                        {{ d.title || d.date || '未命名' }}
+                      </div>
+                      <div class="muted" v-if="d.note" style="margin-top:6px; white-space:pre-wrap;">
+                        {{ d.note }}
+                      </div>
                     </div>
 
-                    <div v-if="planItemsForSelectedDay.length===0" class="muted item">
-                      呢日未有 item。右上角「Add Item」新增。
+                    <div v-if="days.length===0" class="cardItem muted">
+                      未有 Day。按右上角「+ Day」新增。
                     </div>
                   </div>
-                </template>
-              </div>
-            </div>
-          </template>
-
-          <!-- FLIGHTS -->
-          <template v-else-if="view==='flights'">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0;">航程</h3>
-              <div class="right tab btn" @click="openNew('flights')">＋ Add Flight</div>
-            </div>
-
-            <div class="list" style="margin-top:12px;">
-              <div class="item" v-for="f in flights" :key="f.id">
-                <div class="top">
-                  <div class="pill">SEG {{ f.seg_no }}</div>
-                  <div class="title">{{ f.carrier }}{{ f.flight_no }}</div>
-                  <div class="muted">{{ f.depart_airport }} → {{ f.arrive_airport }}</div>
-                  <div class="right tab btn" @click="openEdit('flights', f)">Edit</div>
-                  <div class="tab btn danger" @click="delRow('flights', f.id)">Del</div>
                 </div>
-                <div class="muted" style="margin-top:6px;">
-                  {{ f.depart_time }}  →  {{ f.arrive_time }}
+
+                <!-- Plan Items -->
+                <div class="panel">
+                  <div v-if="!selectedDay" class="muted">未選 Day。</div>
+
+                  <template v-else>
+                    <div class="row" style="margin-bottom:10px;">
+                      <div class="pill">Day {{ selectedDay.day_no }}</div>
+                      <div class="titleStrong" style="font-size:20px;">
+                        {{ selectedDay.title || selectedDay.date }}
+                      </div>
+                      <div class="right btn" @click="openEdit('days', selectedDay)">Edit Day</div>
+                    </div>
+
+                    <div class="list">
+                      <div class="cardItem" v-for="x in planItemsForSelectedDay" :key="x.id">
+                        <div class="row">
+                          <div class="pill">{{ x.time_label || '時間' }}</div>
+                          <div class="pill">{{ kindLabel(x.kind) }}</div>
+                          <div class="titleStrong">{{ x.title }}</div>
+                          <div class="right btn" @click="openEdit('plan_items', x)">Edit</div>
+                          <div class="btn btnDanger" @click="delRow('plan_items', x.id)">Del</div>
+                        </div>
+
+                        <div class="muted" v-if="x.note" style="margin-top:8px; white-space:pre-wrap;">
+                          {{ x.note }}
+                        </div>
+                        <div class="mono muted" v-if="x.maps_query" style="margin-top:8px;">
+                          maps: {{ x.maps_query }}
+                        </div>
+                      </div>
+
+                      <div v-if="planItemsForSelectedDay.length===0" class="cardItem muted">
+                        呢日未有 item。按右上角「+ Add」新增。
+                      </div>
+                    </div>
+                  </template>
                 </div>
-                <div class="muted" v-if="f.note" style="white-space:pre-wrap; margin-top:6px;">{{ f.note }}</div>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <!-- EXPENSES -->
-          <template v-else-if="view==='expenses'">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0;">記帳</h3>
-              <div class="right tab btn" @click="openNew('expenses')">＋ Add Expense</div>
-            </div>
+            <!-- FLIGHTS -->
+            <template v-else-if="view==='flights'">
+              <div class="sectionTitleRow">
+                <div class="sectionTitle">航程</div>
+                <div class="right btn" @click="openNew('flights')">+ Add</div>
+              </div>
 
-            <div class="list" style="margin-top:12px;">
-              <div class="item" v-for="e in expenses" :key="e.id">
-                <div class="top">
-                  <div class="pill">{{ e.happened_on || 'date' }}</div>
-                  <div class="pill">{{ e.category || 'category' }}</div>
-                  <div class="title">{{ e.merchant || 'merchant' }}</div>
-                  <div class="muted">{{ e.amount }} {{ e.currency }}</div>
-                  <div class="right tab btn" @click="openEdit('expenses', e)">Edit</div>
-                  <div class="tab btn danger" @click="delRow('expenses', e.id)">Del</div>
+              <div class="list">
+                <div class="cardItem" v-for="f in flights" :key="f.id">
+                  <div class="row">
+                    <div class="pill">SEG {{ f.seg_no }}</div>
+                    <div class="titleStrong">{{ f.carrier }}{{ f.flight_no }}</div>
+                    <div class="muted">{{ f.depart_airport }} → {{ f.arrive_airport }}</div>
+                    <div class="right btn" @click="openEdit('flights', f)">Edit</div>
+                    <div class="btn btnDanger" @click="delRow('flights', f.id)">Del</div>
+                  </div>
+                  <div class="muted" style="margin-top:8px;">
+                    {{ f.depart_time }} → {{ f.arrive_time }}
+                  </div>
+                  <div class="muted" v-if="f.note" style="margin-top:8px; white-space:pre-wrap;">
+                    {{ f.note }}
+                  </div>
                 </div>
-                <div class="muted" v-if="e.note" style="margin-top:6px; white-space:pre-wrap;">{{ e.note }}</div>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <!-- SHOPPING -->
-          <template v-else-if="view==='shopping'">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <h3 style="margin:0;">購物</h3>
-              <div class="right tab btn" @click="openNew('shopping_items')">＋ Add Item</div>
-            </div>
+            <!-- EXPENSES -->
+            <template v-else-if="view==='expenses'">
+              <div class="sectionTitleRow">
+                <div class="sectionTitle">記帳</div>
+                <div class="right btn" @click="openNew('expenses')">+ Add</div>
+              </div>
 
-            <div class="list" style="margin-top:12px;">
-              <div class="item" v-for="s in shopping" :key="s.id">
-                <div class="top">
-                  <div class="pill" :class="s.done ? 'ok' : ''">{{ s.done ? 'DONE' : 'TODO' }}</div>
-                  <div class="title">{{ s.name }}</div>
-                  <div class="muted" v-if="s.location">{{ s.location }}</div>
-                  <div class="muted" v-if="s.price_text">{{ s.price_text }}</div>
-                  <div class="right tab btn" @click="openEdit('shopping_items', s)">Edit</div>
-                  <div class="tab btn danger" @click="delRow('shopping_items', s.id)">Del</div>
+              <div class="list">
+                <div class="cardItem" v-for="e in expenses" :key="e.id">
+                  <div class="row">
+                    <div class="pill">{{ e.happened_on || 'date' }}</div>
+                    <div class="pill">{{ e.category || 'category' }}</div>
+                    <div class="titleStrong">{{ e.merchant || 'merchant' }}</div>
+                    <div class="muted">{{ e.amount }} {{ e.currency }}</div>
+                    <div class="right btn" @click="openEdit('expenses', e)">Edit</div>
+                    <div class="btn btnDanger" @click="delRow('expenses', e.id)">Del</div>
+                  </div>
+
+                  <div class="muted" v-if="e.note" style="margin-top:8px; white-space:pre-wrap;">
+                    {{ e.note }}
+                  </div>
                 </div>
-                <div class="muted" v-if="s.note" style="margin-top:6px; white-space:pre-wrap;">{{ s.note }}</div>
               </div>
-            </div>
-          </template>
-        </div>
-      </div>
+            </template>
 
-      <!-- Debug FAB + Drawer (Tips removed) -->
-      <div class="debug-fab">
-        <div class="badge" :class="connected ? 'ok' : 'danger'">DB {{ connected ? 'OK' : 'ERR' }}</div>
-        <button @click="toggleDebug()">🐞 Debug</button>
-      </div>
+            <!-- SHOPPING -->
+            <template v-else-if="view==='shopping'">
+              <div class="sectionTitleRow">
+                <div class="sectionTitle">購物</div>
+                <div class="right btn" @click="openNew('shopping_items')">+ Add</div>
+              </div>
 
-      <div v-if="debugOpen" class="debug-drawer-backdrop" @click="closeDebug()"></div>
+              <div class="list">
+                <div class="cardItem" v-for="s in shopping" :key="s.id">
+                  <div class="row">
+                    <div class="pill" :class="s.done ? 'chipOk' : ''">{{ s.done ? 'DONE' : 'TODO' }}</div>
+                    <div class="titleStrong">{{ s.name }}</div>
+                    <div class="muted" v-if="s.location">{{ s.location }}</div>
+                    <div class="muted" v-if="s.price_text">{{ s.price_text }}</div>
+                    <div class="right btn" @click="openEdit('shopping_items', s)">Edit</div>
+                    <div class="btn btnDanger" @click="delRow('shopping_items', s.id)">Del</div>
+                  </div>
 
-      <div v-if="debugOpen" class="debug-drawer" @click.stop>
-        <div class="head">
-          <div class="title">Debug</div>
-          <div class="right">
-            <button class="xbtn" @click="closeDebug()">Close</button>
+                  <div class="muted" v-if="s.note" style="margin-top:8px; white-space:pre-wrap;">
+                    {{ s.note }}
+                  </div>
+                </div>
+              </div>
+            </template>
+
           </div>
         </div>
+      </div>
 
-        <div class="item">
-          <div class="muted">Vue:</div>
-          <div class="pill">{{ Vue?.version || 'unknown' }}</div>
-        </div>
+      <!-- DEBUG floating button -->
+      <div class="dbgFab" @click="toggleDebug()">
+        <div :class="dbgDotClass"></div>
+        <div class="mono" style="font-weight:900;">DBG</div>
+        <div class="mono muted">{{ connected ? 'OK' : 'ERR' }}</div>
+      </div>
 
-        <div class="item" style="margin-top:10px;">
-          <div class="muted">Supabase connected:</div>
-          <div class="pill" :class="connected ? 'ok' : 'danger'">{{ connected ? 'YES' : 'NO' }}</div>
-        </div>
+      <!-- DEBUG overlay panel -->
+      <div v-if="showDebug" class="dbgOverlay" @click.self="toggleDebug()">
+        <div class="dbgPanel">
+          <div class="dbgHeader">
+            <div class="dbgTitle">Debug</div>
+            <div class="spacer"></div>
+            <div class="btn" @click="toggleDebug()">Close</div>
+          </div>
 
-        <div class="item danger" v-if="lastError" style="margin-top:10px;">
-          <div class="muted">Last error:</div>
-          <div style="white-space:pre-wrap;">{{ lastError.message || lastError }}</div>
+          <div class="dbgItem">
+            <div class="muted">Vue</div>
+            <div class="pill">{{ Vue?.version || 'unknown' }}</div>
+          </div>
+
+          <div class="dbgItem">
+            <div class="muted">Supabase</div>
+            <div class="pill" :class="connected ? 'chipOk' : 'chipBad'">{{ connected ? 'connected' : 'not connected' }}</div>
+            <div class="muted mono" style="margin-top:8px;">{{ statusText }}</div>
+          </div>
+
+          <div class="dbgItem" v-if="lastError" style="border-color: rgba(255,180,180,.35);">
+            <div class="muted">Last error</div>
+            <div style="white-space:pre-wrap; margin-top:8px;">{{ lastError.message || lastError }}</div>
+          </div>
+
+          <div class="dbgItem">
+            <div class="muted">Quick actions</div>
+            <div class="row" style="margin-top:10px;">
+              <div class="btn" @click="ping()">Ping</div>
+              <div class="btn" @click="loadAll()">Reload</div>
+              <div class="btn" @click="lastError=null">Clear error</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- EDIT PANEL -->
-      <div v-if="editing" style="position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:14px;">
-        <div class="card" style="width:min(920px, 98vw); max-height:90vh; overflow:auto;">
-          <div style="display:flex; align-items:center; gap:10px;">
+      <!-- EDIT MODAL -->
+      <div v-if="editing" style="position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:14px; z-index:1100;">
+        <div class="glass" style="width:min(920px, 98vw); max-height:90vh; overflow:auto; padding:14px;">
+          <div class="row">
             <div class="pill">{{ editing.mode.toUpperCase() }}</div>
-            <div class="title" style="font-size:20px;">{{ editing.table }}</div>
-            <div class="right tab btn" @click="closeEdit()">Close</div>
+            <div class="titleStrong" style="font-size:20px;">{{ editing.table }}</div>
+            <div class="right btn" @click="closeEdit()">Close</div>
           </div>
 
-          <div class="muted mono" style="margin-top:10px;">* created_at / updated_at 由 DB 自己處理；你唔需要填。</div>
+          <div class="muted mono" style="margin-top:10px;">* created_at / updated_at 由 DB 自己處理；唔需要填。</div>
 
           <div style="margin-top:12px;">
             <div class="grid2" v-if="editing.table==='plan_items'">
@@ -718,11 +938,11 @@
               </div>
               <div>
                 <label class="muted">depart_time</label>
-                <input v-model="editing.row.depart_time" placeholder="2026-01-08 02:00:00+08" />
+                <input v-model="editing.row.depart_time" />
               </div>
               <div>
                 <label class="muted">arrive_time</label>
-                <input v-model="editing.row.arrive_time" placeholder="2026-01-08 07:05:00+09" />
+                <input v-model="editing.row.arrive_time" />
               </div>
               <div style="grid-column:1/-1;">
                 <label class="muted">note</label>
@@ -771,11 +991,11 @@
             </div>
           </div>
 
-          <div style="display:flex; gap:10px; margin-top:14px;">
-            <button class="tab btn" @click="saveEdit()" :disabled="loading">
+          <div class="row" style="margin-top:14px;">
+            <div class="btn btnOk" @click="saveEdit()" :style="loading ? 'opacity:.5; pointer-events:none;' : ''">
               {{ loading ? 'Saving...' : 'Save' }}
-            </button>
-            <button class="tab btn danger" @click="closeEdit()">Cancel</button>
+            </div>
+            <div class="btn btnDanger" @click="closeEdit()">Cancel</div>
           </div>
         </div>
       </div>
