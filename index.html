@@ -824,7 +824,12 @@
 
       openEdit(table, row) {
         const r = JSON.parse(JSON.stringify(row));
-        const editObj = { table, mode:"update", row: r };
+        const isNew = !r.id;
+        const editObj = {
+          table,
+          mode: isNew ? "insert" : "update",
+          row: r
+        };
         if (table === "plan_items" || table === "expenses") {
           const d = this.days.find(x => x.id === r.day_id);
           editObj.uiDayNo = d ? d.day_no : "";
@@ -849,6 +854,27 @@
         try {
           delete payload.created_at;
           delete payload.updated_at;
+
+          // ---- sanitize: convert empty strings to null for typed columns (Postgres date/timestamp/number)
+          const emptyToNull = (obj, keys) => {
+            keys.forEach((k) => {
+              if (obj[k] === "") obj[k] = null;
+            });
+          };
+          if (table === "days") {
+            // if days.date is a Postgres DATE column, "" will error
+            emptyToNull(payload, ["date"]);
+          }
+          if (table === "expenses") {
+            // happened_on is DATE
+            emptyToNull(payload, ["happened_on"]);
+            // numeric fields sometimes come in as ""
+            if (payload.amount === "") payload.amount = null;
+          }
+          if (table === "flights") {
+            // timestamps: "" will also error
+            emptyToNull(payload, ["depart_time", "arrive_time"]);
+          }
 
           if (table === "plan_items" || table === "expenses") {
             const uiNo = this.editing.uiDayNo;
