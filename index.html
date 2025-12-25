@@ -840,7 +840,7 @@
 
       async saveEdit() {
         if (!this.editing) return;
-        const { table } = this.editing;
+        const { table, mode } = this.editing;
         const payload = { ...this.editing.row };
 
         this.loading = true;
@@ -864,7 +864,21 @@
             payload.order_no = max + 1;
           }
 
-          const { error } = await sb.from(table).upsert(payload);
+          let q;
+          if (mode === "insert") {
+            // avoid accidentally sending an id on insert
+            delete payload.id;
+            q = sb.from(table).insert(payload);
+          } else {
+            if (!payload.id) throw new Error("Update mode missing id");
+            const id = payload.id;
+            // don't update primary key field itself
+            // (some tables allow it, some don't)
+            delete payload.id;
+            q = sb.from(table).update(payload).eq("id", id);
+          }
+
+          const { error } = await q;
           if (error) throw error;
 
           this.statusText = "saved";
