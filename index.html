@@ -846,7 +846,7 @@
       async saveEdit() {
         if (!this.editing) return;
         const { table, mode } = this.editing;
-        const payload = { ...this.editing.row };
+        let payload = { ...this.editing.row };
 
         this.loading = true;
         this.lastError = null;
@@ -854,6 +854,15 @@
         try {
           delete payload.created_at;
           delete payload.updated_at;
+
+          // ---- whitelist payload columns per table (prevents "order_no not found" etc.)
+          const pick = (obj, keys) => {
+            const out = {};
+            keys.forEach((k) => {
+              if (Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
+            });
+            return out;
+          };
 
           // ---- sanitize: convert empty strings to null for typed columns (Postgres date/timestamp/number)
           const emptyToNull = (obj, keys) => {
@@ -888,6 +897,20 @@
           if (table === "plan_items" && (payload.order_no == null || payload.order_no === "")) {
             const max = this.planForDay.reduce((m,x) => Math.max(m, x.order_no || 0), 0);
             payload.order_no = max + 1;
+          }
+
+          // apply whitelist at the end (after day_id mapping / auto order_no)
+          if (table === "days") {
+            payload = pick(payload, ["id","day_no","date","title","note","sort_order"]);
+          } else if (table === "plan_items") {
+            payload = pick(payload, ["id","day_id","time_label","kind","title","note","maps_query","order_no"]);
+          } else if (table === "flights") {
+            payload = pick(payload, ["id","seg_no","flight_no","carrier","depart_airport","arrive_airport","depart_time","arrive_time","note"]);
+          } else if (table === "shopping_items") {
+            payload = pick(payload, ["id","name","location","price_text","note","done","order_no"]);
+          } else if (table === "expenses") {
+            // IMPORTANT: expenses has NO order_no
+            payload = pick(payload, ["id","day_id","happened_on","category","merchant","amount","currency","paid_by","note"]);
           }
 
           let q;
