@@ -515,13 +515,20 @@
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
+      align-items: start;
     }
     .grid1{
       display:grid;
       grid-template-columns: 1fr;
       gap: 12px;
     }
-    label{ display:block; font-weight:900; opacity:.86; margin-bottom: 6px; }
+    /* Make modal fields align nicely in 2-col layout */
+    .grid2 > div,
+    .grid1 > div{
+      min-width: 0;
+    }
+
+    /* unify input/select height so rows line up */
     input, textarea, select{
       width:100%;
       box-sizing:border-box;
@@ -533,9 +540,34 @@
       outline:none;
       font-size: 15px;
     }
+
+    /* hard align heights for single-line controls */
+    input:not([type="checkbox"]),
+    select{
+      height: 44px;
+      line-height: 44px;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    label{
+      display:block;
+      font-weight:900;
+      opacity:.86;
+      margin-bottom: 6px;
+      line-height: 1.2;
+      word-break: keep-all;
+    }
     textarea{ min-height: 110px; resize: vertical; }
     .modalBtns{ display:flex; gap:10px; margin-top: 12px; flex-wrap:wrap; }
     .hint{ opacity:.75; font-size: 13px; line-height: 1.35; }
+
+    /* on small screens, stack the 2-col grid to avoid misalignment */
+    @media (max-width: 420px){
+      .grid2{
+        grid-template-columns: 1fr;
+      }
+    }
 
     /* ====== debug panel ====== */
     .debugPanel{
