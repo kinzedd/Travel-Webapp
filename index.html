@@ -14,625 +14,645 @@
   <!-- Supabase JS v2 (UMD global: window.supabase) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    :root{
-      --bg1: rgba(12,18,32,.78);
-      --bg2: rgba(12,18,32,.62);
-      --card: rgba(255,255,255,.38);
-      --card2: rgba(255,255,255,.30);
-      --bd: rgba(0,0,0,.08);
-      --bd2: rgba(255,255,255,.14);
-      --txt: rgba(20,30,45,.92);
-      --muted: rgba(20,30,45,.62);
-      --ok: rgba(191,255,209,.40);
-      --danger: rgba(255,180,180,.45);
-      --shadow: 0 14px 40px rgba(0,0,0,.35);
-      --r: 20px;
-      --r2: 16px;
-      --safeBottom: env(safe-area-inset-bottom);
-      --safeTop: env(safe-area-inset-top);
+<style>
+  :root{
+    /* ===== LIGHT SNOW THEME (readable + clean) ===== */
+    --bg1: rgba(240,245,255,.82);
+    --bg2: rgba(220,230,245,.72);
 
-      /* alignment tokens */
-      --cardPad: 14px;
-      --innerPad: 12px;
-    }
+    /* main cards */
+    --card: rgba(255,255,255,.62);
+    --card2: rgba(255,255,255,.44);
 
-    html,body{height:100%;}
-    body{
-      margin:0;
-      color:var(--txt);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(160,200,255,.28), transparent 60%),
-        radial-gradient(900px 600px at 90% 30%, rgba(255,255,255,.18), transparent 60%),
-        linear-gradient(180deg, rgba(240,245,255,.65), rgba(220,230,245,.55)),
-        url("./bg.jpg") center/cover no-repeat fixed;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
-      overflow-x:hidden;
-    }
+    /* borders + text */
+    --bd: rgba(15,23,35,.10);
+    --bd2: rgba(15,23,35,.16);
+    --txt: rgba(12,18,28,.96);
+    --muted: rgba(12,18,28,.62);
 
+    --ok: rgba(120,255,170,.45);
+    --danger: rgba(255,120,120,.45);
 
-    a{ color:inherit; text-decoration:none; }
-    .muted{color:var(--muted);}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px;}
+    /* shadow tuned for light bg */
+    --shadow: 0 16px 45px rgba(15,23,35,.18);
 
-    #app{ min-height:100vh; }
-    .wrap{
-      max-width: 820px;
-      margin: 0 auto;
-      padding: calc(14px + var(--safeTop)) 12px calc(110px + var(--safeBottom));
-    }
+    --r: 20px;
+    --r2: 16px;
+    --safeBottom: env(safe-area-inset-bottom);
+    --safeTop: env(safe-area-inset-top);
 
-    .card{
-      background: linear-gradient(180deg, var(--card), var(--card2));
-      border: 1px solid var(--bd);
-      text-shadow: 0 1px 1px rgba(255,255,255,.35);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-    }
+    /* alignment tokens */
+    --cardPad: 14px;
+    --innerPad: 12px;
+  }
 
-    .header{
-      padding: 14px;
-      display:flex;
-      flex-wrap: wrap; /* allow title full width on mobile */
-      gap:12px;
-      align-items:stretch;
-    }
+  html,body{height:100%;}
+  body{
+    margin:0;
+    color:var(--txt);
+    background:
+      radial-gradient(1200px 700px at 20% 10%, rgba(160,200,255,.28), transparent 60%),
+      radial-gradient(900px 600px at 90% 30%, rgba(255,255,255,.18), transparent 60%),
+      linear-gradient(180deg, rgba(240,245,255,.70), rgba(220,230,245,.60)),
+      url("./bg.jpg") center/cover no-repeat fixed;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+    overflow-x:hidden;
+  }
 
-    .kicker{
-      font-size:12px;
-      letter-spacing:.22em;
-      opacity:.75;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .titleRow{ display:flex; gap:10px; align-items:flex-start; }
-    .appTitle{
-      font-size:44px;
-      line-height:1.02;
-      font-weight:900;
-      margin: 8px 0 2px;
+  a{ color:inherit; text-decoration:none; }
+  .muted{color:var(--muted);}
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px;}
 
-      /* force one-line title on mobile */
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .subTitle{ font-size:16px; font-weight:700; opacity:.8; margin-top:4px; }
+  #app{ min-height:100vh; }
+  .wrap{
+    max-width: 820px;
+    margin: 0 auto;
+    padding: calc(14px + var(--safeTop)) 12px calc(110px + var(--safeBottom));
+  }
 
-    .headerRight{
-      margin-left:auto;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:8px;
-      min-width: unset; /* prevent squeezing title */
-    }
+  .card{
+    background: linear-gradient(180deg, var(--card), var(--card2));
+    border: 1px solid var(--bd);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 
-    /* hide geo coord pill on mobile */
-    @media (max-width:420px){
-      .headerRight .pill.muted.mono{ display:none; }
-    }
+    /* NEW: highlight edge so card is always visible on snow bg */
+    outline: 1px solid rgba(255,255,255,.38);
+    outline-offset: -1px;
 
-    .pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--bd);
-      background: rgba(255,255,255,.06);
-      white-space:nowrap;
-    }
+    /* remove the old white text-shadow that made dark text look dirty */
+    text-shadow: none;
+  }
 
-    .btn{
-      user-select:none;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--bd2);
-      background: rgba(255,255,255,.06);
-      transition: transform .08s ease, background .15s ease;
-      font-weight:800;
-    }
-    .btn:active{ transform: scale(.98); }
-    .btn.ghost{ background: transparent; }
-    .btn.small{ padding: 8px 10px; font-weight:800; font-size:13px; }
-    .btn.icon{
-      width: 38px; height: 38px; padding:0;
-      justify-content:center;
-      border-radius: 14px;
-    }
-    .btn.danger{ border-color: var(--danger); color: #ffd3d3; }
+  .header{
+    padding: 14px;
+    display:flex;
+    flex-wrap: wrap;
+    gap:12px;
+    align-items:stretch;
+  }
 
-    .section{ margin-top: 12px; }
-    .sectionHeader{
-      padding: 12px 14px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .sectionTitle{
-      font-size:22px;
-      font-weight:900;
-    }
+  .kicker{
+    font-size:12px;
+    letter-spacing:.22em;
+    opacity:.72;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .titleRow{ display:flex; gap:10px; align-items:flex-start; }
+  .appTitle{
+    font-size:44px;
+    line-height:1.02;
+    font-weight:900;
+    margin: 8px 0 2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 
-    /* ====== day slider (FIX wrap + thinner) ====== */
-    .daySlider{
-      /* align left edge with period content */
-      padding-left: 26px; /* wrap (12) + card (14) => red line */
-      padding-right: 14px;
-      padding-top: 8px;
-      padding-bottom: 12px;
-      overflow-x:auto;
-      display:flex;
-      gap:10px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-    }
-    .daySlider::-webkit-scrollbar{ height: 6px; }
-    .daySlider::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.10); border-radius: 999px; }
+    /* make title crisp */
+    color: rgba(10,16,26,.96);
+    text-shadow: 0 1px 0 rgba(255,255,255,.45);
+  }
+  .subTitle{ font-size:16px; font-weight:700; opacity:.75; margin-top:4px; }
 
-    /* mobile: day slider single-line pills */
-    @media (max-width: 420px){
-      .dayTop,
-      .dayName,
-      .dayDate{
-        display:none;
-      }
-    }
+  .headerRight{
+    margin-left:auto;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:8px;
+    min-width: unset;
+  }
 
-    .dayCard{
-      min-width: 190px;
-      max-width: 210px;
-      scroll-snap-align: start;
-      padding: 9px 10px;              /* thinner */
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      position:relative;
-    }
-    .dayCard.active{
-      border-color: rgba(191,255,209,.35);
-      background: rgba(191,255,209,.06);
-    }
-    .dayTop{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom: 6px;
-      min-width:0;
-    }
-    .dayChip{
-      display:inline-flex;
-      align-items:center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.20);
-      font-weight:1000;
-      font-size:13px;
-      white-space:nowrap;
-    }
+  @media (max-width:420px){
+    .headerRight .pill.muted.mono{ display:none; }
+  }
 
-    /* Day card main display: Date + Weather (replace title) */
-    .dayMain{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .dayDateLine{
-      font-size:16px;
-      font-weight:1000;
-      line-height:1.15;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      color: rgba(15,25,40,.95);
-    }
-    .dayWxLine{
-      font-size:13px;
-      font-weight:900;
-      opacity:.85;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+  .pill{
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(15,23,35,.12);
+    background: rgba(255,255,255,.55);
+    white-space:nowrap;
+  }
 
-    .editMini{
-      margin-left:auto;
-      width:30px;height:30px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      flex:0 0 auto;
-    }
-    .editMini svg{ width:15px; height:15px; opacity:.92; }
+  .btn{
+    user-select:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(15,23,35,.14);
+    background: rgba(255,255,255,.55);
+    transition: transform .08s ease, background .15s ease;
+    font-weight:800;
+    color: rgba(12,18,28,.92);
+  }
+  .btn:active{ transform: scale(.98); }
+  .btn.ghost{ background: rgba(255,255,255,.36); }
+  .btn.small{ padding: 8px 10px; font-weight:800; font-size:13px; }
+  .btn.icon{
+    width: 38px; height: 38px; padding:0;
+    justify-content:center;
+    border-radius: 14px;
+  }
+  .btn.danger{ border-color: var(--danger); color: rgba(140,20,20,.95); }
 
-    /* ====== plan ====== */
-    .planGrid{
-      padding: 12px 14px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+  .section{ margin-top: 12px; }
+  .sectionHeader{
+    padding: 12px 14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom: 1px solid rgba(15,23,35,.08);
+  }
+  .sectionTitle{
+    font-size:22px;
+    font-weight:900;
+  }
 
-    .period{
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      background: rgba(255,255,255,.05);
-      overflow:hidden;
-      text-shadow: 0 1px 1px rgba(255,255,255,.35);
-    }
-    .periodHeader{
-      padding: 12px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .periodTitle{ font-size:22px; font-weight:1000; color: rgba(15,25,40,.95);}
-    .periodBtns{ display:flex; gap:10px; }
+  /* ====== day slider ====== */
+  .daySlider{
+    padding-left: 26px;
+    padding-right: 14px;
+    padding-top: 8px;
+    padding-bottom: 12px;
+    overflow-x:auto;
+    display:flex;
+    gap:10px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .daySlider::-webkit-scrollbar{ height: 6px; }
+  .daySlider::-webkit-scrollbar-thumb{ background: rgba(15,23,35,.12); border-radius: 999px; }
 
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      padding: 12px;
+  @media (max-width: 420px){
+    .dayTop,
+    .dayName,
+    .dayDate{
+      display:none;
     }
+  }
 
-    .itemCard{
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      background: rgba(255,255,255,.04);
-      text-shadow: 0 1px 1px rgba(255,255,255,.35);
-      padding: 12px;
-      position:relative;
-    }
-    .itemTop{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-    }
-    .badgeEmoji{
-      width: 26px;
-      text-align:center;
-      font-size:18px;
-      line-height:1;
-      margin-top:2px;
-      flex:0 0 26px;
-    }
-    .itemMain{ flex:1; min-width:0; }
-    .itemTitle{
-      font-weight:1000;
-      font-size:18px;
-      line-height:1.2;
-      margin: 0 0 6px;
-      color: rgba(15,25,40,.95);
-      word-break: break-word;
-    }
-    .itemNote{
-      white-space: pre-wrap;
-      opacity:.82;
-      line-height:1.35;
-    }
-    .itemActions{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex:0 0 auto;
-    }
-    .penBtn{
-      width:32px;height:32px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    .penBtn svg{ width:15px; height:15px; opacity:.92; }
+  .dayCard{
+    min-width: 190px;
+    max-width: 210px;
+    scroll-snap-align: start;
+    padding: 9px 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(15,23,35,.10);
+    background: rgba(255,255,255,.56);
+    box-shadow: 0 10px 28px rgba(15,23,35,.10);
+    position:relative;
+  }
+  .dayCard.active{
+    border-color: rgba(120,255,170,.35);
+    background: rgba(220,255,235,.72);
+  }
+  .dayTop{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom: 6px;
+    min-width:0;
+  }
+  .dayChip{
+    display:inline-flex;
+    align-items:center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(15,23,35,.12);
+    background: rgba(255,255,255,.45);
+    font-weight:1000;
+    font-size:13px;
+    white-space:nowrap;
+  }
 
-    .mapLink{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      margin-top:10px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      font-weight:900;
-      max-width: 100%;
-    }
-    .mapLink span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* Day card main display */
+  .dayMain{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .dayDateLine{
+    font-size:16px;
+    font-weight:1000;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    color: rgba(10,16,26,.96);
+  }
+  .dayWxLine{
+    font-size:13px;
+    font-weight:900;
+    opacity:.88;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    color: rgba(10,16,26,.86);
+  }
 
-    /* ====== flights (smaller) ====== */
-    .flightList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:12px; }
-    .flightCard{
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      padding: 12px;                 /* smaller */
-      overflow:hidden;
-      position:relative;
-    }
-    .flightMeta{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      margin-bottom: 10px;
-      font-weight:1000; opacity:.9;
-      font-size:13px;
-    }
-    .flightRoute{
-      display:grid;
-      grid-template-columns: 1fr 90px 1fr;
-      align-items:center;
-      gap:12px;
-    }
-    .flightSide{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-    }
-    .flightCode{ font-size:18px; font-weight:1000; letter-spacing:.02em; }
-    .flightTime{ font-size:32px; font-weight:1000; line-height:1; margin-top: 4px; }  /* smaller */
-    .flightTerminal{ opacity:.72; font-weight:900; margin-top: 6px; font-size:12px; }
-    .flightMid{ display:flex; align-items:center; justify-content:center; }
-    .flightLine{
-      width: 100%;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.16);
-      position:relative;
-    }
-    .flightLine:before{
-      content:"";
-      position:absolute;
-      left:0; top:0;
-      width: 55%;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(191,255,209,.38);
-    }
-    .plane{
-      font-size: 16px;
-      position:absolute;
-      left: 40%;
-      top: -11px;
-    }
+  .editMini{
+    margin-left:auto;
+    width:30px;height:30px;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,35,.14);
+    background: rgba(255,255,255,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .editMini svg{ width:15px; height:15px; opacity:.92; }
 
-    /* ====== shopping ====== */
-    .shopList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
-    .shopRow{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .shopRow.done{ opacity:.62; }
-    .shopRow.done .shopName{ text-decoration: line-through; }
+  /* ====== plan ====== */
+  .planGrid{
+    padding: 12px 14px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
 
-    .check{
-      width: 22px; height: 22px;
-      margin-top: 2px;
-      accent-color: #bfffd1;
-    }
-    .shopMain{ flex:1; min-width:0; }
-    .shopName{ font-weight:1000; font-size:18px; }
-    .shopMeta{ opacity:.75; margin-top: 4px; }
+  .period{
+    border: 1px solid rgba(15,23,35,.10);
+    border-radius: 18px;
+    background: rgba(255,255,255,.56);
+    box-shadow: 0 10px 28px rgba(15,23,35,.10);
+    overflow:hidden;
+    text-shadow: none;
+  }
+  .periodHeader{
+    padding: 12px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom: 1px solid rgba(15,23,35,.08);
+  }
+  .periodTitle{ font-size:22px; font-weight:1000; color: rgba(10,16,26,.96);}
+  .periodBtns{ display:flex; gap:10px; }
 
-    /* ====== expenses ====== */
-    .expList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
-    .expRow{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .expLeft{ min-width:0; }
-    .expTitle{ font-weight:1000; font-size:18px; }
-    .expMeta{ opacity:.75; margin-top: 4px; }
-    .expAmt{ font-weight:1000; font-size:18px; white-space:nowrap; }
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding: 12px;
+  }
 
-    /* ====== bottom toolbar ====== */
-    .bottomBar{
-      position: fixed;
-      left: 12px; right: 12px;
-      bottom: calc(12px + var(--safeBottom));
-      z-index: 30;
-      display:flex;
-      justify-content:center;
-      pointer-events:none;
-    }
-    .barInner{
-      pointer-events:auto;
-      width:min(520px, 100%);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(10,14,24,.72);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 45px rgba(0,0,0,.38);
-      padding: 10px;
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-    }
-    .navBtn{
-      flex:1;
-      border-radius: 18px;
-      padding: 10px 6px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      text-align:center;
-      font-weight:1000;
-      cursor:pointer;
-    }
-    .navBtn.active{
-      border-color: rgba(191,255,209,.35);
-      background: rgba(191,255,209,.08);
-    }
-    .navIcon{ font-size:20px; line-height:1; display:block; margin-bottom:6px; }
+  .itemCard{
+    border: 1px solid rgba(15,23,35,.10);
+    border-radius: 18px;
+    background: rgba(255,255,255,.52);
+    box-shadow: 0 10px 24px rgba(15,23,35,.08);
+    text-shadow: none;
+    padding: 12px;
+    position:relative;
+  }
+  .itemTop{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .badgeEmoji{
+    width: 26px;
+    text-align:center;
+    font-size:18px;
+    line-height:1;
+    margin-top:2px;
+    flex:0 0 26px;
+  }
+  .itemMain{ flex:1; min-width:0; }
+  .itemTitle{
+    font-weight:1000;
+    font-size:18px;
+    line-height:1.2;
+    margin: 0 0 6px;
+    color: rgba(10,16,26,.96);
+    word-break: break-word;
+  }
+  .itemNote{
+    white-space: pre-wrap;
+    opacity:.82;
+    line-height:1.35;
+  }
+  .itemActions{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex:0 0 auto;
+  }
+  .penBtn{
+    width:32px;height:32px;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,35,.14);
+    background: rgba(255,255,255,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .penBtn svg{ width:15px; height:15px; opacity:.92; }
 
-    /* ====== modal ====== */
-    .overlay{
-      position: fixed;
-      inset: 0;
-      z-index: 60;
-      background: rgba(0,0,0,.52);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 14px;
-    }
-    .modal{
-      width: min(560px, 96vw);
-      max-height: 86vh;
-      overflow:auto;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(14,18,30,.76);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 20px 55px rgba(0,0,0,.45);
-      padding: 14px;
-    }
-    .modalTop{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 10px;
-    }
-    .modalTitle{ font-weight:1000; font-size:18px; }
-    .spacer{ flex:1; }
+  .mapLink{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,35,.14);
+    background: rgba(255,255,255,.45);
+    font-weight:900;
+    max-width: 100%;
+  }
+  .mapLink span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-items: start;
-    }
-    .grid1{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    /* Make modal fields align nicely in 2-col layout */
-    .grid2 > div,
-    .grid1 > div{
-      min-width: 0;
-    }
+  /* ====== flights ====== */
+  .flightList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:12px; }
+  .flightCard{
+    border-radius: 20px;
+    border: 1px solid rgba(15,23,35,.10);
+    background: rgba(255,255,255,.56);
+    box-shadow: 0 10px 28px rgba(15,23,35,.10);
+    padding: 12px;
+    overflow:hidden;
+    position:relative;
+  }
+  .flightMeta{
+    display:flex; gap:10px; align-items:center; justify-content:space-between;
+    margin-bottom: 10px;
+    font-weight:1000; opacity:.9;
+    font-size:13px;
+  }
+  .flightRoute{
+    display:grid;
+    grid-template-columns: 1fr 90px 1fr;
+    align-items:center;
+    gap:12px;
+  }
+  .flightSide{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .flightCode{ font-size:18px; font-weight:1000; letter-spacing:.02em; }
+  .flightTime{ font-size:32px; font-weight:1000; line-height:1; margin-top: 4px; }
+  .flightTerminal{ opacity:.72; font-weight:900; margin-top: 6px; font-size:12px; }
+  .flightMid{ display:flex; align-items:center; justify-content:center; }
+  .flightLine{
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(15,23,35,.14);
+    position:relative;
+  }
+  .flightLine:before{
+    content:"";
+    position:absolute;
+    left:0; top:0;
+    width: 55%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(120,255,170,.35);
+  }
+  .plane{
+    font-size: 16px;
+    position:absolute;
+    left: 40%;
+    top: -11px;
+  }
 
-    /* unify input/select height so rows line up */
-    input, textarea, select{
-      width:100%;
-      box-sizing:border-box;
-      background: rgba(255,255,255,.06);
-      color: var(--txt);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 14px;
-      padding: 10px 12px;
-      outline:none;
-      font-size: 15px;
-    }
+  /* ====== shopping ====== */
+  .shopList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
+  .shopRow{
+    border-radius: 18px;
+    border: 1px solid rgba(15,23,35,.10);
+    background: rgba(255,255,255,.52);
+    box-shadow: 0 10px 24px rgba(15,23,35,.08);
+    padding: 12px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .shopRow.done{ opacity:.62; }
+  .shopRow.done .shopName{ text-decoration: line-through; }
 
-    /* hard align heights for single-line controls */
-    input:not([type="checkbox"]),
-    select{
-      height: 44px;
-      line-height: 44px;
-      padding-top: 0;
-      padding-bottom: 0;
-    }
+  .check{
+    width: 22px; height: 22px;
+    margin-top: 2px;
+    accent-color: #7dffb2;
+  }
+  .shopMain{ flex:1; min-width:0; }
+  .shopName{ font-weight:1000; font-size:18px; }
+  .shopMeta{ opacity:.75; margin-top: 4px; }
 
-    label{
-      display:block;
-      font-weight:900;
-      opacity:.86;
-      margin-bottom: 6px;
-      line-height: 1.2;
-      word-break: keep-all;
-    }
-    textarea{ min-height: 110px; resize: vertical; }
-    .modalBtns{ display:flex; gap:10px; margin-top: 12px; flex-wrap:wrap; }
-    .hint{ opacity:.75; font-size: 13px; line-height: 1.35; }
+  /* ====== expenses ====== */
+  .expList{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
+  .expRow{
+    border-radius: 18px;
+    border: 1px solid rgba(15,23,35,.10);
+    background: rgba(255,255,255,.52);
+    box-shadow: 0 10px 24px rgba(15,23,35,.08);
+    padding: 12px;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .expLeft{ min-width:0; }
+  .expTitle{ font-weight:1000; font-size:18px; }
+  .expMeta{ opacity:.75; margin-top: 4px; }
+  .expAmt{ font-weight:1000; font-size:18px; white-space:nowrap; }
 
-    /* on small screens, stack the 2-col grid to avoid misalignment */
-    @media (max-width: 420px){
-      .grid2{
-        grid-template-columns: 1fr;
-      }
-    }
+  /* ====== bottom toolbar ====== */
+  .bottomBar{
+    position: fixed;
+    left: 12px; right: 12px;
+    bottom: calc(12px + var(--safeBottom));
+    z-index: 30;
+    display:flex;
+    justify-content:center;
+    pointer-events:none;
+  }
+  .barInner{
+    pointer-events:auto;
+    width:min(520px, 100%);
+    border-radius: 22px;
+    border: 1px solid rgba(15,23,35,.12);
+    background: rgba(255,255,255,.62);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 16px 45px rgba(15,23,35,.18);
+    padding: 10px;
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .navBtn{
+    flex:1;
+    border-radius: 18px;
+    padding: 10px 6px;
+    border: 1px solid rgba(15,23,35,.10);
+    background: rgba(255,255,255,.46);
+    text-align:center;
+    font-weight:1000;
+    cursor:pointer;
+  }
+  .navBtn.active{
+    border-color: rgba(120,255,170,.35);
+    background: rgba(220,255,235,.70);
+  }
+  .navIcon{ font-size:20px; line-height:1; display:block; margin-bottom:6px; }
 
-    /* ====== debug panel ====== */
-    .debugPanel{
-      position: fixed;
-      right: 12px;
-      top: calc(12px + var(--safeTop));
-      z-index: 80;
-      width: min(360px, 92vw);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(10,14,24,.82);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 22px 60px rgba(0,0,0,.45);
-      padding: 12px;
-    }
-    .debugRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .debugTitle{ font-weight:1000; }
-    .debugBox{
-      margin-top: 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      padding: 10px;
-      max-height: 220px;
-      overflow:auto;
-    }
+  /* ====== modal ====== */
+  .overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(0,0,0,.42);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 14px;
+  }
+  .modal{
+    width: min(560px, 96vw);
+    max-height: 86vh;
+    overflow:auto;
+    border-radius: 22px;
+    border: 1px solid rgba(15,23,35,.14);
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 20px 55px rgba(15,23,35,.22);
+    padding: 14px;
+  }
+  .modalTop{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 10px;
+  }
+  .modalTitle{ font-weight:1000; font-size:18px; }
+  .spacer{ flex:1; }
 
-    /* ====== header small controls ====== */
-    .hdrTools{ display:flex; gap:8px; align-items:center; }
-    .dbDot{
-      width:10px; height:10px; border-radius:999px;
-      background: rgba(255,90,90,.9);
-      box-shadow: 0 0 0 2px rgba(255,90,90,.18);
-    }
-    .dbDot.ok{
-      background: rgba(120,255,170,.95);
-      box-shadow: 0 0 0 2px rgba(120,255,170,.18);
-    }
-    .miniIconBtn{
-      width:38px; height:38px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-    }
+  .grid2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .grid1{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .grid2 > div,
+  .grid1 > div{
+    min-width: 0;
+  }
 
-    @media (max-width: 420px){
-      .appTitle{ font-size: 40px; }
-      .headerRight{ min-width: 150px; }
-      .dayCard{ min-width: 180px; max-width: 200px; }
-      .flightTime{ font-size: 30px; }
-    }
-  </style>
+  input, textarea, select{
+    width:100%;
+    box-sizing:border-box;
+    background: rgba(255,255,255,.70);
+    color: var(--txt);
+    border: 1px solid rgba(15,23,35,.14);
+    border-radius: 14px;
+    padding: 10px 12px;
+    outline:none;
+    font-size: 15px;
+  }
+
+  input:not([type="checkbox"]),
+  select{
+    height: 44px;
+    line-height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  label{
+    display:block;
+    font-weight:900;
+    opacity:.86;
+    margin-bottom: 6px;
+    line-height: 1.2;
+    word-break: keep-all;
+  }
+  textarea{ min-height: 110px; resize: vertical; }
+  .modalBtns{ display:flex; gap:10px; margin-top: 12px; flex-wrap:wrap; }
+  .hint{ opacity:.75; font-size: 13px; line-height: 1.35; }
+
+  @media (max-width: 420px){
+    .grid2{ grid-template-columns: 1fr; }
+  }
+
+  /* ====== debug panel ====== */
+  .debugPanel{
+    position: fixed;
+    right: 12px;
+    top: calc(12px + var(--safeTop));
+    z-index: 80;
+    width: min(360px, 92vw);
+    border-radius: 22px;
+    border: 1px solid rgba(15,23,35,.12);
+    background: rgba(255,255,255,.66);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 22px 60px rgba(15,23,35,.22);
+    padding: 12px;
+  }
+  .debugRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .debugTitle{ font-weight:1000; }
+  .debugBox{
+    margin-top: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(15,23,35,.10);
+    background: rgba(255,255,255,.52);
+    padding: 10px;
+    max-height: 220px;
+    overflow:auto;
+  }
+
+  /* ====== header small controls ====== */
+  .hdrTools{ display:flex; gap:8px; align-items:center; }
+  .dbDot{
+    width:10px; height:10px; border-radius:999px;
+    background: rgba(255,90,90,.9);
+    box-shadow: 0 0 0 2px rgba(255,90,90,.18);
+  }
+  .dbDot.ok{
+    background: rgba(120,255,170,.95);
+    box-shadow: 0 0 0 2px rgba(120,255,170,.18);
+  }
+  .miniIconBtn{
+    width:38px; height:38px;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,35,.14);
+    background: rgba(255,255,255,.45);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+
+  @media (max-width: 420px){
+    .appTitle{ font-size: 40px; }
+    .headerRight{ min-width: 150px; }
+    .dayCard{ min-width: 180px; max-width: 200px; }
+    .flightTime{ font-size: 30px; }
+  }
+</style>
+
 </head>
 
 <body>
