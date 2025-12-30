@@ -1019,7 +1019,7 @@
         const q = item.maps_query || item.title || "";
         if (!q) return;
 
-        let origin = "Sapporo";
+        let origin = "Current+Location";
         if (this.geo.ok && this.geo.lat != null && this.geo.lon != null) {
           origin = `${this.geo.lat},${this.geo.lon}`;
         }
@@ -1232,7 +1232,7 @@
                       <div class="itemMain">
                         <div class="itemTitle">{{ x.title }}</div>
                         <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
+                        <a class="mapLink" v-if="x.maps_query" href="javascript:void(0)" @click="openMap(x)">
                           <span>開地圖：{{ x.maps_query || x.title }}</span>
                         </a>
                       </div>
@@ -1248,7 +1248,7 @@
                       <div class="itemMain">
                         <div class="itemTitle">{{ x.title }}</div>
                         <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
+                        <a class="mapLink" v-if="x.maps_query" href="javascript:void(0)" @click="openMap(x)">
                           <span>開地圖：{{ x.maps_query || x.title }}</span>
                         </a>
                       </div>
@@ -1278,7 +1278,7 @@
                       <div class="itemMain">
                         <div class="itemTitle">{{ x.title }}</div>
                         <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
+                        <a class="mapLink" v-if="x.maps_query" href="javascript:void(0)" @click="openMap(x)">
                           <span>開地圖：{{ x.maps_query || x.title }}</span>
                         </a>
                       </div>
@@ -1294,7 +1294,7 @@
                       <div class="itemMain">
                         <div class="itemTitle">{{ x.title }}</div>
                         <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
+                        <a class="mapLink" v-if="x.maps_query" href="javascript:void(0)" @click="openMap(x)">
                           <span>開地圖：{{ x.maps_query || x.title }}</span>
                         </a>
                       </div>
@@ -1324,7 +1324,7 @@
                       <div class="itemMain">
                         <div class="itemTitle">{{ x.title }}</div>
                         <div class="itemNote muted" v-if="x.note">{{ x.note }}</div>
-                        <a class="mapLink" v-if="x.maps_query || x.title" href="javascript:void(0)" @click="openMap(x)">
+                        <a class="mapLink" v-if="x.maps_query" href="javascript:void(0)" @click="openMap(x)">
                           <span>開地圖：{{ x.maps_query || x.title }}</span>
                         </a>
                       </div>
