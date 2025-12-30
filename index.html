@@ -25,10 +25,13 @@
     --card2: rgba(255,255,255,.44);
 
     /* borders + text */
-    --bd: rgba(15,23,35,.10);
-    --bd2: rgba(15,23,35,.16);
-    --txt: rgba(12,18,28,.96);
-    --muted: rgba(12,18,28,.62);
+/* borders + text (snow harmony) */
+    --bd: rgba(35,52,74,.12);
+    --bd2: rgba(35,52,74,.18);
+    --txt: rgba(35,52,74,.94);     /* cold slate */
+    --muted: rgba(35,52,74,.62);   /* soft slate */
+    --icon: rgba(35,52,74,.86);    /* icons / pen */
+
 
     --ok: rgba(120,255,170,.45);
     --danger: rgba(255,120,120,.45);
@@ -651,6 +654,45 @@
     .dayCard{ min-width: 180px; max-width: 200px; }
     .flightTime{ font-size: 30px; }
   }
+  /* ===== PATCH: make pen/icon match snow text ===== */
+  .appTitle{
+    color: rgba(30,46,68,.95);
+  }
+  
+  .btn{
+    color: var(--txt);
+  }
+  
+  /* pen + icon buttons */
+  .penBtn,
+  .editMini,
+  .miniIconBtn{
+    border-color: rgba(35,52,74,.16);
+    background: rgba(255,255,255,.48);
+  }
+  
+  /* Force SVG stroke to follow theme (your penSvg uses stroke="white") */
+  .penBtn svg,
+  .editMini svg{
+    color: var(--icon);
+  }
+  .penBtn svg * ,
+  .editMini svg *{
+    stroke: var(--icon) !important;
+  }
+  
+  /* Day card lines follow new palette */
+  .dayDateLine{
+    color: rgba(30,46,68,.95);
+  }
+  .dayWxLine{
+    color: rgba(30,46,68,.82);
+  }
+  .itemTitle,
+  .periodTitle{
+    color: rgba(30,46,68,.95);
+  }
+
 </style>
 
 </head>
