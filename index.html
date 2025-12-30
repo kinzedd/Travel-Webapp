@@ -218,25 +218,30 @@
       font-size:13px;
       white-space:nowrap;
     }
-    .dayDate{
-      font-weight:900;
-      opacity:.8;
-      font-size:13px;
-      white-space:nowrap;             /* IMPORTANT: stop breaking */
-      overflow:hidden;
-      text-overflow:ellipsis;
-      min-width:0;
+
+    /* Day card main display: Date + Weather (replace title) */
+    .dayMain{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
-    .dayName{
-      font-size:16px;                 /* smaller */
+    .dayDateLine{
+      font-size:16px;
       font-weight:1000;
       line-height:1.15;
-      margin-top: 2px;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      white-space:nowrap;
       overflow:hidden;
+      text-overflow:ellipsis;
     }
+    .dayWxLine{
+      font-size:13px;
+      font-weight:900;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
     .editMini{
       margin-left:auto;
       width:30px;height:30px;
@@ -637,6 +642,15 @@
   const sb = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
   if (!sb) console.error("Supabase client init failed: window.supabase missing?");
 
+  // Hardcode Sapporo weather location
+  const SAPPORO = {
+    name: "Sapporo",
+    label: "札幌 (43.06, 141.35)",
+    lat: 43.0618,
+    lon: 141.3545,
+    timezone: "Asia%2FTokyo"
+  };
+
   const safeStr = (v) => (v == null ? "" : String(v));
   const enc = (s) => encodeURIComponent(String(s ?? ""));
 
@@ -661,6 +675,7 @@
 
         geo: { ok:false, lat:null, lon:null, label:"" },
         weather: { ok:false, temp:null, wind:null, code:null },
+        dailyWx: {}, // { "YYYY-MM-DD": { code, tmax, tmin } } (forecast range)
 
         days: [],
         selectedDayId: null,
@@ -954,7 +969,6 @@
             if (!payload.id) throw new Error("Update mode missing id");
             const id = payload.id;
             // don't update primary key field itself
-            // (some tables allow it, some don't)
             delete payload.id;
             q = sb.from(table).update(payload).eq("id", id);
           }
@@ -1005,7 +1019,7 @@
         const q = item.maps_query || item.title || "";
         if (!q) return;
 
-        let origin = "Current+Location";
+        let origin = "Sapporo";
         if (this.geo.ok && this.geo.lat != null && this.geo.lon != null) {
           origin = `${this.geo.lat},${this.geo.lon}`;
         }
@@ -1031,18 +1045,38 @@
         return `${hh}:${mm}`;
       },
 
+      // Day card: date line in zh-HK
+      fmtZhDay(dateStr){
+        if (!dateStr) return "-";
+        const dt = new Date(String(dateStr).slice(0,10) + "T00:00:00");
+        if (isNaN(dt.getTime())) return String(dateStr);
+        const y = dt.getFullYear();
+        const m = dt.getMonth() + 1;
+        const d = dt.getDate();
+        const wk = dt.toLocaleDateString("zh-HK", { weekday:"short" });
+        return `${y}/${m}/${d} ${wk}`;
+      },
+
+      // Day card: weather text (forecast window only)
+      dayWxText(dateStr){
+        const key = String(dateStr || "").slice(0,10);
+        const w = this.dailyWx?.[key];
+        if (!w) return "（天氣未有資料）";
+        const hi = (w.tmax == null) ? "?" : Math.round(w.tmax);
+        const lo = (w.tmin == null) ? "?" : Math.round(w.tmin);
+        return `${this.wEmoji(w.code)} ${hi}° / ${lo}°`;
+      },
+
       async initGeoAndWeather() {
+        // Hardcoded to Sapporo (no geolocation prompt)
         try {
-          const pos = await new Promise((resolve, reject) => {
-            if (!navigator.geolocation) return reject(new Error("Geolocation not supported"));
-            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy:false, timeout:8000, maximumAge: 60_000 });
-          });
+          const lat = SAPPORO.lat;
+          const lon = SAPPORO.lon;
 
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          this.geo = { ok:true, lat, lon, label: `${lat.toFixed(2)}, ${lon.toFixed(2)}` };
+          this.geo = { ok:true, lat, lon, label: SAPPORO.label };
 
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=Asia%2FHong_Kong`;
+          // current weather
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=${SAPPORO.timezone}`;
           const r = await fetch(url);
           const j = await r.json();
           const cur = j?.current || {};
@@ -1052,9 +1086,34 @@
             code: cur.weather_code,
             wind: cur.wind_speed_10m
           };
+
+          // daily forecast (usually next ~16 days)
+          try{
+            const dailyUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+              + `&daily=weather_code,temperature_2m_max,temperature_2m_min`
+              + `&timezone=${SAPPORO.timezone}`;
+
+            const r2 = await fetch(dailyUrl);
+            const j2 = await r2.json();
+            const t = j2?.daily?.time || [];
+            const code = j2?.daily?.weather_code || [];
+            const tmax = j2?.daily?.temperature_2m_max || [];
+            const tmin = j2?.daily?.temperature_2m_min || [];
+
+            const map = {};
+            for (let i=0; i<t.length; i++){
+              const k = String(t[i]).slice(0,10);
+              map[k] = { code: code[i], tmax: tmax[i], tmin: tmin[i] };
+            }
+            this.dailyWx = map;
+          } catch (_e) {
+            this.dailyWx = {};
+          }
+
         } catch (e) {
           this.geo = { ok:false, lat:null, lon:null, label:"" };
           this.weather = { ok:false, temp:null, wind:null, code:null };
+          this.dailyWx = {};
         }
       },
 
@@ -1143,10 +1202,15 @@
               >
                 <div class="dayTop">
                   <div class="dayChip">Day {{ d.day_no }}</div>
-                  <div class="dayDate">{{ d.date || '-' }}</div>
+                  <!-- removed date next to Day chip -->
                   <div class="editMini" @click.stop="openEdit('days', d)" v-html="penSvg()"></div>
                 </div>
-                <div class="dayName">{{ d.title || d.date || '未命名' }}</div>
+
+                <!-- replace title with date + day weather -->
+                <div class="dayMain">
+                  <div class="dayDateLine">{{ fmtZhDay(d.date) }}</div>
+                  <div class="dayWxLine">{{ dayWxText(d.date) }}</div>
+                </div>
               </div>
             </div>
 
@@ -1421,6 +1485,7 @@
           <div class="mono muted">Vue: {{ Vue?.version || 'unknown' }}</div>
           <div class="mono muted">DB: {{ connected ? 'OK' : 'ERR' }}</div>
           <div class="mono muted">status: {{ statusText }}</div>
+          <div class="mono muted" style="margin-top:10px;">wx: hardcoded → Sapporo</div>
           <div class="mono muted" v-if="lastError" style="margin-top:10px; white-space:pre-wrap;">
             error: {{ lastError.message || lastError }}
           </div>
