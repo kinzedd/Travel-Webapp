@@ -1091,6 +1091,7 @@
           try{
             const dailyUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
               + `&daily=weather_code,temperature_2m_max,temperature_2m_min`
+              + `&forecast_days=16`
               + `&timezone=${SAPPORO.timezone}`;
 
             const r2 = await fetch(dailyUrl);
