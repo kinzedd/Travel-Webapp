@@ -779,6 +779,28 @@
       planAM() { return this.groupPeriod("am"); },
       planPM() { return this.groupPeriod("pm"); },
       planNight() { return this.groupPeriod("night"); },
+
+      // ===== expenses totals =====
+      expensesForSelectedDay() {
+        if (!this.selectedDayId) return [];
+        return (this.expenses || []).filter(e => e.day_id === this.selectedDayId);
+      },
+
+      expensesDayTotal() {
+        return this.expensesForSelectedDay.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
+      },
+
+      expensesGrandTotal() {
+        return (this.expenses || []).reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
+      },
+
+      // if all expenses share the same currency, show it next to totals; otherwise show blank
+      expensesCurrencyLabel() {
+        const rows = (this.expenses || []).filter(e => (e?.currency ?? "").trim() !== "");
+        if (!rows.length) return "";
+        const set = new Set(rows.map(e => String(e.currency).trim().toUpperCase()));
+        return set.size === 1 ? [...set][0] : "";
+      },
     },
 
     methods: {
@@ -1502,6 +1524,23 @@
               </div>
 
               <div class="muted" v-if="expenses.length===0">（未有記帳）</div>
+
+              <!-- Totals (added; placed at bottom) -->
+              <div v-if="expenses.length>0"
+                   style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(15,23,35,.10);">
+                <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                  <div class="muted" style="font-weight:900;">Day total</div>
+                  <div style="font-weight:1000;">
+                    {{ Math.round(expensesDayTotal).toLocaleString() }}<span v-if="expensesCurrencyLabel"> {{ expensesCurrencyLabel }}</span>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:6px;">
+                  <div class="muted" style="font-weight:900;">Grand total</div>
+                  <div style="font-weight:1000;">
+                    {{ Math.round(expensesGrandTotal).toLocaleString() }}<span v-if="expensesCurrencyLabel"> {{ expensesCurrencyLabel }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </template>
 
