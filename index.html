@@ -752,6 +752,9 @@
         shopping: [],
         expenses: [],
 
+        // expenses totals UI
+        expensesTotalDayId: null,
+
         editing: null, // {table, mode, row, uiDayNo}
         showDelete: false,
 
@@ -781,13 +784,18 @@
       planNight() { return this.groupPeriod("night"); },
 
       // ===== expenses totals =====
-      expensesForSelectedDay() {
-        if (!this.selectedDayId) return [];
-        return (this.expenses || []).filter(e => e.day_id === this.selectedDayId);
+      expensesTotalDayIdEff() {
+        // default to currently selected day if user hasn't chosen a totals day
+        return this.expensesTotalDayId || this.selectedDayId || null;
+      },
+
+      expensesForTotalDay() {
+        if (!this.expensesTotalDayIdEff) return [];
+        return (this.expenses || []).filter(e => e.day_id === this.expensesTotalDayIdEff);
       },
 
       expensesDayTotal() {
-        return this.expensesForSelectedDay.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
+        return this.expensesForTotalDay.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
       },
 
       expensesGrandTotal() {
@@ -1528,6 +1536,18 @@
               <!-- Totals (added; placed at bottom) -->
               <div v-if="expenses.length>0"
                    style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(15,23,35,.10);">
+                <!-- Pick which day to compute Day total -->
+                <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:8px;">
+                  <div class="muted" style="font-weight:900;">Day total for</div>
+                  <select v-model="expensesTotalDayId"
+                          style="width:auto; min-width: 140px; height: 38px; line-height:38px; padding:0 10px; border-radius: 14px;">
+                    <option :value="null">（跟目前 Day）</option>
+                    <option v-for="d in days" :key="d.id" :value="d.id">
+                      Day {{ d.day_no }}{{ d.date ? ' · ' + String(d.date).slice(0,10) : '' }}
+                    </option>
+                  </select>
+                </div>
+
                 <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
                   <div class="muted" style="font-weight:900;">Day total</div>
                   <div style="font-weight:1000;">
